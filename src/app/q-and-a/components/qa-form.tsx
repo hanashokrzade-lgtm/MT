@@ -82,12 +82,14 @@ export function QaForm() {
     }
 
     const checkPermission = () => {
+      if (navigator.permissions) {
         navigator.permissions.query({ name: 'microphone' as PermissionName }).then((permissionStatus) => {
             setMicPermission(permissionStatus.state);
             permissionStatus.onchange = () => {
                 setMicPermission(permissionStatus.state);
             };
         });
+      }
     }
 
     checkPermission();
@@ -161,40 +163,28 @@ export function QaForm() {
         return;
     }
 
-    if (micPermission === 'prompt') {
-        try {
-            // Request permission by trying to get user media
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            // Stop the stream immediately, we only needed it for the permission prompt
-            stream.getTracks().forEach(track => track.stop());
-            setMicPermission('granted');
-            // Now that permission is granted, we can start recording
-            recognitionRef.current.start();
-            setIsRecording(true);
-        } catch (err) {
-            setMicPermission('denied');
-            toast({
+    try {
+        if (micPermission === 'prompt') {
+            await navigator.mediaDevices.getUserMedia({ audio: true });
+        }
+        recognitionRef.current.start();
+        setIsRecording(true);
+    } catch (err) {
+        setMicPermission('denied');
+        if (err instanceof DOMException && err.name === 'NotAllowedError') {
+             toast({
                 title: 'دسترسی به میکروفون رد شد',
                 description: 'برای استفاده از میکروفون، باید دسترسی را مجاز کنید.',
                 variant: 'destructive'
             });
+        } else {
+            toast({
+                title: 'خطا در شروع ضبط',
+                description: 'مشکلی در شروع ضبط صدا به وجود آمد. لطفاً دوباره تلاش کنید.',
+                variant: 'destructive'
+            });
         }
-    } else if (micPermission === 'granted') {
-        try {
-            recognitionRef.current.start();
-            setIsRecording(true);
-        } catch(e) {
-            // This might happen if permission is revoked between checks
-            setIsRecording(false);
-            if (e instanceof DOMException && (e.name === "NotAllowedError" || e.name === "SecurityError")) {
-                setMicPermission('denied');
-                toast({
-                    title: 'خطا در شروع ضبط',
-                    description: 'دسترسی به میکروفون مجاز نیست. لطفاً دسترسی را در مرورگر خود فعال کنید.',
-                    variant: 'destructive',
-                });
-            }
-        }
+        setIsRecording(false);
     }
   };
 
@@ -393,12 +383,13 @@ export function QaForm() {
                       size="icon" 
                       variant="ghost" 
                       className={`w-12 h-12 rounded-full flex-shrink-0 transition-colors ${
-                        isRecording ? 'bg-red-500/20 text-red-500 hover:bg-red-500/30' : 'text-muted-foreground'
+                        isRecording ? 'bg-red-500/20 text-red-500 hover:bg-red-500/30' : 
+                        micPermission === 'denied' || micPermission === 'unsupported' ? 'text-muted-foreground/50 cursor-not-allowed' : 'text-muted-foreground'
                       }`}
-                      disabled={loading || micPermission === 'unsupported'}
-                      title={micPermission === 'denied' ? 'دسترسی به میکروفون مسدود است' : (isRecording ? 'توقف ضبط' : 'شروع ضبط')}
+                      disabled={loading || micPermission === 'unsupported' || micPermission === 'denied'}
+                      title={micPermission === 'denied' ? 'دسترسی به میکروفون مسدود است' : (micPermission === 'unsupported' ? 'مرورگر پشتیبانی نمی‌کند' : (isRecording ? 'توقف ضبط' : 'شروع ضبط'))}
                     >
-                        {micPermission !== 'granted' ? <MicOff className="h-6 w-6" /> : <Mic className={`h-6 w-6 ${isRecording ? 'animate-pulse' : ''}`} />}
+                        {isRecording ? <Mic className="h-6 w-6 animate-pulse" /> : <Mic className="h-6 w-6" />}
                         <span className="sr-only">{isRecording ? 'توقف ضبط' : 'شروع ضبط'}</span>
                     </Button>
                     <FormField
@@ -452,5 +443,3 @@ export function QaForm() {
     </div>
   );
 }
-
-    
