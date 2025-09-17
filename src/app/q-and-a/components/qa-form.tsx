@@ -76,57 +76,73 @@ export function QaForm() {
 
   useEffect(() => {
     const SpeechRecognition = (window as IWindow).SpeechRecognition || (window as IWindow).webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      navigator.permissions.query({ name: 'microphone' as PermissionName }).then((permissionStatus) => {
-        setMicPermission(permissionStatus.state);
-        permissionStatus.onchange = () => {
-          setMicPermission(permissionStatus.state);
-        };
-      });
-
-      const recognition = new SpeechRecognition();
-      recognition.continuous = false;
-      recognition.lang = 'fa-IR';
-      recognition.interimResults = false;
-
-      recognition.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        form.setValue('question', transcript);
-        if (transcript.trim().length >= 10) {
-            form.handleSubmit(onSubmit)();
-        }
-      };
-
-      recognition.onerror = (event: any) => {
-        console.error('Speech recognition error', event.error);
-        let description = 'متاسفانه مشکلی در تشخیص صدای شما پیش آمد.';
-        if (event.error === 'not-allowed') {
-          description = 'برای استفاده از میکروفون، لطفاً دسترسی لازم را در مرورگر خود فعال کنید.';
-          setMicPermission('denied');
-        } else if (event.error === 'no-speech') {
-            description = 'صدایی تشخیص داده نشد. لطفاً دوباره تلاش کنید.';
-        }
-        
-        toast({
-            title: 'خطا در تشخیص گفتار',
-            description: description,
-            variant: 'destructive',
-        });
-        setIsRecording(false);
-      };
-
-      recognition.onend = () => {
-        setIsRecording(false);
-      };
-
-      recognitionRef.current = recognition;
-    } else {
-        setMicPermission('unsupported');
+    if (!SpeechRecognition) {
+      setMicPermission('unsupported');
+      return;
     }
+
+    // Check permission status initially
+    navigator.permissions.query({ name: 'microphone' as PermissionName }).then((permissionStatus) => {
+      setMicPermission(permissionStatus.state);
+      permissionStatus.onchange = () => {
+        setMicPermission(permissionStatus.state);
+      };
+    });
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.lang = 'fa-IR';
+    recognition.interimResults = false;
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      form.setValue('question', transcript, { shouldValidate: true });
+      if (transcript.trim().length >= 10) {
+        form.handleSubmit(onSubmit)();
+      } else {
+        toast({
+          title: 'سوال کوتاه است',
+          description: 'سوال ضبط شده برای ارسال باید حداقل ۱۰ کاراکتر داشته باشد.',
+          variant: 'destructive',
+        });
+      }
+    };
+
+    recognition.onerror = (event: any) => {
+      let description = 'متاسفانه مشکلی در تشخیص صدای شما پیش آمد.';
+      if (event.error === 'not-allowed') {
+        description = 'برای استفاده از میکروفون، لطفاً دسترسی لازم را در مرورگر خود فعال کنید.';
+        setMicPermission('denied');
+      } else if (event.error === 'no-speech') {
+        description = 'صدایی تشخیص داده نشد. لطفاً دوباره تلاش کنید.';
+      }
+      
+      toast({
+        title: 'خطا در تشخیص گفتار',
+        description: description,
+        variant: 'destructive',
+      });
+      setIsRecording(false);
+    };
+
+    recognition.onend = () => {
+      setIsRecording(false);
+    };
+
+    recognitionRef.current = recognition;
   }, [form, toast]);
 
+
   const handleToggleRecording = () => {
-    if (!recognitionRef.current) {
+    if (micPermission === 'denied') {
+      toast({
+        title: 'دسترسی به میکروفون مسدود است',
+        description: 'لطفاً از تنظیمات مرورگر خود دسترسی به میکروفون را برای این سایت فعال کنید.',
+        variant: 'destructive',
+      });
+      return;
+    }
+     if (micPermission === 'unsupported' || !recognitionRef.current) {
         toast({
             title: 'مرورگر پشتیبانی نمی‌شود',
             description: 'متاسفانه مرورگر شما از قابلیت تشخیص گفتار پشتیبانی نمی‌کند.',
@@ -134,11 +150,25 @@ export function QaForm() {
         });
         return;
     }
+
     if (isRecording) {
       recognitionRef.current.stop();
     } else {
-      recognitionRef.current.start();
-      setIsRecording(true);
+      try {
+        recognitionRef.current.start();
+        setIsRecording(true);
+      } catch (error) {
+         // This can happen if permission was denied after the page loaded
+         setIsRecording(false);
+         if(error instanceof DOMException && error.name === 'NotAllowedError') {
+            setMicPermission('denied');
+            toast({
+                title: 'خطا در شروع ضبط',
+                description: 'دسترسی به میکروفون مجاز نیست. لطفاً دسترسی را در مرورگر خود فعال کنید.',
+                variant: 'destructive',
+            });
+         }
+      }
     }
   };
 
@@ -172,10 +202,9 @@ export function QaForm() {
     const message = messages[index];
     if (message.type !== 'bot') return;
 
-    // Pause currently playing audio if it's different from the one clicked
+    // Pause currently playing audio if it's a different one
     if (activeAudio && activeAudio.index !== index && audioRefs.current[activeAudio.index]) {
       audioRefs.current[activeAudio.index]?.pause();
-      setActiveAudio(null);
     }
     
     const audio = audioRefs.current[index];
@@ -188,42 +217,56 @@ export function QaForm() {
         return;
     }
     
-    // If audio is already loaded, just play
-    if (message.audioDataUri && audio.src) {
+    // If audio is paused, play it
+    if (activeAudio?.index === index && !activeAudio.isPlaying) {
         audio.play().catch(console.error);
         setActiveAudio({ index, isPlaying: true });
         return;
     }
 
     // If audio is not loaded, fetch it
-    setMessages(prev => prev.map((msg, i) => i === index ? { ...msg, isLoadingAudio: true } : msg));
-    try {
-        const audioResponse = await generateAudioFromText(message.text);
-        const newAudioDataUri = audioResponse.audioDataUri;
-        
-        setMessages(prev => {
-           const newMessages = [...prev];
-           newMessages[index] = { ...newMessages[index], audioDataUri: newAudioDataUri, isLoadingAudio: false };
-           return newMessages;
-        });
-
-        // Use a timeout to ensure state has updated and src is set before playing
-        setTimeout(() => {
-            const currentAudio = audioRefs.current[index];
-            if(currentAudio){
-                currentAudio.src = newAudioDataUri;
-                currentAudio.play().catch(console.error);
-                setActiveAudio({ index, isPlaying: true });
+    if (!message.audioDataUri) {
+        setMessages(prev => prev.map((msg, i) => i === index ? { ...msg, isLoadingAudio: true } : msg));
+        try {
+            const audioResponse = await generateAudioFromText(message.text);
+            const newAudioDataUri = audioResponse.audioDataUri;
+            
+            setMessages(prev => {
+            const newMessages = [...prev];
+            const botMessage = newMessages[index];
+            if(botMessage.type === 'bot') {
+                botMessage.audioDataUri = newAudioDataUri;
+                botMessage.isLoadingAudio = false;
             }
-        }, 0);
+            return newMessages;
+            });
 
-    } catch (error) {
-        toast({
-            title: 'خطا در تولید صدا',
-            description: 'متاسفانه در تولید فایل صوتی مشکلی پیش آمد.',
-            variant: 'destructive',
-        });
-        setMessages(prev => prev.map((msg, i) => i === index ? { ...msg, isLoadingAudio: false } : msg));
+            // Use a timeout to ensure state has updated and src is set before playing
+            setTimeout(() => {
+                const currentAudio = audioRefs.current[index];
+                if(currentAudio){
+                    currentAudio.src = newAudioDataUri;
+                    currentAudio.play().catch(e => {
+                        console.error("Audio play failed:", e);
+                         toast({ title: 'خطا در پخش صدا', variant: 'destructive' });
+                    });
+                    setActiveAudio({ index, isPlaying: true });
+                }
+            }, 0);
+
+        } catch (error) {
+            console.error("Audio generation failed:", error);
+            toast({
+                title: 'خطا در تولید صدا',
+                description: 'متاسفانه در تولید فایل صوتی مشکلی پیش آمد.',
+                variant: 'destructive',
+            });
+            setMessages(prev => prev.map((msg, i) => i === index ? { ...msg, isLoadingAudio: false } : msg));
+        }
+    } else {
+        // If audio is already loaded, just play
+        audio.play().catch(console.error);
+        setActiveAudio({ index, isPlaying: true });
     }
   };
 
@@ -246,7 +289,6 @@ export function QaForm() {
     });
   };
   
-
   return (
     <div className="flex flex-col h-[calc(100vh-12rem)]">
         <ScrollArea className="flex-grow p-4" ref={scrollAreaRef}>
@@ -285,8 +327,11 @@ export function QaForm() {
                                     </Button>
                                     <audio 
                                         ref={el => audioRefs.current[index] = el}
+                                        onPlay={() => setActiveAudio({ index, isPlaying: true })}
+                                        onPause={() => setActiveAudio({ index, isPlaying: false })}
                                         onEnded={() => setActiveAudio({ index, isPlaying: false })}
                                         className="hidden"
+                                        src={message.audioDataUri || undefined}
                                     />
                                 </div>
                             )}
@@ -324,10 +369,10 @@ export function QaForm() {
                       className={`w-12 h-12 rounded-full flex-shrink-0 transition-colors ${
                         isRecording ? 'bg-red-500/20 text-red-500 hover:bg-red-500/30' : 'text-muted-foreground'
                       }`}
-                      disabled={loading || micPermission === 'denied' || micPermission === 'unsupported'}
+                      disabled={loading || micPermission !== 'granted'}
                       title={micPermission === 'denied' ? 'دسترسی به میکروفون مسدود است' : (isRecording ? 'توقف ضبط' : 'شروع ضبط')}
                     >
-                        {micPermission === 'denied' ? <MicOff className="h-6 w-6" /> : <Mic className={`h-6 w-6 ${isRecording ? 'animate-pulse' : ''}`} />}
+                        {micPermission !== 'granted' ? <MicOff className="h-6 w-6" /> : <Mic className={`h-6 w-6 ${isRecording ? 'animate-pulse' : ''}`} />}
                         <span className="sr-only">{isRecording ? 'توقف ضبط' : 'شروع ضبط'}</span>
                     </Button>
                     <FormField
@@ -370,6 +415,11 @@ export function QaForm() {
              {micPermission === 'denied' && (
                 <p className="text-xs text-destructive text-center mt-2">
                     شما دسترسی به میکروفون را مسدود کرده‌اید. لطفاً از تنظیمات مرورگر خود دسترسی را فعال کنید.
+                </p>
+            )}
+             {micPermission === 'unsupported' && (
+                <p className="text-xs text-destructive text-center mt-2">
+                    متاسفانه مرورگر شما از قابلیت تشخیص گفتار پشتیبانی نمی‌کند.
                 </p>
             )}
         </div>
