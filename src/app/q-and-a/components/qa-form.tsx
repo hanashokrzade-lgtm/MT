@@ -68,17 +68,21 @@ export function QaForm() {
   const handlePlayAudio = async () => {
     if (!result) return;
     
-    if (audioRef.current && audioDataUri) {
-      if (isPlaying) {
+    // If audio is already playing, pause it.
+    if (isPlaying && audioRef.current) {
         audioRef.current.pause();
         setIsPlaying(false);
-      } else {
-        audioRef.current.play();
-        setIsPlaying(true);
-      }
-      return;
+        return;
     }
 
+    // If audio is paused, play it.
+    if (!isPlaying && audioRef.current && audioDataUri) {
+        audioRef.current.play();
+        setIsPlaying(true);
+        return;
+    }
+
+    // If audio is not loaded, load and play it.
     setAudioLoading(true);
     try {
       const response = await generateAudioFromText(result.answer);
@@ -175,13 +179,10 @@ export function QaForm() {
       )}
 
       {result && (
-        <Card>
-          <CardHeader>
+        <Card className="animate-in fade-in-50 duration-500">
+          <CardHeader className="flex flex-row justify-between items-center">
             <CardTitle>پاسخ مشاور</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <p className="text-muted-foreground leading-relaxed whitespace-pre-line">{result.answer}</p>
-            <Button onClick={handlePlayAudio} size="lg" disabled={audioLoading}>
+            <Button onClick={handlePlayAudio} size="lg" disabled={audioLoading} variant="ghost" className="bg-primary/10 hover:bg-primary/20">
                 {audioLoading ? (
                     <Loader2 className="ml-2 h-5 w-5 animate-spin" />
                 ) : isPlaying ? (
@@ -189,8 +190,11 @@ export function QaForm() {
                 ) : (
                     <Volume2 className="ml-2 h-5 w-5" />
                 )}
-                {isPlaying ? 'توقف' : 'پخش صوتی پاسخ'}
+                {isPlaying ? 'توقف' : 'پخش صوتی'}
             </Button>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <p className="text-muted-foreground leading-relaxed whitespace-pre-line">{result.answer}</p>
             <audio ref={audioRef} className="hidden" />
           </CardContent>
         </Card>
