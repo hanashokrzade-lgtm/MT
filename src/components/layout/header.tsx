@@ -8,6 +8,8 @@ import { cn } from '@/lib/utils';
 import {
   Sheet,
   SheetContent,
+  SheetHeader,
+  SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { useState } from 'react';
@@ -68,6 +70,14 @@ export function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right">
+                <SheetHeader>
+                    <SheetTitle>
+                        <Link href="/" className="flex items-center gap-2 font-bold text-lg" onClick={() => setSheetOpen(false)}>
+                            <GraduationCap className="h-7 w-7 text-primary" />
+                            <span>مشاور تحصیلی من</span>
+                        </Link>
+                    </SheetTitle>
+                </SheetHeader>
                 <div className="flex flex-col gap-4 mt-8">
                   <NavLinkItems />
                 </div>

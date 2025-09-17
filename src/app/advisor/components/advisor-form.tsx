@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -44,11 +44,14 @@ import {
   ArrowLeft,
   Sparkles,
   RotateCcw,
+  Volume2,
+  Pause,
 } from 'lucide-react';
 import {
   analyzeStudentAnswersAndSuggestMajors,
   type AnalyzeStudentAnswersAndSuggestMajorsOutput,
 } from '@/ai/flows/analyze-student-answers-and-suggest-majors';
+import { generateAudioFromText } from '@/ai/flows/generate-audio-from-text';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
@@ -85,6 +88,11 @@ export function AdvisorForm() {
   const [result, setResult] = useState<AnalyzeStudentAnswersAndSuggestMajorsOutput | null>(null);
   const { toast } = useToast();
 
+  const [audioLoading, setAudioLoading] = useState(false);
+  const [audioDataUri, setAudioDataUri] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -115,6 +123,7 @@ export function AdvisorForm() {
   const onSubmit = async (data: FormData) => {
     setLoading(true);
     setResult(null);
+    setAudioDataUri(null);
     try {
       const response = await analyzeStudentAnswersAndSuggestMajors(data);
       setResult(response);
@@ -133,7 +142,60 @@ export function AdvisorForm() {
     form.reset();
     setStep(1);
     setResult(null);
+    setAudioDataUri(null);
+    setIsPlaying(false);
+    if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+    }
   }
+
+  const handlePlayAudio = async () => {
+    if (!result) return;
+    if (audioDataUri) {
+        if(audioRef.current) {
+            if (isPlaying) {
+                audioRef.current.pause();
+                setIsPlaying(false);
+            } else {
+                audioRef.current.play();
+                setIsPlaying(true);
+            }
+        }
+        return;
+    }
+
+    setAudioLoading(true);
+    try {
+        const fullText = `
+            ${result.summary}
+            ${result.stepByStepPath}
+        `;
+        const response = await generateAudioFromText(fullText);
+        setAudioDataUri(response.audioDataUri);
+    } catch (error) {
+        toast({
+            title: 'خطا در تولید صدا',
+            description: 'متاسفانه در تولید فایل صوتی مشکلی پیش آمد. لطفاً دوباره تلاش کنید.',
+            variant: 'destructive',
+        });
+    } finally {
+        setAudioLoading(false);
+    }
+  };
+
+  useState(() => {
+    if (audioDataUri && audioRef.current) {
+        audioRef.current.src = audioDataUri;
+        audioRef.current.play();
+        setIsPlaying(true);
+        audioRef.current.onended = () => {
+            setIsPlaying(false);
+        }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [audioDataUri]);
+
 
   if (loading) {
     return (
@@ -227,11 +289,22 @@ export function AdvisorForm() {
           </CardContent>
         </Card>
         
-        <div className="text-center">
-            <Button onClick={resetForm} size="lg">
+        <div className="text-center flex flex-col sm:flex-row justify-center items-center gap-4">
+            <Button onClick={handlePlayAudio} size="lg" disabled={audioLoading}>
+                {audioLoading ? (
+                    <Loader2 className="ml-2 h-5 w-5 animate-spin" />
+                ) : isPlaying ? (
+                    <Pause className="ml-2 h-5 w-5" />
+                ) : (
+                    <Volume2 className="ml-2 h-5 w-5" />
+                )}
+                {isPlaying ? 'توقف' : 'پخش صوتی نتایج'}
+            </Button>
+            <Button onClick={resetForm} size="lg" variant="outline">
                 <RotateCcw className="ml-2 h-5 w-5" />
                 شروع مجدد مشاوره
             </Button>
+            <audio ref={audioRef} className="hidden" />
         </div>
 
       </div>
