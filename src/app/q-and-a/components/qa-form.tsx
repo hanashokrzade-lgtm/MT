@@ -45,7 +45,9 @@ interface IWindow extends Window {
 
 export function QaForm() {
   const [loading, setLoading] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>([
+      { type: 'bot', text: 'سلام و درود بر شما! خوشحالم که در خدمتتون هستم. من یک مشاور تحصیلی خبره هستم و اینجا هستم تا به تمام سوالات شما در مورد انتخاب رشته، دانشگاه‌ها، بازار کار و آینده تحصیلی پاسخ دهم. لطفاً سوال خود را مطرح کنید تا با دقت و بهترین راهنمایی ممکن، شما را یاری کنم.' }
+  ]);
   const [activeAudio, setActiveAudio] = useState<{ index: number; isPlaying: boolean } | null>(null);
   
   const [isRecording, setIsRecording] = useState(false);
@@ -198,7 +200,7 @@ export function QaForm() {
 
     // Pause currently playing audio if it's a different one
     if (activeAudio && activeAudio.index !== index && audioRefs.current[activeAudio.index]) {
-      audioRefs.current[activeAudio.index]?.pause();
+        audioRefs.current[activeAudio.index]?.pause();
     }
     
     const audio = audioRefs.current[index];
@@ -207,14 +209,12 @@ export function QaForm() {
     // If the clicked audio is currently playing, pause it
     if (activeAudio?.index === index && activeAudio.isPlaying) {
         audio.pause();
-        setActiveAudio({ index, isPlaying: false });
         return;
     }
     
     // If audio is paused, play it
     if (activeAudio?.index === index && !activeAudio.isPlaying) {
-        audio.play().catch(console.error);
-        setActiveAudio({ index, isPlaying: true });
+        await audio.play().catch(console.error);
         return;
     }
 
@@ -226,13 +226,13 @@ export function QaForm() {
             const newAudioDataUri = audioResponse.audioDataUri;
             
             setMessages(prev => {
-            const newMessages = [...prev];
-            const botMessage = newMessages[index];
-            if(botMessage.type === 'bot') {
-                botMessage.audioDataUri = newAudioDataUri;
-                botMessage.isLoadingAudio = false;
-            }
-            return newMessages;
+                const newMessages = [...prev];
+                const botMessage = newMessages[index];
+                if(botMessage.type === 'bot') {
+                    botMessage.audioDataUri = newAudioDataUri;
+                    botMessage.isLoadingAudio = false;
+                }
+                return newMessages;
             });
 
             // Use a timeout to ensure state has updated and src is set before playing
@@ -244,7 +244,6 @@ export function QaForm() {
                         console.error("Audio play failed:", e);
                          toast({ title: 'خطا در پخش صدا', variant: 'destructive' });
                     });
-                    setActiveAudio({ index, isPlaying: true });
                 }
             }, 0);
 
@@ -259,8 +258,7 @@ export function QaForm() {
         }
     } else {
         // If audio is already loaded, just play
-        audio.play().catch(console.error);
-        setActiveAudio({ index, isPlaying: true });
+        await audio.play().catch(console.error);
     }
   };
 
@@ -287,15 +285,6 @@ export function QaForm() {
     <div className="flex flex-col h-[calc(100vh-12rem)]">
         <ScrollArea className="flex-grow p-4" ref={scrollAreaRef}>
             <div className="space-y-6 max-w-4xl mx-auto">
-                {messages.length === 0 && !loading && (
-                    <Alert className="text-right border-accent bg-accent/10">
-                        <Sparkles className="h-4 w-4 text-accent-foreground" />
-                        <AlertTitle className="text-accent-foreground">شروع گفتگو</AlertTitle>
-                        <AlertDescription className="text-accent-foreground/80">
-                            می‌توانید سوال خود را در مورد رشته‌های تحصیلی، دانشگاه‌ها، بازار کار و آینده شغلی از مشاور هوشمند بپرسید.
-                        </AlertDescription>
-                    </Alert>
-                )}
                 {messages.map((message, index) => (
                     <div key={index} className={`flex items-start gap-3 ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
                         {message.type === 'bot' && (
@@ -303,7 +292,7 @@ export function QaForm() {
                                 <AvatarFallback className="bg-primary/20"><Bot className="h-5 w-5 text-primary" /></AvatarFallback>
                             </Avatar>
                         )}
-                        <div className={`max-w-xl p-4 rounded-2xl shadow-sm ${message.type === 'user' ? 'bg-primary text-primary-foreground rounded-br-none' : 'bg-card border rounded-bl-none'}`}>
+                        <div className={`max-w-xl p-4 rounded-2xl shadow-sm ${message.type === 'user' ? 'bg-primary text-primary-foreground rounded-br-none' : 'bg-card border rounded-bl-none'} ${message.type === 'bot' ? 'text-right' : ''}`}>
                             <div className="prose prose-sm max-w-none text-card-foreground leading-relaxed">
                                 {renderMessageContent(message.text)}
                             </div>
