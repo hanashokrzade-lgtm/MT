@@ -49,7 +49,6 @@ export function QaForm() {
   const [activeAudio, setActiveAudio] = useState<{ index: number; isPlaying: boolean } | null>(null);
   
   const [isRecording, setIsRecording] = useState(false);
-  const [micPermission, setMicPermission] = useState<PermissionState | 'unsupported'>('prompt');
   const recognitionRef = useRef<any>(null);
 
 
@@ -73,129 +72,93 @@ export function QaForm() {
         }
     }
   };
-
-  useEffect(() => {
+  
+    useEffect(() => {
     const SpeechRecognition = (window as IWindow).SpeechRecognition || (window as IWindow).webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      setMicPermission('unsupported');
-      return;
-    }
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.lang = 'fa-IR';
+      recognition.interimResults = false;
 
-    const checkPermission = async () => {
-      if (navigator.permissions) {
-        try {
-            const permissionStatus = await navigator.permissions.query({ name: 'microphone' as PermissionName });
-            setMicPermission(permissionStatus.state);
-            permissionStatus.onchange = () => {
-                setMicPermission(permissionStatus.state);
-            };
-        } catch (err) {
-             console.error("Error checking microphone permission:", err);
-             // Fallback for browsers that might not support query
-             setMicPermission('prompt');
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        form.setValue('question', transcript, { shouldValidate: true });
+        if (transcript.trim().length >= 10) {
+            form.handleSubmit(onSubmit)();
+        } else {
+             toast({
+                title: 'سوال کوتاه است',
+                description: 'سوال ضبط شده برای ارسال باید حداقل ۱۰ کاراکتر داشته باشد.',
+                variant: 'destructive',
+            });
         }
-      }
-    }
+      };
 
-    checkPermission();
-
-    const recognition = new SpeechRecognition();
-    recognition.continuous = false;
-    recognition.lang = 'fa-IR';
-    recognition.interimResults = false;
-
-    recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript;
-      form.setValue('question', transcript, { shouldValidate: true });
-      // Automatically submit the form if the transcript is long enough
-      if (transcript.trim().length >= 10) {
-        form.handleSubmit(onSubmit)();
-      } else {
+      recognition.onerror = (event: any) => {
+        let description = 'متاسفانه مشکلی در تشخیص صدای شما پیش آمد.';
+        if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+          description = 'برای استفاده از میکروفون، لطفاً دسترسی لازم را در مرورگر خود فعال کنید.';
+        } else if (event.error === 'no-speech') {
+            description = 'صدایی تشخیص داده نشد. لطفاً دوباره تلاش کنید و بلندتر صحبت کنید.';
+        }
+        
         toast({
-          title: 'سوال کوتاه است',
-          description: 'سوال ضبط شده برای ارسال باید حداقل ۱۰ کاراکتر داشته باشد.',
+          title: 'خطا در تشخیص گفتار',
+          description: description,
           variant: 'destructive',
         });
-      }
-    };
+        setIsRecording(false);
+      };
 
-    recognition.onerror = (event: any) => {
-      let description = 'متاسفانه مشکلی در تشخیص صدای شما پیش آمد.';
-      if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
-        description = 'برای استفاده از میکروفون، لطفاً دسترسی لازم را در مرورگر خود فعال کنید.';
-        setMicPermission('denied');
-      } else if (event.error === 'no-speech') {
-        description = 'صدایی تشخیص داده نشد. لطفاً دوباره تلاش کنید و بلندتر صحبت کنید.';
-      }
-      
-      toast({
-        title: 'خطا در تشخیص گفتار',
-        description: description,
-        variant: 'destructive',
-      });
-      setIsRecording(false);
-    };
+      recognition.onend = () => {
+        setIsRecording(false);
+      };
 
-    recognition.onend = () => {
-      setIsRecording(false);
-    };
-
-    recognitionRef.current = recognition;
+      recognitionRef.current = recognition;
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-
   const handleToggleRecording = async () => {
-    if (micPermission === 'unsupported' || !recognitionRef.current) {
-        toast({
-            title: 'مرورگر پشتیبانی نمی‌شود',
-            description: 'متاسفانه مرورگر شما از قابلیت تشخیص گفتار پشتیبانی نمی‌کند.',
-            variant: 'destructive',
-        });
-        return;
+    if (!recognitionRef.current) {
+      toast({
+        title: 'مرورگر پشتیبانی نمی‌شود',
+        description: 'متاسفانه مرورگر شما از قابلیت تشخیص گفتار پشتیبانی نمی‌کند.',
+        variant: 'destructive',
+      });
+      return;
     }
-
+    
     if (isRecording) {
       recognitionRef.current.stop();
       return;
     }
-    
-    if (micPermission === 'denied') {
-        toast({
-            title: 'دسترسی به میکروفون مسدود است',
-            description: 'لطفاً از تنظیمات مرورگر خود دسترسی به میکروفون را برای این سایت فعال کنید.',
-            variant: 'destructive',
-        });
-        return;
-    }
 
     try {
-        if(micPermission === 'prompt'){
-            await navigator.mediaDevices.getUserMedia({ audio: true });
-            setMicPermission('granted');
-        }
-
-        recognitionRef.current.start();
-        setIsRecording(true);
+      // Always ask for permission before starting
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+      recognitionRef.current.start();
+      setIsRecording(true);
     } catch (err) {
-        console.error("Error starting recording:", err);
-        if (err instanceof DOMException && (err.name === 'NotAllowedError' || err.name === 'SecurityError')) {
-             setMicPermission('denied');
-             toast({
-                title: 'دسترسی به میکروفون رد شد',
-                description: 'برای استفاده از میکروفون، باید دسترسی را مجاز کنید.',
-                variant: 'destructive'
-            });
-        } else {
-            toast({
-                title: 'خطا در شروع ضبط',
-                description: 'مشکلی در شروع ضبط صدا به وجود آمد. لطفاً دوباره تلاش کنید.',
-                variant: 'destructive'
-            });
-        }
-        setIsRecording(false);
+      console.error("Error starting recording:", err);
+      if (err instanceof DOMException && (err.name === 'NotAllowedError' || err.name === 'SecurityError')) {
+           toast({
+              title: 'دسترسی به میکروفون رد شد',
+              description: 'برای استفاده از میکروفون، باید دسترسی را مجاز کنید.',
+              variant: 'destructive'
+          });
+      } else {
+          toast({
+              title: 'خطا در شروع ضبط',
+              description: 'مشکلی در شروع ضبط صدا به وجود آمد. لطفاً دوباره تلاش کنید.',
+              variant: 'destructive'
+          });
+      }
+      setIsRecording(false);
     }
   };
+
 
   useEffect(() => {
     scrollToBottom();
@@ -207,7 +170,6 @@ export function QaForm() {
     // Stop recording if it's active before sending
     if (isRecording && recognitionRef.current) {
       recognitionRef.current.stop();
-      setIsRecording(false);
     }
     
     setLoading(true);
@@ -399,11 +361,10 @@ export function QaForm() {
                       size="icon" 
                       variant="ghost" 
                       className={`w-12 h-12 rounded-full flex-shrink-0 transition-colors ${
-                        isRecording ? 'bg-red-500/20 text-red-500 hover:bg-red-500/30' : 
-                        micPermission === 'denied' || micPermission === 'unsupported' ? 'text-muted-foreground/50 cursor-not-allowed' : 'text-muted-foreground'
+                        isRecording ? 'bg-red-500/20 text-red-500 hover:bg-red-500/30' : 'text-muted-foreground'
                       }`}
-                      disabled={loading || micPermission === 'unsupported'}
-                      title={micPermission === 'denied' ? 'دسترسی به میکروفون مسدود است' : (micPermission === 'unsupported' ? 'مرورگر پشتیبانی نمی‌کند' : (isRecording ? 'توقف ضبط' : 'شروع ضبط'))}
+                      disabled={loading}
+                      title={isRecording ? 'توقف ضبط' : 'شروع ضبط'}
                     >
                         {isRecording ? <Mic className="h-6 w-6 animate-pulse" /> : <Mic className="h-6 w-6" />}
                         <span className="sr-only">{isRecording ? 'توقف ضبط' : 'شروع ضبط'}</span>
@@ -445,17 +406,9 @@ export function QaForm() {
                 </Form>
                 </CardContent>
             </Card>
-             {micPermission === 'denied' && (
-                <p className="text-xs text-destructive text-center mt-2">
-                    شما دسترسی به میکروفون را مسدود کرده‌اید. لطفاً از تنظیمات مرورگر خود دسترسی را فعال کنید.
-                </p>
-            )}
-             {micPermission === 'unsupported' && (
-                <p className="text-xs text-destructive text-center mt-2">
-                    متاسفانه مرورگر شما از قابلیت تشخیص گفتار پشتیبانی نمی‌کند.
-                </p>
-            )}
         </div>
     </div>
   );
 }
+
+    
