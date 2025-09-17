@@ -125,7 +125,7 @@ export function QaForm() {
         description = 'برای استفاده از میکروفون، لطفاً دسترسی لازم را در مرورگر خود فعال کنید.';
         setMicPermission('denied');
       } else if (event.error === 'no-speech') {
-        description = 'صدایی تشخیص داده نشد. لطفاً دوباره تلاش کنید.';
+        description = 'صدایی تشخیص داده نشد. لطفاً دوباره تلاش کنید و بلندتر صحبت کنید.';
       }
       
       toast({
@@ -157,11 +157,9 @@ export function QaForm() {
 
     if (isRecording) {
       recognitionRef.current.stop();
-      setIsRecording(false);
       return;
     }
     
-    // Check permission status before attempting to record
     if (micPermission === 'denied') {
         toast({
             title: 'دسترسی به میکروفون مسدود است',
@@ -172,11 +170,8 @@ export function QaForm() {
     }
 
     try {
-        // This will prompt the user for permission if it's not already granted.
-        await navigator.mediaDevices.getUserMedia({ audio: true });
-        
-        // At this point, permission is granted. Update state if it was 'prompt'.
-        if (micPermission === 'prompt') {
+        if(micPermission === 'prompt'){
+            await navigator.mediaDevices.getUserMedia({ audio: true });
             setMicPermission('granted');
         }
 
@@ -184,7 +179,6 @@ export function QaForm() {
         setIsRecording(true);
     } catch (err) {
         console.error("Error starting recording:", err);
-        // This catch block will handle the case where the user denies permission in the prompt.
         if (err instanceof DOMException && (err.name === 'NotAllowedError' || err.name === 'SecurityError')) {
              setMicPermission('denied');
              toast({
@@ -465,5 +459,3 @@ export function QaForm() {
     </div>
   );
 }
-
-    
