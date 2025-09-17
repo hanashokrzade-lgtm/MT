@@ -75,9 +75,9 @@ export function QaForm() {
     }
   };
   
-  useEffect(() => {
+ useEffect(() => {
     const SpeechRecognition = (window as IWindow).SpeechRecognition || (window as IWindow).webkitSpeechRecognition;
-    if (SpeechRecognition) {
+    if (SpeechRecognition && !recognitionRef.current) {
       const recognition = new SpeechRecognition();
       recognition.continuous = false;
       recognition.lang = 'fa-IR';
@@ -143,13 +143,14 @@ export function QaForm() {
       recognitionRef.current.start();
       setIsRecording(true);
     } catch (err) {
-      if (err instanceof DOMException && (err.name === 'NotAllowedError' || err.name === 'SecurityError')) {
+      if (err instanceof DOMException && (err.name === 'NotAllowedError' || err.name === 'SecurityError' || err.name === 'NotFoundError')) {
            toast({
               title: 'دسترسی به میکروفون رد شد',
-              description: 'برای استفاده از میکروفون، باید دسترسی را مجاز کنید.',
+              description: 'برای استفاده از میکروفون، باید دسترسی را مجاز کنید. اگر میکروفونی متصل نیست، لطفاً آن را وصل کنید.',
               variant: 'destructive'
           });
       } else {
+          console.error('Error starting recording:', err);
           toast({
               title: 'خطا در شروع ضبط',
               description: 'مشکلی در شروع ضبط صدا به وجود آمد. لطفاً دوباره تلاش کنید.',
@@ -159,6 +160,20 @@ export function QaForm() {
       setIsRecording(false);
     }
   };
+
+  useEffect(() => {
+    const audioEl = activeAudio ? audioRefs.current[activeAudio.index] : null;
+    if (audioEl && activeAudio?.isPlaying) {
+      audioEl.play().catch(e => {
+          console.error("Audio play failed in useEffect:", e);
+          toast({ title: 'خطا در پخش صدا', variant: 'destructive' });
+          // Reset state if play fails
+          setActiveAudio(null);
+      });
+    } else if (audioEl && !activeAudio?.isPlaying) {
+      audioEl.pause();
+    }
+  }, [activeAudio, toast]);
 
 
   useEffect(() => {
@@ -194,72 +209,67 @@ export function QaForm() {
   };
 
   const handlePlayAudio = async (index: number) => {
+    // If this audio is currently playing, pause it.
+    if (activeAudio?.index === index && activeAudio.isPlaying) {
+        setActiveAudio({ index, isPlaying: false });
+        return;
+    }
+
+    // If another audio is playing, stop it.
+    if (activeAudio && activeAudio.index !== index) {
+        const otherAudioEl = audioRefs.current[activeAudio.index];
+        if (otherAudioEl) {
+            otherAudioEl.pause();
+            otherAudioEl.currentTime = 0;
+        }
+    }
+
     const message = messages[index];
     if (message.type !== 'bot') return;
 
-    // Pause currently playing audio if it's a different one
-    if (activeAudio && activeAudio.index !== index && audioRefs.current[activeAudio.index]) {
-        audioRefs.current[activeAudio.index]?.pause();
-    }
-    
-    const audio = audioRefs.current[index];
-    if (!audio) return;
+    const audioEl = audioRefs.current[index];
+    if (!audioEl) return;
 
-    // If the clicked audio is currently playing, pause it
-    if (activeAudio?.index === index && activeAudio.isPlaying) {
-        audio.pause();
-        return;
-    }
-    
-    // If audio is paused, play it
-    if (activeAudio?.index === index && !activeAudio.isPlaying) {
-        await audio.play().catch(console.error);
+    // If audio is loaded, just play it.
+    if (message.audioDataUri) {
+        audioEl.src = message.audioDataUri; // Ensure src is set
+        setActiveAudio({ index, isPlaying: true });
         return;
     }
 
-    // If audio is not loaded, fetch it
-    if (!message.audioDataUri) {
-        setMessages(prev => prev.map((msg, i) => i === index ? { ...msg, isLoadingAudio: true } : msg));
-        try {
-            const audioResponse = await generateAudioFromText(message.text);
-            const newAudioDataUri = audioResponse.audioDataUri;
-            
-            setMessages(prev => {
-                const newMessages = [...prev];
-                const botMessage = newMessages[index];
-                if(botMessage.type === 'bot') {
-                    botMessage.audioDataUri = newAudioDataUri;
-                    botMessage.isLoadingAudio = false;
-                }
-                return newMessages;
-            });
+    // If audio is not loaded, fetch it.
+    setMessages(prev => prev.map((msg, i) => i === index ? { ...msg, isLoadingAudio: true } : msg));
+    try {
+        const audioResponse = await generateAudioFromText(message.text);
+        const newAudioDataUri = audioResponse.audioDataUri;
+        
+        setMessages(prev => {
+            const newMessages = [...prev];
+            const botMessage = newMessages[index];
+            if(botMessage.type === 'bot') {
+                botMessage.audioDataUri = newAudioDataUri;
+                botMessage.isLoadingAudio = false;
+            }
+            return newMessages;
+        });
 
-            // Use a timeout to ensure state has updated and src is set before playing
-            setTimeout(() => {
-                const currentAudio = audioRefs.current[index];
-                if(currentAudio){
-                    currentAudio.src = newAudioDataUri;
-                    currentAudio.play().catch(e => {
-                        console.error("Audio play failed:", e);
-                         toast({ title: 'خطا در پخش صدا', variant: 'destructive' });
-                    });
-                }
-            }, 0);
-
-        } catch (error) {
-            console.error("Audio generation failed:", error);
-            toast({
-                title: 'خطا در تولید صدا',
-                description: 'متاسفانه در تولید فایل صوتی مشکلی پیش آمد.',
-                variant: 'destructive',
-            });
-            setMessages(prev => prev.map((msg, i) => i === index ? { ...msg, isLoadingAudio: false } : msg));
+        // The useEffect will handle playing the audio once the state is updated.
+        const targetAudioEl = audioRefs.current[index];
+        if (targetAudioEl) {
+            targetAudioEl.src = newAudioDataUri;
+            setActiveAudio({ index, isPlaying: true });
         }
-    } else {
-        // If audio is already loaded, just play
-        await audio.play().catch(console.error);
+    } catch (error) {
+        console.error("Audio generation failed:", error);
+        toast({
+            title: 'خطا در تولید صدا',
+            description: 'متاسفانه در تولید فایل صوتی مشکلی پیش آمد.',
+            variant: 'destructive',
+        });
+        setMessages(prev => prev.map((msg, i) => i === index ? { ...msg, isLoadingAudio: false } : msg));
+        setActiveAudio(null); // Reset active audio on error
     }
-  };
+};
 
   const renderMessageContent = (text: string) => {
     // This regex splits the text by numbered lists, bullet points, and newlines
@@ -297,7 +307,7 @@ export function QaForm() {
                             </div>
                              {message.type === 'bot' && (
                                 <div className="mt-4 pt-3 border-t border-border/50">
-                                    <Button onClick={() => handlePlayAudio(index)} size="sm" variant="ghost" className="h-8 gap-2 text-muted-foreground hover:bg-accent/20 hover:text-accent-foreground">
+                                    <Button onClick={() => handlePlayAudio(index)} size="sm" variant="ghost" className="h-8 gap-2 text-muted-foreground hover:bg-accent/20 hover:text-accent-foreground" disabled={message.isLoadingAudio}>
                                         {message.isLoadingAudio ? (
                                             <Loader2 className="h-4 w-4 animate-spin" />
                                         ) : (activeAudio?.index === index && activeAudio.isPlaying) ? (
@@ -309,11 +319,14 @@ export function QaForm() {
                                     </Button>
                                     <audio 
                                         ref={el => audioRefs.current[index] = el}
-                                        onPlay={() => setActiveAudio({ index, isPlaying: true })}
-                                        onPause={() => setActiveAudio({ index, isPlaying: false })}
-                                        onEnded={() => setActiveAudio({ index, isPlaying: false })}
+                                        onEnded={() => setActiveAudio(null)}
+                                        onPause={() => {
+                                            // Only update if it was this specific audio that was paused.
+                                            if (activeAudio?.index === index) {
+                                                setActiveAudio({ index, isPlaying: false });
+                                            }
+                                        }}
                                         className="hidden"
-                                        src={message.audioDataUri || undefined}
                                     />
                                 </div>
                             )}
@@ -398,9 +411,3 @@ export function QaForm() {
     </div>
   );
 }
-
-    
-
-    
-
-    
