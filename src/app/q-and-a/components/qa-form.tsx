@@ -14,7 +14,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, Sparkles, Volume2, Pause, User, Bot, Send } from 'lucide-react';
+import { Loader2, Sparkles, Volume2, Pause, User, Bot, Send, Mic } from 'lucide-react';
 import {
   generateAnswerForQuestion,
 } from '@/ai/flows/generate-answer-for-question';
@@ -37,10 +37,20 @@ interface Message {
     isLoadingAudio?: boolean;
 }
 
+// Add this interface for the SpeechRecognition API
+interface IWindow extends Window {
+  SpeechRecognition: any;
+  webkitSpeechRecognition: any;
+}
+
 export function QaForm() {
   const [loading, setLoading] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [activeAudio, setActiveAudio] = useState<{ index: number; isPlaying: boolean } | null>(null);
+  
+  const [isRecording, setIsRecording] = useState(false);
+  const recognitionRef = useRef<any>(null);
+
 
   const audioRefs = useRef<(HTMLAudioElement | null)[]>([]);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -64,10 +74,62 @@ export function QaForm() {
   };
 
   useEffect(() => {
+    const SpeechRecognition = (window as IWindow).SpeechRecognition || (window as IWindow).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.lang = 'fa-IR';
+      recognition.interimResults = false;
+
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        form.setValue('question', transcript);
+        if (transcript.length >= 10) {
+            form.handleSubmit(onSubmit)();
+        }
+      };
+
+      recognition.onerror = (event: any) => {
+        console.error('Speech recognition error', event.error);
+        toast({
+            title: 'خطا در تشخیص گفتار',
+            description: 'متاسفانه مشکلی در تشخیص صدای شما پیش آمد.',
+            variant: 'destructive',
+        });
+        setIsRecording(false);
+      };
+
+      recognition.onend = () => {
+        setIsRecording(false);
+      };
+
+      recognitionRef.current = recognition;
+    }
+  }, [form, toast]);
+
+  const handleToggleRecording = () => {
+    if (!recognitionRef.current) {
+        toast({
+            title: 'مرورگر پشتیبانی نمی‌شود',
+            description: 'متاسفانه مرورگر شما از قابلیت تشخیص گفتار پشتیبانی نمی‌کند.',
+            variant: 'destructive',
+        });
+        return;
+    }
+    if (isRecording) {
+      recognitionRef.current.stop();
+    } else {
+      recognitionRef.current.start();
+    }
+    setIsRecording(!isRecording);
+  };
+
+  useEffect(() => {
     scrollToBottom();
   }, [messages, loading]);
 
   const onSubmit = async (data: QaFormData) => {
+    if (loading) return;
     setLoading(true);
     setMessages(prev => [...prev, { type: 'user', text: data.question }]);
     form.reset();
@@ -76,7 +138,8 @@ export function QaForm() {
       const response = await generateAnswerForQuestion({ question: data.question });
       setMessages(prev => [...prev, { type: 'bot', text: response.answer, audioDataUri: null, isLoadingAudio: false }]);
     } catch (error) {
-      setMessages(prev => prev.slice(0, -1)); // Remove user message if AI fails
+      // Keep user message, but show an error message from bot
+      setMessages(prev => [...prev, { type: 'bot', text: 'متاسفانه در ارتباط با سرویس هوش مصنوعی مشکلی پیش آمد. لطفاً دوباره تلاش کنید.' }]);
       toast({
         title: 'خطا در دریافت پاسخ',
         description: 'متاسفانه در ارتباط با سرویس هوش مصنوعی مشکلی پیش آمد. لطفاً دوباره تلاش کنید.',
@@ -108,8 +171,8 @@ export function QaForm() {
     }
     
     // If audio is already loaded, just play
-    if (message.audioDataUri) {
-        audio.play();
+    if (message.audioDataUri && audio.src) {
+        audio.play().catch(console.error);
         setActiveAudio({ index, isPlaying: true });
         return;
     }
@@ -120,12 +183,21 @@ export function QaForm() {
         const audioResponse = await generateAudioFromText(message.text);
         const newAudioDataUri = audioResponse.audioDataUri;
         
-        setMessages(prev => prev.map((msg, i) => i === index ? { ...msg, audioDataUri: newAudioDataUri, isLoadingAudio: false } : msg));
+        setMessages(prev => {
+           const newMessages = [...prev];
+           newMessages[index] = { ...newMessages[index], audioDataUri: newAudioDataUri, isLoadingAudio: false };
+           return newMessages;
+        });
 
-        // Use a useEffect to play the audio once the src is set
-        audio.src = newAudioDataUri;
-        audio.play();
-        setActiveAudio({ index, isPlaying: true });
+        // Use a timeout to ensure state has updated and src is set before playing
+        setTimeout(() => {
+            const currentAudio = audioRefs.current[index];
+            if(currentAudio){
+                currentAudio.src = newAudioDataUri;
+                currentAudio.play().catch(console.error);
+                setActiveAudio({ index, isPlaying: true });
+            }
+        }, 0);
 
     } catch (error) {
         toast({
@@ -138,17 +210,24 @@ export function QaForm() {
   };
 
   const renderMessageContent = (text: string) => {
-    const parts = text.split(/(\n\d+\.\s.*|\n\*\s.*)/).filter(Boolean);
+    // This regex splits the text by numbered lists, bullet points, and newlines
+    // while keeping the delimiters for styling.
+    const parts = text.split(/(\n\d+\.\s.*?|\n\*\s.*?|\n)/g).filter(Boolean);
+    
     return parts.map((part, index) => {
-        if (part.match(/^\n\d+\.\s/)) { 
-            return <p key={index} className="mb-2 pl-4">{part.trim()}</p>;
-        }
-        if (part.match(/^\n\*\s/)) {
-            return <li key={index} className="list-disc list-inside mb-1">{part.replace(/^\n\*\s/, '').trim()}</li>;
-        }
-        return part.split('\n').map((line, lineIndex) => <p key={`${index}-${lineIndex}`} className="mb-2">{line || <br/>}</p>);
+      if (part.match(/^\n\d+\.\s/)) {
+        return <p key={index} className="mb-1 pl-4">{part.trim()}</p>;
+      }
+      if (part.match(/^\n\*\s/)) {
+        return <li key={index} className="list-disc list-inside mb-1">{part.replace(/^\n\*\s/, '').trim()}</li>;
+      }
+      if (part === '\n') {
+        return <br key={index} />;
+      }
+      return <span key={index}>{part}</span>;
     });
-  }
+  };
+  
 
   return (
     <div className="flex flex-col h-[calc(100vh-12rem)]">
@@ -170,12 +249,12 @@ export function QaForm() {
                                 <AvatarFallback className="bg-primary/20"><Bot className="h-5 w-5 text-primary" /></AvatarFallback>
                             </Avatar>
                         )}
-                        <div className={`max-w-xl p-4 rounded-2xl ${message.type === 'user' ? 'bg-primary text-primary-foreground rounded-br-none' : 'bg-card border rounded-bl-none'}`}>
-                            <div className="leading-relaxed whitespace-normal prose prose-sm max-w-none text-card-foreground">
+                        <div className={`max-w-xl p-4 rounded-2xl shadow-sm ${message.type === 'user' ? 'bg-primary text-primary-foreground rounded-br-none' : 'bg-card border rounded-bl-none'}`}>
+                            <div className="prose prose-sm max-w-none text-card-foreground leading-relaxed">
                                 {renderMessageContent(message.text)}
                             </div>
                              {message.type === 'bot' && (
-                                <div className="mt-4 pt-3 border-t border-border">
+                                <div className="mt-4 pt-3 border-t border-border/50">
                                     <Button onClick={() => handlePlayAudio(index)} size="sm" variant="ghost" className="h-8 gap-2 text-muted-foreground hover:bg-accent/20 hover:text-accent-foreground">
                                         {message.isLoadingAudio ? (
                                             <Loader2 className="h-4 w-4 animate-spin" />
@@ -215,10 +294,21 @@ export function QaForm() {
             </div>
         </ScrollArea>
         <div className="p-4 border-t bg-background">
-             <Card className="max-w-4xl mx-auto">
+             <Card className="max-w-4xl mx-auto shadow-none">
                 <CardContent className="p-2">
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="flex items-center gap-2">
+                    <Button 
+                      type="button" 
+                      onClick={handleToggleRecording} 
+                      size="icon" 
+                      variant="ghost" 
+                      className={`w-12 h-12 rounded-full flex-shrink-0 ${isRecording ? 'text-red-500 animate-pulse' : 'text-muted-foreground'}`}
+                      disabled={loading}
+                    >
+                        <Mic className="h-6 w-6" />
+                        <span className="sr-only">{isRecording ? 'توقف ضبط' : 'شروع ضبط'}</span>
+                    </Button>
                     <FormField
                         control={form.control}
                         name="question"
@@ -226,7 +316,7 @@ export function QaForm() {
                         <FormItem className="flex-grow">
                             <FormControl>
                             <Textarea
-                                placeholder="سوال خود را اینجا بنویسید..."
+                                placeholder={isRecording ? 'در حال شنیدن...' : 'سوال خود را اینجا بنویسید یا با میکروفون بپرسید...'}
                                 rows={1}
                                 className="resize-none border-0 shadow-none focus-visible:ring-0 min-h-0 h-auto py-3"
                                 {...field}
@@ -240,7 +330,7 @@ export function QaForm() {
                                 }}
                             />
                             </FormControl>
-                            <FormMessage className="pl-3" />
+                            <FormMessage className="absolute bottom-full mb-2" />
                         </FormItem>
                         )}
                     />
