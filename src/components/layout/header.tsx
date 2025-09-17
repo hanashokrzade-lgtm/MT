@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { GraduationCap, Home, ClipboardList, BarChartHorizontalBig, Menu } from 'lucide-react';
+import { GraduationCap, Home, ClipboardList, BarChartHorizontalBig, Menu, Mic } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -19,6 +19,7 @@ const navLinks = [
   { href: '/', label: 'خانه', icon: Home },
   { href: '/advisor', label: 'مشاوره', icon: ClipboardList },
   { href: '/alignment', label: 'تحلیل اهداف', icon: BarChartHorizontalBig },
+  { href: '/q-and-a', label: 'پرسش و پاسخ', icon: Mic },
 ];
 
 export function Header() {
