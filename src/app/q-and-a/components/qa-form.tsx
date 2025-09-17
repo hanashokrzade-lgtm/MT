@@ -9,19 +9,21 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Sparkles, Volume2, Pause, RotateCcw } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Loader2, Sparkles, Volume2, Pause, User, Bot, Send } from 'lucide-react';
 import {
   generateAnswerForQuestion,
   type GenerateAnswerForQuestionOutput,
 } from '@/ai/flows/generate-answer-for-question';
 import { generateAudioFromText } from '@/ai/flows/generate-audio-from-text';
 import { useToast } from '@/hooks/use-toast';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const qaSchema = z.object({
   question: z.string().min(10, { message: 'لطفاً سوال خود را با حداقل ۱۰ کاراکتر وارد کنید.' }),
@@ -29,13 +31,20 @@ const qaSchema = z.object({
 
 type QaFormData = z.infer<typeof qaSchema>;
 
+interface Message {
+    type: 'user' | 'bot';
+    text: string;
+    audioDataUri?: string | null;
+}
+
 export function QaForm() {
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<GenerateAnswerForQuestionOutput | null>(null);
-  const [audioLoading, setAudioLoading] = useState(false);
-  const [audioDataUri, setAudioDataUri] = useState<string | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [activeAudio, setActiveAudio] = useState<{ index: number; isPlaying: boolean } | null>(null);
+
+  const audioRefs = useRef<(HTMLAudioElement | null)[]>([]);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+
   const { toast } = useToast();
 
   const form = useForm<QaFormData>({
@@ -45,15 +54,27 @@ export function QaForm() {
     },
   });
 
+  const scrollToBottom = () => {
+    if (scrollAreaRef.current) {
+        const scrollableView = scrollAreaRef.current.querySelector('div[data-radix-scroll-area-viewport]');
+        if (scrollableView) {
+            scrollableView.scrollTop = scrollableView.scrollHeight;
+        }
+    }
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, loading]);
+
   const onSubmit = async (data: QaFormData) => {
     setLoading(true);
-    setResult(null);
-    setAudioDataUri(null);
-    setIsPlaying(false);
+    setMessages(prev => [...prev, { type: 'user', text: data.question }]);
+    form.reset();
 
     try {
-      const response = await generateAnswerForQuestion(data);
-      setResult(response);
+      const response = await generateAnswerForQuestion({ question: data.question });
+      setMessages(prev => [...prev, { type: 'bot', text: response.answer, audioDataUri: null }]);
     } catch (error) {
       toast({
         title: 'خطا در دریافت پاسخ',
@@ -65,140 +86,167 @@ export function QaForm() {
     }
   };
 
-  const handlePlayAudio = async () => {
-    if (!result) return;
+  const handlePlayAudio = async (index: number) => {
+    const message = messages[index];
+    if (message.type !== 'bot') return;
+
+    // Pause currently playing audio if different
+    if (activeAudio && activeAudio.index !== index && audioRefs.current[activeAudio.index]) {
+        audioRefs.current[activeAudio.index]?.pause();
+    }
     
-    // If audio is already playing, pause it.
-    if (isPlaying && audioRef.current) {
-        audioRef.current.pause();
-        setIsPlaying(false);
-        return;
-    }
+    const audio = audioRefs.current[index];
+    if (!audio) return;
 
-    // If audio is paused, play it.
-    if (!isPlaying && audioRef.current && audioDataUri) {
-        audioRef.current.play();
-        setIsPlaying(true);
-        return;
-    }
-
-    // If audio is not loaded, load and play it.
-    setAudioLoading(true);
-    try {
-      const response = await generateAudioFromText(result.answer);
-      setAudioDataUri(response.audioDataUri);
-    } catch (error) {
-      toast({
-        title: 'خطا در تولید صدا',
-        description: 'متاسفانه در تولید فایل صوتی مشکلی پیش آمد. لطفاً دوباره تلاش کنید.',
-        variant: 'destructive',
-      });
-    } finally {
-      setAudioLoading(false);
-    }
-  };
-  
-  const resetForm = () => {
-    form.reset();
-    setResult(null);
-    setAudioDataUri(null);
-    setIsPlaying(false);
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
+    if (activeAudio?.index === index && activeAudio.isPlaying) {
+        audio.pause();
+        setActiveAudio({ index, isPlaying: false });
+    } else {
+        if (!message.audioDataUri) {
+            setMessages(prev => prev.map((msg, i) => i === index ? { ...msg, isLoadingAudio: true } : msg));
+            try {
+                const audioResponse = await generateAudioFromText(message.text);
+                const newAudioDataUri = audioResponse.audioDataUri;
+                setMessages(prev => prev.map((msg, i) => i === index ? { ...msg, audioDataUri: newAudioDataUri, isLoadingAudio: false } : msg));
+                audio.src = newAudioDataUri;
+                audio.play();
+                setActiveAudio({ index, isPlaying: true });
+            } catch (error) {
+                toast({
+                    title: 'خطا در تولید صدا',
+                    description: 'متاسفانه در تولید فایل صوتی مشکلی پیش آمد.',
+                    variant: 'destructive',
+                });
+                setMessages(prev => prev.map((msg, i) => i === index ? { ...msg, isLoadingAudio: false } : msg));
+            }
+        } else {
+            audio.play();
+            setActiveAudio({ index, isPlaying: true });
+        }
     }
   };
 
-  useEffect(() => {
-    if (audioDataUri && audioRef.current) {
-      audioRef.current.src = audioDataUri;
-      audioRef.current.play();
-      setIsPlaying(true);
-      audioRef.current.onended = () => setIsPlaying(false);
-    }
-  }, [audioDataUri]);
-
+  const renderMessageContent = (text: string) => {
+    const lines = text.split('\n');
+    return lines.map((line, index) => {
+        if (line.match(/^\d+\.\s/)) { // Numbered list
+            return <p key={index} className="mb-2 pl-4">{line}</p>;
+        }
+        if (line.trim().startsWith('*')) { // Bulleted list
+            return <li key={index} className="list-disc list-inside mb-1">{line.replace('*','')}</li>;
+        }
+        return <p key={index} className="mb-2">{line || <br/>}</p>;
+    });
+  }
 
   return (
-    <div className="space-y-8">
-      <Card>
-        <CardHeader>
-          <CardTitle>سوال خود را بپرسید</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="question"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>سوال شما</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="مثال: تفاوت رشته مهندسی نرم‌افزار و علوم کامپیوتر چیست؟"
-                        rows={5}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+    <div className="flex flex-col h-[calc(100vh-12rem)]">
+        <ScrollArea className="flex-grow p-4" ref={scrollAreaRef}>
+            <div className="space-y-6 max-w-4xl mx-auto">
+                {messages.length === 0 && !loading && (
+                    <Alert className="border-accent bg-accent/10">
+                        <Sparkles className="h-4 w-4 text-accent-foreground" />
+                        <AlertTitle className="text-accent-foreground">شروع گفتگو</AlertTitle>
+                        <AlertDescription className="text-accent-foreground/80">
+                            می‌توانید سوال خود را در مورد رشته‌های تحصیلی، دانشگاه‌ها، بازار کار و آینده شغلی از مشاور هوشمند بپرسید.
+                        </AlertDescription>
+                    </Alert>
                 )}
-              />
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button type="submit" disabled={loading} className="w-full sm:w-auto bg-accent hover:bg-accent/90 text-accent-foreground">
-                  {loading ? (
-                    <>
-                      <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-                      در حال پردازش...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="ml-2 h-4 w-4" />
-                      دریافت پاسخ
-                    </>
-                  )}
-                </Button>
-                {result && (
-                     <Button onClick={resetForm} variant="outline" className="w-full sm:w-auto">
-                        <RotateCcw className="ml-2 h-4 w-4" />
-                        پرسش جدید
+                {messages.map((message, index) => (
+                    <div key={index} className={`flex items-start gap-3 ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+                        {message.type === 'bot' && (
+                            <Avatar className="w-9 h-9 border-2 border-primary">
+                                <AvatarFallback className="bg-primary/20"><Bot className="h-5 w-5 text-primary" /></AvatarFallback>
+                            </Avatar>
+                        )}
+                        <div className={`max-w-xl p-4 rounded-2xl ${message.type === 'user' ? 'bg-primary text-primary-foreground rounded-br-none' : 'bg-card border rounded-bl-none'}`}>
+                            <div className="leading-relaxed whitespace-normal prose prose-sm max-w-none text-card-foreground">
+                                {renderMessageContent(message.text)}
+                            </div>
+                             {message.type === 'bot' && (
+                                <div className="mt-4 pt-3 border-t border-white/10">
+                                    <Button onClick={() => handlePlayAudio(index)} size="sm" variant="ghost" className="h-8 gap-2 bg-primary/10 hover:bg-primary/20 text-primary-foreground">
+                                        {(message as any).isLoadingAudio ? (
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                        ) : (activeAudio?.index === index && activeAudio.isPlaying) ? (
+                                            <Pause className="h-4 w-4" />
+                                        ) : (
+                                            <Volume2 className="h-4 w-4" />
+                                        )}
+                                        <span>{(activeAudio?.index === index && activeAudio.isPlaying) ? 'توقف' : 'پخش صوتی'}</span>
+                                    </Button>
+                                    <audio 
+                                        ref={el => audioRefs.current[index] = el}
+                                        src={message.audioDataUri || ''}
+                                        onEnded={() => setActiveAudio({ index, isPlaying: false })}
+                                        className="hidden"
+                                    />
+                                </div>
+                            )}
+                        </div>
+                        {message.type === 'user' && (
+                             <Avatar className="w-9 h-9">
+                                <AvatarFallback><User className="h-5 w-5" /></AvatarFallback>
+                            </Avatar>
+                        )}
+                    </div>
+                ))}
+                {loading && (
+                    <div className="flex items-start gap-3 justify-start">
+                        <Avatar className="w-9 h-9 border-2 border-primary">
+                             <AvatarFallback className="bg-primary/20"><Bot className="h-5 w-5 text-primary" /></AvatarFallback>
+                        </Avatar>
+                        <div className="max-w-xl p-4 rounded-2xl bg-card border rounded-bl-none flex items-center gap-2">
+                             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                             <span className="text-muted-foreground text-sm">در حال فکر کردن...</span>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </ScrollArea>
+        <div className="p-4 border-t bg-background">
+             <Card className="max-w-4xl mx-auto">
+                <CardContent className="p-2">
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="flex items-center gap-2">
+                    <FormField
+                        control={form.control}
+                        name="question"
+                        render={({ field }) => (
+                        <FormItem className="flex-grow">
+                            <FormControl>
+                            <Textarea
+                                placeholder="سوال خود را اینجا بنویسید..."
+                                rows={1}
+                                className="resize-none border-0 shadow-none focus-visible:ring-0 min-h-0 h-auto py-3"
+                                {...field}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                        e.preventDefault();
+                                        if (form.getValues('question').trim().length >= 10) {
+                                            form.handleSubmit(onSubmit)();
+                                        }
+                                    }
+                                }}
+                            />
+                            </FormControl>
+                            <FormMessage className="pl-3" />
+                        </FormItem>
+                        )}
+                    />
+                    <Button type="submit" disabled={loading} size="icon" className="w-12 h-12 rounded-full flex-shrink-0 bg-accent hover:bg-accent/90">
+                        {loading ? (
+                            <Loader2 className="h-6 w-6 animate-spin" />
+                        ) : (
+                            <Send className="h-6 w-6" />
+                        )}
+                        <span className="sr-only">ارسال</span>
                     </Button>
-                )}
-              </div>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-
-      {loading && (
-        <Card className="flex flex-col items-center justify-center p-8 min-h-[200px]">
-            <Loader2 className="h-10 w-10 animate-spin text-primary" />
-            <p className="mt-4 text-md text-muted-foreground">کمی صبر کنید، مشاور هوشمند در حال آماده کردن پاسخ است...</p>
-        </Card>
-      )}
-
-      {result && (
-        <Card className="animate-in fade-in-50 duration-500">
-          <CardHeader className="flex flex-row justify-between items-center">
-            <CardTitle>پاسخ مشاور</CardTitle>
-            <Button onClick={handlePlayAudio} size="lg" disabled={audioLoading} variant="ghost" className="bg-primary/10 hover:bg-primary/20">
-                {audioLoading ? (
-                    <Loader2 className="ml-2 h-5 w-5 animate-spin" />
-                ) : isPlaying ? (
-                    <Pause className="ml-2 h-5 w-5" />
-                ) : (
-                    <Volume2 className="ml-2 h-5 w-5" />
-                )}
-                {isPlaying ? 'توقف' : 'پخش صوتی'}
-            </Button>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <p className="text-muted-foreground leading-relaxed whitespace-pre-line">{result.answer}</p>
-            <audio ref={audioRef} className="hidden" />
-          </CardContent>
-        </Card>
-      )}
+                    </form>
+                </Form>
+                </CardContent>
+            </Card>
+        </div>
     </div>
   );
 }
