@@ -16,9 +16,8 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50">
-      <div className="container max-w-lg mx-auto p-2">
-        <nav className="flex items-center justify-around bg-card border border-border shadow-lg rounded-full p-2">
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border shadow-lg">
+      <nav className="container mx-auto flex items-center justify-around h-20">
           {navLinks.map((link) => {
             const isActive = (pathname === '/' && link.href === '/') || (pathname !== '/' && link.href !== '/' && pathname.startsWith(link.href));
             return (
@@ -26,19 +25,23 @@ export function BottomNav() {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  'flex flex-col items-center justify-center text-center w-16 h-16 rounded-full transition-colors duration-300 ease-in-out',
+                  'flex flex-col items-center justify-center text-center w-20 h-full transition-colors duration-200 ease-in-out',
                   isActive
-                    ? 'bg-primary/20 text-primary'
+                    ? 'text-primary'
                     : 'text-muted-foreground hover:text-foreground'
                 )}
               >
-                <link.icon className="h-6 w-6 mb-1" />
-                <span className="text-xs font-medium">{link.label}</span>
+                <div className={cn(
+                    'p-3 rounded-full transition-colors',
+                    isActive ? 'bg-primary/10' : ''
+                )}>
+                    <link.icon className="h-6 w-6" />
+                </div>
+                <span className="text-xs font-medium mt-1">{link.label}</span>
               </Link>
             )
           })}
         </nav>
-      </div>
     </div>
   );
 }
