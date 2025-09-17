@@ -25,7 +25,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const qaSchema = z.object({
-  question: z.string().min(10, { message: 'لطفاً سوال خود را با حداقل ۱۰ کاراکتر وارد کنید.' }),
+  question: z.string().min(2, { message: 'لطفاً سوال خود را با حداقل ۲ کاراکتر وارد کنید.' }),
 });
 
 type QaFormData = z.infer<typeof qaSchema>;
@@ -73,7 +73,7 @@ export function QaForm() {
     }
   };
   
-    useEffect(() => {
+  useEffect(() => {
     const SpeechRecognition = (window as IWindow).SpeechRecognition || (window as IWindow).webkitSpeechRecognition;
     if (SpeechRecognition) {
       const recognition = new SpeechRecognition();
@@ -84,12 +84,12 @@ export function QaForm() {
       recognition.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;
         form.setValue('question', transcript, { shouldValidate: true });
-        if (transcript.trim().length >= 10) {
+        if (transcript.trim().length >= 2) {
             form.handleSubmit(onSubmit)();
         } else {
              toast({
                 title: 'سوال کوتاه است',
-                description: 'سوال ضبط شده برای ارسال باید حداقل ۱۰ کاراکتر داشته باشد.',
+                description: 'سوال ضبط شده برای ارسال باید حداقل ۲ کاراکتر داشته باشد.',
                 variant: 'destructive',
             });
         }
@@ -165,7 +165,7 @@ export function QaForm() {
   }, [messages, loading]);
 
   const onSubmit = async (data: QaFormData) => {
-    if (loading || data.question.trim().length < 10) return;
+    if (loading || data.question.trim().length < 2) return;
     
     // Stop recording if it's active before sending
     if (isRecording && recognitionRef.current) {
@@ -383,7 +383,7 @@ export function QaForm() {
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter' && !e.shiftKey) {
                                         e.preventDefault();
-                                        if (form.getValues('question').trim().length >= 10) {
+                                        if (form.getValues('question').trim().length >= 2) {
                                             form.handleSubmit(onSubmit)();
                                         }
                                     }
@@ -394,7 +394,7 @@ export function QaForm() {
                         </FormItem>
                         )}
                     />
-                    <Button type="submit" disabled={loading || form.watch('question').trim().length < 10} size="icon" className="w-12 h-12 rounded-full flex-shrink-0 bg-accent hover:bg-accent/90">
+                    <Button type="submit" disabled={loading || form.watch('question').trim().length < 2} size="icon" className="w-12 h-12 rounded-full flex-shrink-0 bg-accent hover:bg-accent/90">
                         {loading ? (
                             <Loader2 className="h-6 w-6 animate-spin" />
                         ) : (
