@@ -107,6 +107,7 @@ export function QaForm() {
     recognition.onresult = (event: any) => {
       const transcript = event.results[0][0].transcript;
       form.setValue('question', transcript, { shouldValidate: true });
+      // Automatically submit the form if the transcript is long enough
       if (transcript.trim().length >= 10) {
         form.handleSubmit(onSubmit)();
       } else {
@@ -140,7 +141,8 @@ export function QaForm() {
     };
 
     recognitionRef.current = recognition;
-  }, [form, toast]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
 
   const handleToggleRecording = async () => {
@@ -155,9 +157,11 @@ export function QaForm() {
 
     if (isRecording) {
       recognitionRef.current.stop();
+      setIsRecording(false);
       return;
     }
-
+    
+    // Check permission status before attempting to record
     if (micPermission === 'denied') {
         toast({
             title: 'دسترسی به میکروفون مسدود است',
@@ -168,16 +172,19 @@ export function QaForm() {
     }
 
     try {
-        // Explicitly request microphone access. This will trigger the browser prompt if not already granted.
+        // This will prompt the user for permission if it's not already granted.
         await navigator.mediaDevices.getUserMedia({ audio: true });
         
-        // Update permission state in case it was 'prompt'
-        setMicPermission('granted');
+        // At this point, permission is granted. Update state if it was 'prompt'.
+        if (micPermission === 'prompt') {
+            setMicPermission('granted');
+        }
 
         recognitionRef.current.start();
         setIsRecording(true);
     } catch (err) {
         console.error("Error starting recording:", err);
+        // This catch block will handle the case where the user denies permission in the prompt.
         if (err instanceof DOMException && (err.name === 'NotAllowedError' || err.name === 'SecurityError')) {
              setMicPermission('denied');
              toast({
@@ -206,6 +213,7 @@ export function QaForm() {
     // Stop recording if it's active before sending
     if (isRecording && recognitionRef.current) {
       recognitionRef.current.stop();
+      setIsRecording(false);
     }
     
     setLoading(true);
@@ -457,3 +465,5 @@ export function QaForm() {
     </div>
   );
 }
+
+    
