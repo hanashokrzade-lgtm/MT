@@ -143,7 +143,6 @@ export function QaForm() {
       recognitionRef.current.start();
       setIsRecording(true);
     } catch (err) {
-      console.error("Error starting recording:", err);
       if (err instanceof DOMException && (err.name === 'NotAllowedError' || err.name === 'SecurityError')) {
            toast({
               title: 'دسترسی به میکروفون رد شد',
@@ -399,6 +398,8 @@ export function QaForm() {
     </div>
   );
 }
+
+    
 
     
 
