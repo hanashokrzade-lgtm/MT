@@ -288,7 +288,7 @@ export function QaForm() {
         <ScrollArea className="flex-grow p-4" ref={scrollAreaRef}>
             <div className="space-y-6 max-w-4xl mx-auto">
                 {messages.length === 0 && !loading && (
-                    <Alert className="border-accent bg-accent/10">
+                    <Alert className="text-right border-accent bg-accent/10">
                         <Sparkles className="h-4 w-4 text-accent-foreground" />
                         <AlertTitle className="text-accent-foreground">شروع گفتگو</AlertTitle>
                         <AlertDescription className="text-accent-foreground/80">
