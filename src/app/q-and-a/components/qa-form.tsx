@@ -14,7 +14,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, Sparkles, Volume2, Pause, User, Bot, Send, Mic, MicOff } from 'lucide-react';
+import { Loader2, Sparkles, Volume2, Pause, User, Bot, Send, Mic } from 'lucide-react';
 import {
   generateAnswerForQuestion,
 } from '@/ai/flows/generate-answer-for-question';
@@ -81,14 +81,19 @@ export function QaForm() {
       return;
     }
 
-    const checkPermission = () => {
+    const checkPermission = async () => {
       if (navigator.permissions) {
-        navigator.permissions.query({ name: 'microphone' as PermissionName }).then((permissionStatus) => {
+        try {
+            const permissionStatus = await navigator.permissions.query({ name: 'microphone' as PermissionName });
             setMicPermission(permissionStatus.state);
             permissionStatus.onchange = () => {
                 setMicPermission(permissionStatus.state);
             };
-        });
+        } catch (err) {
+             console.error("Error checking microphone permission:", err);
+             // Fallback for browsers that might not support query
+             setMicPermission('prompt');
+        }
       }
     }
 
@@ -150,7 +155,6 @@ export function QaForm() {
 
     if (isRecording) {
       recognitionRef.current.stop();
-      setIsRecording(false);
       return;
     }
 
@@ -164,14 +168,18 @@ export function QaForm() {
     }
 
     try {
-        if (micPermission === 'prompt') {
-            await navigator.mediaDevices.getUserMedia({ audio: true });
-        }
+        // Explicitly request microphone access. This will trigger the browser prompt if not already granted.
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+        
+        // Update permission state in case it was 'prompt'
+        setMicPermission('granted');
+
         recognitionRef.current.start();
         setIsRecording(true);
     } catch (err) {
-        setMicPermission('denied');
-        if (err instanceof DOMException && err.name === 'NotAllowedError') {
+        console.error("Error starting recording:", err);
+        if (err instanceof DOMException && (err.name === 'NotAllowedError' || err.name === 'SecurityError')) {
+             setMicPermission('denied');
              toast({
                 title: 'دسترسی به میکروفون رد شد',
                 description: 'برای استفاده از میکروفون، باید دسترسی را مجاز کنید.',
@@ -194,6 +202,12 @@ export function QaForm() {
 
   const onSubmit = async (data: QaFormData) => {
     if (loading || data.question.trim().length < 10) return;
+    
+    // Stop recording if it's active before sending
+    if (isRecording && recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
+    
     setLoading(true);
     setMessages(prev => [...prev, { type: 'user', text: data.question }]);
     form.reset();
@@ -386,7 +400,7 @@ export function QaForm() {
                         isRecording ? 'bg-red-500/20 text-red-500 hover:bg-red-500/30' : 
                         micPermission === 'denied' || micPermission === 'unsupported' ? 'text-muted-foreground/50 cursor-not-allowed' : 'text-muted-foreground'
                       }`}
-                      disabled={loading || micPermission === 'unsupported' || micPermission === 'denied'}
+                      disabled={loading || micPermission === 'unsupported'}
                       title={micPermission === 'denied' ? 'دسترسی به میکروفون مسدود است' : (micPermission === 'unsupported' ? 'مرورگر پشتیبانی نمی‌کند' : (isRecording ? 'توقف ضبط' : 'شروع ضبط'))}
                     >
                         {isRecording ? <Mic className="h-6 w-6 animate-pulse" /> : <Mic className="h-6 w-6" />}
