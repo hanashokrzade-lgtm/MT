@@ -14,7 +14,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, Sparkles, Volume2, Pause, User, Bot, Send, Mic } from 'lucide-react';
+import { Loader2, Sparkles, Volume2, Pause, User, Bot, Send, Mic, MicOff } from 'lucide-react';
 import {
   generateAnswerForQuestion,
 } from '@/ai/flows/generate-answer-for-question';
@@ -49,6 +49,7 @@ export function QaForm() {
   const [activeAudio, setActiveAudio] = useState<{ index: number; isPlaying: boolean } | null>(null);
   
   const [isRecording, setIsRecording] = useState(false);
+  const [micPermission, setMicPermission] = useState<PermissionState | 'unsupported'>('prompt');
   const recognitionRef = useRef<any>(null);
 
 
@@ -76,6 +77,13 @@ export function QaForm() {
   useEffect(() => {
     const SpeechRecognition = (window as IWindow).SpeechRecognition || (window as IWindow).webkitSpeechRecognition;
     if (SpeechRecognition) {
+      navigator.permissions.query({ name: 'microphone' as PermissionName }).then((permissionStatus) => {
+        setMicPermission(permissionStatus.state);
+        permissionStatus.onchange = () => {
+          setMicPermission(permissionStatus.state);
+        };
+      });
+
       const recognition = new SpeechRecognition();
       recognition.continuous = false;
       recognition.lang = 'fa-IR';
@@ -84,16 +92,24 @@ export function QaForm() {
       recognition.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;
         form.setValue('question', transcript);
-        if (transcript.length >= 10) {
+        if (transcript.trim().length >= 10) {
             form.handleSubmit(onSubmit)();
         }
       };
 
       recognition.onerror = (event: any) => {
         console.error('Speech recognition error', event.error);
+        let description = 'متاسفانه مشکلی در تشخیص صدای شما پیش آمد.';
+        if (event.error === 'not-allowed') {
+          description = 'برای استفاده از میکروفون، لطفاً دسترسی لازم را در مرورگر خود فعال کنید.';
+          setMicPermission('denied');
+        } else if (event.error === 'no-speech') {
+            description = 'صدایی تشخیص داده نشد. لطفاً دوباره تلاش کنید.';
+        }
+        
         toast({
             title: 'خطا در تشخیص گفتار',
-            description: 'متاسفانه مشکلی در تشخیص صدای شما پیش آمد.',
+            description: description,
             variant: 'destructive',
         });
         setIsRecording(false);
@@ -104,6 +120,8 @@ export function QaForm() {
       };
 
       recognitionRef.current = recognition;
+    } else {
+        setMicPermission('unsupported');
     }
   }, [form, toast]);
 
@@ -120,8 +138,8 @@ export function QaForm() {
       recognitionRef.current.stop();
     } else {
       recognitionRef.current.start();
+      setIsRecording(true);
     }
-    setIsRecording(!isRecording);
   };
 
   useEffect(() => {
@@ -129,7 +147,7 @@ export function QaForm() {
   }, [messages, loading]);
 
   const onSubmit = async (data: QaFormData) => {
-    if (loading) return;
+    if (loading || data.question.trim().length < 10) return;
     setLoading(true);
     setMessages(prev => [...prev, { type: 'user', text: data.question }]);
     form.reset();
@@ -303,10 +321,13 @@ export function QaForm() {
                       onClick={handleToggleRecording} 
                       size="icon" 
                       variant="ghost" 
-                      className={`w-12 h-12 rounded-full flex-shrink-0 ${isRecording ? 'text-red-500 animate-pulse' : 'text-muted-foreground'}`}
-                      disabled={loading}
+                      className={`w-12 h-12 rounded-full flex-shrink-0 transition-colors ${
+                        isRecording ? 'bg-red-500/20 text-red-500 hover:bg-red-500/30' : 'text-muted-foreground'
+                      }`}
+                      disabled={loading || micPermission === 'denied' || micPermission === 'unsupported'}
+                      title={micPermission === 'denied' ? 'دسترسی به میکروفون مسدود است' : (isRecording ? 'توقف ضبط' : 'شروع ضبط')}
                     >
-                        <Mic className="h-6 w-6" />
+                        {micPermission === 'denied' ? <MicOff className="h-6 w-6" /> : <Mic className={`h-6 w-6 ${isRecording ? 'animate-pulse' : ''}`} />}
                         <span className="sr-only">{isRecording ? 'توقف ضبط' : 'شروع ضبط'}</span>
                     </Button>
                     <FormField
@@ -334,7 +355,7 @@ export function QaForm() {
                         </FormItem>
                         )}
                     />
-                    <Button type="submit" disabled={loading || form.getValues('question').trim().length < 10} size="icon" className="w-12 h-12 rounded-full flex-shrink-0 bg-accent hover:bg-accent/90">
+                    <Button type="submit" disabled={loading || form.watch('question').trim().length < 10} size="icon" className="w-12 h-12 rounded-full flex-shrink-0 bg-accent hover:bg-accent/90">
                         {loading ? (
                             <Loader2 className="h-6 w-6 animate-spin" />
                         ) : (
@@ -346,6 +367,11 @@ export function QaForm() {
                 </Form>
                 </CardContent>
             </Card>
+             {micPermission === 'denied' && (
+                <p className="text-xs text-destructive text-center mt-2">
+                    شما دسترسی به میکروفون را مسدود کرده‌اید. لطفاً از تنظیمات مرورگر خود دسترسی را فعال کنید.
+                </p>
+            )}
         </div>
     </div>
   );
