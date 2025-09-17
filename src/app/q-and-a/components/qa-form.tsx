@@ -17,11 +17,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Loader2, Sparkles, Volume2, Pause, User, Bot, Send } from 'lucide-react';
 import {
   generateAnswerForQuestion,
-  type GenerateAnswerForQuestionOutput,
 } from '@/ai/flows/generate-answer-for-question';
 import { generateAudioFromText } from '@/ai/flows/generate-audio-from-text';
 import { useToast } from '@/hooks/use-toast';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
@@ -35,6 +34,7 @@ interface Message {
     type: 'user' | 'bot';
     text: string;
     audioDataUri?: string | null;
+    isLoadingAudio?: boolean;
 }
 
 export function QaForm() {
@@ -74,8 +74,9 @@ export function QaForm() {
 
     try {
       const response = await generateAnswerForQuestion({ question: data.question });
-      setMessages(prev => [...prev, { type: 'bot', text: response.answer, audioDataUri: null }]);
+      setMessages(prev => [...prev, { type: 'bot', text: response.answer, audioDataUri: null, isLoadingAudio: false }]);
     } catch (error) {
+      setMessages(prev => prev.slice(0, -1)); // Remove user message if AI fails
       toast({
         title: 'خطا در دریافت پاسخ',
         description: 'متاسفانه در ارتباط با سرویس هوش مصنوعی مشکلی پیش آمد. لطفاً دوباره تلاش کنید.',
@@ -90,52 +91,62 @@ export function QaForm() {
     const message = messages[index];
     if (message.type !== 'bot') return;
 
-    // Pause currently playing audio if different
+    // Pause currently playing audio if it's different from the one clicked
     if (activeAudio && activeAudio.index !== index && audioRefs.current[activeAudio.index]) {
-        audioRefs.current[activeAudio.index]?.pause();
+      audioRefs.current[activeAudio.index]?.pause();
+      setActiveAudio(null);
     }
     
     const audio = audioRefs.current[index];
     if (!audio) return;
 
+    // If the clicked audio is currently playing, pause it
     if (activeAudio?.index === index && activeAudio.isPlaying) {
         audio.pause();
         setActiveAudio({ index, isPlaying: false });
-    } else {
-        if (!message.audioDataUri) {
-            setMessages(prev => prev.map((msg, i) => i === index ? { ...msg, isLoadingAudio: true } : msg));
-            try {
-                const audioResponse = await generateAudioFromText(message.text);
-                const newAudioDataUri = audioResponse.audioDataUri;
-                setMessages(prev => prev.map((msg, i) => i === index ? { ...msg, audioDataUri: newAudioDataUri, isLoadingAudio: false } : msg));
-                audio.src = newAudioDataUri;
-                audio.play();
-                setActiveAudio({ index, isPlaying: true });
-            } catch (error) {
-                toast({
-                    title: 'خطا در تولید صدا',
-                    description: 'متاسفانه در تولید فایل صوتی مشکلی پیش آمد.',
-                    variant: 'destructive',
-                });
-                setMessages(prev => prev.map((msg, i) => i === index ? { ...msg, isLoadingAudio: false } : msg));
-            }
-        } else {
-            audio.play();
-            setActiveAudio({ index, isPlaying: true });
-        }
+        return;
+    }
+    
+    // If audio is already loaded, just play
+    if (message.audioDataUri) {
+        audio.play();
+        setActiveAudio({ index, isPlaying: true });
+        return;
+    }
+
+    // If audio is not loaded, fetch it
+    setMessages(prev => prev.map((msg, i) => i === index ? { ...msg, isLoadingAudio: true } : msg));
+    try {
+        const audioResponse = await generateAudioFromText(message.text);
+        const newAudioDataUri = audioResponse.audioDataUri;
+        
+        setMessages(prev => prev.map((msg, i) => i === index ? { ...msg, audioDataUri: newAudioDataUri, isLoadingAudio: false } : msg));
+
+        // Use a useEffect to play the audio once the src is set
+        audio.src = newAudioDataUri;
+        audio.play();
+        setActiveAudio({ index, isPlaying: true });
+
+    } catch (error) {
+        toast({
+            title: 'خطا در تولید صدا',
+            description: 'متاسفانه در تولید فایل صوتی مشکلی پیش آمد.',
+            variant: 'destructive',
+        });
+        setMessages(prev => prev.map((msg, i) => i === index ? { ...msg, isLoadingAudio: false } : msg));
     }
   };
 
   const renderMessageContent = (text: string) => {
-    const lines = text.split('\n');
-    return lines.map((line, index) => {
-        if (line.match(/^\d+\.\s/)) { // Numbered list
-            return <p key={index} className="mb-2 pl-4">{line}</p>;
+    const parts = text.split(/(\n\d+\.\s.*|\n\*\s.*)/).filter(Boolean);
+    return parts.map((part, index) => {
+        if (part.match(/^\n\d+\.\s/)) { 
+            return <p key={index} className="mb-2 pl-4">{part.trim()}</p>;
         }
-        if (line.trim().startsWith('*')) { // Bulleted list
-            return <li key={index} className="list-disc list-inside mb-1">{line.replace('*','')}</li>;
+        if (part.match(/^\n\*\s/)) {
+            return <li key={index} className="list-disc list-inside mb-1">{part.replace(/^\n\*\s/, '').trim()}</li>;
         }
-        return <p key={index} className="mb-2">{line || <br/>}</p>;
+        return part.split('\n').map((line, lineIndex) => <p key={`${index}-${lineIndex}`} className="mb-2">{line || <br/>}</p>);
     });
   }
 
@@ -164,9 +175,9 @@ export function QaForm() {
                                 {renderMessageContent(message.text)}
                             </div>
                              {message.type === 'bot' && (
-                                <div className="mt-4 pt-3 border-t border-white/10">
-                                    <Button onClick={() => handlePlayAudio(index)} size="sm" variant="ghost" className="h-8 gap-2 bg-primary/10 hover:bg-primary/20 text-primary-foreground">
-                                        {(message as any).isLoadingAudio ? (
+                                <div className="mt-4 pt-3 border-t border-border">
+                                    <Button onClick={() => handlePlayAudio(index)} size="sm" variant="ghost" className="h-8 gap-2 text-muted-foreground hover:bg-accent/20 hover:text-accent-foreground">
+                                        {message.isLoadingAudio ? (
                                             <Loader2 className="h-4 w-4 animate-spin" />
                                         ) : (activeAudio?.index === index && activeAudio.isPlaying) ? (
                                             <Pause className="h-4 w-4" />
@@ -177,7 +188,6 @@ export function QaForm() {
                                     </Button>
                                     <audio 
                                         ref={el => audioRefs.current[index] = el}
-                                        src={message.audioDataUri || ''}
                                         onEnded={() => setActiveAudio({ index, isPlaying: false })}
                                         className="hidden"
                                     />
@@ -234,7 +244,7 @@ export function QaForm() {
                         </FormItem>
                         )}
                     />
-                    <Button type="submit" disabled={loading} size="icon" className="w-12 h-12 rounded-full flex-shrink-0 bg-accent hover:bg-accent/90">
+                    <Button type="submit" disabled={loading || form.getValues('question').trim().length < 10} size="icon" className="w-12 h-12 rounded-full flex-shrink-0 bg-accent hover:bg-accent/90">
                         {loading ? (
                             <Loader2 className="h-6 w-6 animate-spin" />
                         ) : (
