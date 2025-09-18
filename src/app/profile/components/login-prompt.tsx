@@ -26,8 +26,12 @@ export function LoginPrompt() {
         setIsButtonLoading(true);
         try {
             await signInWithGoogle();
-            // In popup mode, this will run. In redirect mode, the page will navigate away.
-            // A toast is shown in the provider for popup and redirect scenarios.
+            // On success, the onAuthStateChanged in the provider will handle the user state update.
+            // A toast is shown for redirect results in the provider. For popup, we can show it here if needed.
+             toast({
+                title: 'ورود موفق',
+                description: 'شما با موفقیت وارد حساب کاربری خود شدید.',
+            });
         } catch (error: any) {
             console.error("Authentication Error: ", error);
             let description = 'متاسفانه مشکلی در فرآیند ورود با گوگل پیش آمد.';
@@ -35,8 +39,8 @@ export function LoginPrompt() {
                 description = 'دامنه شما برای ورود مجاز نیست. لطفاً با پشتیبانی تماس بگیرید.'
             } else if (error.code === 'auth/popup-closed-by-user') {
                 description = 'پنجره ورود توسط شما بسته شد. لطفاً دوباره تلاش کنید.'
-            } else if (error.code) { // Catch other firebase errors
-                 description = `هدایت به صفحه گوگل با مشکل مواجه شد. (${error.code})`
+            } else if (error.code) { 
+                 description = `ورود با گوگل با مشکل مواجه شد. (${error.code})`
             }
             toast({
                 title: 'خطا در ورود',
@@ -44,7 +48,8 @@ export function LoginPrompt() {
                 variant: 'destructive',
             });
         } finally {
-            // This is crucial for redirect failures or popup closes
+            // This is crucial to reset the button state in all cases:
+            // success (for popup), error, or user closing the popup.
             setIsButtonLoading(false);
         }
     };

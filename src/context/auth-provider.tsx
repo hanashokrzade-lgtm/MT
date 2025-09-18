@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { getAuth, signInWithRedirect, GoogleAuthProvider, onAuthStateChanged, signOut as firebaseSignOut, User, Auth, getRedirectResult } from 'firebase/auth';
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut as firebaseSignOut, User, Auth, getRedirectResult } from 'firebase/auth';
 import { getApp, getApps, initializeApp, type FirebaseApp } from "firebase/app";
 import { useToast } from '@/hooks/use-toast';
 import { LoadingLogo } from '@/components/layout/loading-logo';
@@ -27,7 +27,7 @@ function getFirebaseApp(): FirebaseApp {
 
 interface AuthContextType {
   user: User | null;
-  isAuthLoading: boolean; // Renamed to be specific to initial auth state loading
+  isAuthLoading: boolean;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
 }
@@ -36,56 +36,41 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [isAuthLoading, setIsAuthLoading] = useState(true); // Represents initial auth check
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [auth, setAuth] = useState<Auth | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
-    let unsubscribe: () => void = () => {};
-    try {
-        const app = getFirebaseApp();
-        const authInstance = getAuth(app);
-        setAuth(authInstance);
+    const app = getFirebaseApp();
+    const authInstance = getAuth(app);
+    setAuth(authInstance);
 
-        unsubscribe = onAuthStateChanged(authInstance, (currentUser) => {
-          setUser(currentUser);
-          setIsAuthLoading(false);
-        });
+    const unsubscribe = onAuthStateChanged(authInstance, (currentUser) => {
+      setUser(currentUser);
+      setIsAuthLoading(false);
+    });
 
-        getRedirectResult(authInstance)
-            .then((result) => {
-                if (result) {
-                    toast({
-                        title: 'ورود موفق',
-                        description: 'شما با موفقیت وارد حساب کاربری خود شدید.',
-                    });
-                }
-            })
-            .catch((error) => {
-                console.error("Redirect Result Error: ", error);
-            });
+    getRedirectResult(authInstance)
+      .then((result) => {
+        if (result) {
+          toast({
+            title: 'ورود موفق',
+            description: 'شما با موفقیت وارد حساب کاربری خود شدید.',
+          });
+        }
+      }).catch((error) => {
+        console.error("Redirect Result Error: ", error);
+      });
 
-    } catch (error) {
-        console.error("Firebase initialization error:", error);
-        toast({
-            title: 'خطای حیاتی در اتصال به سرور',
-            description: 'امکان اتصال به سرویس‌های برنامه وجود ندارد. لطفاً صفحه را مجدداً بارگذاری کنید.',
-            variant: 'destructive',
-        });
-        setIsAuthLoading(false);
-    }
-
-    return () => {
-        unsubscribe();
-    };
+    return () => unsubscribe();
   }, [toast]);
 
   const signInWithGoogle = async (): Promise<void> => {
     if (!auth) {
-        throw new Error("سرویس احراز هویت هنوز آماده نیست.");
+      throw new Error("سرویس احراز هویت هنوز آماده نیست.");
     }
     const provider = new GoogleAuthProvider();
-    await signInWithRedirect(auth, provider);
+    await signInWithPopup(auth, provider);
   };
 
   const signOut = async () => {
@@ -112,7 +97,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signInWithGoogle,
     signOut,
   };
-
+  
   if (isAuthLoading) {
       return (
         <div className="fixed inset-0 flex items-center justify-center bg-background z-50">
