@@ -127,10 +127,11 @@ export function AdvisorForm() {
     try {
       const response = await analyzeStudentAnswersAndSuggestMajors(data);
       setResult(response);
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Analysis Error: ", error);
       toast({
         title: 'خطا در تحلیل',
-        description: 'متاسفانه در ارتباط با سرویس هوش مصنوعی مشکلی پیش آمد. لطفاً دوباره تلاش کنید.',
+        description: `مشکلی در ارتباط با سرویس هوش مصنوعی پیش آمد: ${error.message}`,
         variant: 'destructive',
       });
     } finally {
@@ -177,7 +178,7 @@ export function AdvisorForm() {
             title: 'خطا در تولید صدا',
             description: isQuotaError 
               ? 'متاسفانه سقف استفاده از سرویس صوتی تمام شده است. لطفاً کمی بعد دوباره تلاش کنید.'
-              : 'متاسفانه در تولید فایل صوتی مشکلی پیش آمد.',
+              : `مشکلی در تولید فایل صوتی پیش آمد: ${error.message}`,
             variant: 'destructive',
         });
     } finally {

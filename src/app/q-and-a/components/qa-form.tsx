@@ -195,12 +195,13 @@ export function QaForm() {
     try {
       const response = await generateAnswerForQuestion({ question: data.question });
       setMessages(prev => [...prev, { type: 'bot', text: response.answer, audioDataUri: null, isLoadingAudio: false }]);
-    } catch (error) {
+    } catch (error: any) {
       // Keep user message, but show an error message from bot
-      setMessages(prev => [...prev, { type: 'bot', text: 'متاسفانه در ارتباط با سرویس هوش مصنوعی مشکلی پیش آمد. لطفاً دوباره تلاش کنید.' }]);
+      const errorMessage = `مشکلی در ارتباط با سرویس هوش مصنوعی پیش آمد: ${error.message}`;
+      setMessages(prev => [...prev, { type: 'bot', text: errorMessage }]);
       toast({
         title: 'خطا در دریافت پاسخ',
-        description: 'متاسفانه در ارتباط با سرویس هوش مصنوعی مشکلی پیش آمد. لطفاً دوباره تلاش کنید.',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -267,7 +268,7 @@ export function QaForm() {
             title: 'خطا در تولید صدا',
             description: isQuotaError 
               ? 'متاسفانه سقف استفاده از سرویس صوتی تمام شده است. لطفاً کمی بعد دوباره تلاش کنید.'
-              : 'متاسفانه در تولید فایل صوتی مشکلی پیش آمد.',
+              : `مشکلی در تولید فایل صوتی پیش آمد: ${error.message}`,
             variant: 'destructive',
         });
         setMessages(prev => prev.map((msg, i) => i === index ? { ...msg, isLoadingAudio: false } : msg));

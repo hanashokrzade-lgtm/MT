@@ -64,10 +64,11 @@ export function AlignmentForm() {
       const majorOptions = data.majorOptions.split(/,|،|\n/).map(s => s.trim()).filter(Boolean);
       const response = await analyzeAlignmentOfGoalsAndMajors({ ...data, majorOptions });
       setResult(response.sort((a, b) => b.alignmentScore - a.alignmentScore));
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Alignment Error: ", error);
       toast({
         title: 'خطا در تحلیل',
-        description: 'متاسفانه در ارتباط با سرویس هوش مصنوعی مشکلی پیش آمد. لطفاً دوباره تلاش کنید.',
+        description: `مشکلی در ارتباط با سرویس هوش مصنوعی پیش آمد: ${error.message}`,
         variant: 'destructive',
       });
     } finally {
