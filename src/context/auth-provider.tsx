@@ -1,10 +1,25 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut as firebaseSignOut, User, Auth, getRedirectResult } from 'firebase/auth';
+import { 
+  getAuth, 
+  signInWithPopup, 
+  GoogleAuthProvider, 
+  onAuthStateChanged, 
+  signOut as firebaseSignOut, 
+  User, 
+  Auth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+  type UserCredential,
+  type AuthError
+} from 'firebase/auth';
 import { getApp, getApps, initializeApp, type FirebaseApp } from "firebase/app";
 import { useToast } from '@/hooks/use-toast';
 import { LoadingLogo } from '@/components/layout/loading-logo';
+import { useIsMobile } from '@/hooks/use-mobile';
+
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -28,8 +43,11 @@ function getFirebaseApp(): FirebaseApp {
 interface AuthContextType {
   user: User | null;
   isAuthLoading: boolean;
-  signInWithGoogle: () => Promise<void>;
+  signInWithGoogle: () => Promise<UserCredential>;
+  signUpWithEmail: (name: string, email: string, pass: string) => Promise<UserCredential>;
+  signInWithEmail: (email: string, pass: string) => Promise<UserCredential>;
   signOut: () => Promise<void>;
+  auth: Auth | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -50,27 +68,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsAuthLoading(false);
     });
 
-    getRedirectResult(authInstance)
-      .then((result) => {
-        if (result) {
-          toast({
-            title: 'ورود موفق',
-            description: 'شما با موفقیت وارد حساب کاربری خود شدید.',
-          });
-        }
-      }).catch((error) => {
-        console.error("Redirect Result Error: ", error);
-      });
-
     return () => unsubscribe();
-  }, [toast]);
+  }, []);
 
-  const signInWithGoogle = async (): Promise<void> => {
+  const signInWithGoogle = async (): Promise<UserCredential> => {
     if (!auth) {
       throw new Error("سرویس احراز هویت هنوز آماده نیست.");
     }
     const provider = new GoogleAuthProvider();
-    await signInWithPopup(auth, provider);
+    return await signInWithPopup(auth, provider);
+  };
+  
+  const signUpWithEmail = async (name: string, email: string, pass: string): Promise<UserCredential> => {
+    if (!auth) {
+      throw new Error("سرویس احراز هویت هنوز آماده نیست.");
+    }
+    const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+    await updateProfile(userCredential.user, { displayName: name });
+    // Manually refetch the user to get the updated profile
+    await userCredential.user.reload();
+    // Update the local user state
+    setUser(auth.currentUser);
+    return userCredential;
+  };
+  
+  const signInWithEmail = async (email: string, pass: string): Promise<UserCredential> => {
+    if (!auth) {
+      throw new Error("سرویس احراز هویت هنوز آماده نیست.");
+    }
+    return await signInWithEmailAndPassword(auth, email, pass);
   };
 
   const signOut = async () => {
@@ -95,7 +121,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user,
     isAuthLoading,
     signInWithGoogle,
+    signUpWithEmail,
+    signInWithEmail,
     signOut,
+    auth,
   };
   
   if (isAuthLoading) {

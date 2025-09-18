@@ -2,9 +2,17 @@
 
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/auth-provider";
-import { Loader2 } from "lucide-react";
+import { Loader2, KeyRound, Mail, User } from "lucide-react";
 import { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import type { AuthError } from "firebase/auth";
 
 function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
     return (
@@ -17,66 +25,259 @@ function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
     );
 }
 
-export function LoginPrompt() {
-    const { signInWithGoogle } = useAuth();
-    const [isButtonLoading, setIsButtonLoading] = useState(false);
-    const { toast } = useToast();
+const loginSchema = z.object({
+    email: z.string().email({ message: "لطفاً یک ایمیل معتبر وارد کنید." }),
+    password: z.string().min(1, { message: "لطفاً رمز عبور خود را وارد کنید." }),
+});
 
-    const handleSignIn = async () => {
-        setIsButtonLoading(true);
+const registerSchema = z.object({
+    name: z.string().min(2, { message: "نام باید حداقل ۲ کاراکتر باشد." }),
+    email: z.string().email({ message: "لطفاً یک ایمیل معتبر وارد کنید." }),
+    password: z.string().min(6, { message: "رمز عبور باید حداقل ۶ کاراکتر باشد." }),
+});
+
+export function LoginPrompt() {
+    const { signInWithGoogle, signInWithEmail, signUpWithEmail } = useAuth();
+    const [isLoading, setIsLoading] = useState(false);
+    const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+    const { toast } = useToast();
+    const [activeTab, setActiveTab] = useState("login");
+
+    const loginForm = useForm<z.infer<typeof loginSchema>>({
+        resolver: zodResolver(loginSchema),
+        defaultValues: { email: "", password: "" },
+    });
+    
+    const registerForm = useForm<z.infer<typeof registerSchema>>({
+        resolver: zodResolver(registerSchema),
+        defaultValues: { name: "", email: "", password: "" },
+    });
+
+    const handleAuthError = (error: AuthError) => {
+        let title = "خطا در احراز هویت";
+        let description = "مشکلی پیش آمده است. لطفاً دوباره تلاش کنید.";
+
+        switch (error.code) {
+            case 'auth/user-not-found':
+            case 'auth/wrong-password':
+                title = "ایمیل یا رمز عبور اشتباه است";
+                description = "لطفاً اطلاعات وارد شده را بررسی کرده و دوباره تلاش کنید.";
+                break;
+            case 'auth/email-already-in-use':
+                title = "ایمیل تکراری است";
+                description = "این ایمیل قبلاً ثبت‌نام کرده است. لطفاً از بخش ورود استفاده کنید یا با ایمیل دیگری تلاش کنید.";
+                break;
+            case 'auth/weak-password':
+                title = "رمز عبور ضعیف است";
+                description = "رمز عبور شما باید حداقل ۶ کاراکتر باشد.";
+                break;
+             case 'auth/invalid-email':
+                title = "ایمیل نامعتبر است";
+                description = "لطفاً یک آدرس ایمیل صحیح وارد کنید.";
+                break;
+            case 'auth/popup-closed-by-user':
+                title = "پنجره ورود بسته شد";
+                description = "شما پنجره ورود با گوگل را بستید. لطفاً دوباره تلاش کنید.";
+                return; // Don't show a destructive toast for this
+            default:
+                description = `یک خطای ناشناخته رخ داد: ${error.message}`;
+        }
+        
+        toast({
+            title,
+            description,
+            variant: "destructive",
+        });
+    }
+
+    const onLoginSubmit = async (values: z.infer<typeof loginSchema>) => {
+        setIsLoading(true);
+        try {
+            await signInWithEmail(values.email, values.password);
+            toast({
+                title: "ورود موفق",
+                description: "شما با موفقیت وارد حساب کاربری خود شدید.",
+            });
+        } catch (error) {
+            handleAuthError(error as AuthError);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    
+    const onRegisterSubmit = async (values: z.infer<typeof registerSchema>) => {
+        setIsLoading(true);
+        try {
+            await signUpWithEmail(values.name, values.email, values.password);
+             toast({
+                title: "ثبت‌نام موفق",
+                description: "حساب کاربری شما با موفقیت ایجاد شد و وارد شدید.",
+            });
+        } catch (error) {
+            handleAuthError(error as AuthError);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleGoogleSignIn = async () => {
+        setIsGoogleLoading(true);
         try {
             await signInWithGoogle();
-            // On success, the onAuthStateChanged in the provider will handle the user state update.
-            // A toast is shown for redirect results in the provider. For popup, we can show it here if needed.
              toast({
                 title: 'ورود موفق',
                 description: 'شما با موفقیت وارد حساب کاربری خود شدید.',
             });
-        } catch (error: any) {
-            console.error("Authentication Error: ", error);
-            let description = 'متاسفانه مشکلی در فرآیند ورود با گوگل پیش آمد.';
-            if (error.code === 'auth/unauthorized-domain') {
-                description = 'دامنه شما برای ورود مجاز نیست. لطفاً با پشتیبانی تماس بگیرید.'
-            } else if (error.code === 'auth/popup-closed-by-user') {
-                description = 'پنجره ورود توسط شما بسته شد. لطفاً دوباره تلاش کنید.'
-            } else if (error.code) { 
-                 description = `ورود با گوگل با مشکل مواجه شد. (${error.code})`
-            }
-            toast({
-                title: 'خطا در ورود',
-                description: description,
-                variant: 'destructive',
-            });
+        } catch (error) {
+            handleAuthError(error as AuthError);
         } finally {
-            // This is crucial to reset the button state in all cases:
-            // success (for popup), error, or user closing the popup.
-            setIsButtonLoading(false);
+            setIsGoogleLoading(false);
         }
     };
 
     return (
-        <div className="flex flex-col items-center justify-center text-center p-8 h-full">
-            <div className="max-w-md w-full">
-                <h2 className="text-3xl font-bold tracking-tighter text-primary font-headline mb-4">
-                    به پروفایل خود وارد شوید
-                </h2>
-                <p className="text-muted-foreground mb-8">
-                    برای دسترسی به مشاوره‌های ذخیره شده، پیگیری پیشرفت و دریافت پیشنهادهای شخصی‌سازی شده، وارد حساب کاربری خود شوید.
-                </p>
-                
-                <Button onClick={handleSignIn} size="lg" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground" disabled={isButtonLoading}>
-                    {isButtonLoading ? (
-                         <Loader2 className="ml-2 h-5 w-5 animate-spin" />
-                    ) : (
-                        <GoogleIcon className="ml-2 h-5 w-5" />
-                    )}
-                   {isButtonLoading ? 'در حال هدایت...' : 'ورود با حساب کاربری گوگل'}
-                </Button>
+        <div className="flex flex-col items-center justify-center text-center p-4 sm:p-8 h-full">
+            <Card className="w-full max-w-md">
+                <CardHeader>
+                    <CardTitle className="text-2xl font-bold tracking-tighter text-primary font-headline">
+                         به پروفایل خود دسترسی پیدا کنید
+                    </CardTitle>
+                    <CardDescription>
+                        برای دسترسی به تاریخچه و امکانات شخصی‌سازی شده، وارد شوید یا ثبت‌نام کنید.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                        <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="login">ورود</TabsTrigger>
+                            <TabsTrigger value="register">ثبت نام</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="login">
+                            <Form {...loginForm}>
+                                <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4 pt-4 text-right">
+                                    <FormField
+                                        control={loginForm.control}
+                                        name="email"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>ایمیل</FormLabel>
+                                                <FormControl>
+                                                    <div className="relative">
+                                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                        <Input placeholder="email@example.com" {...field} className="pl-10" />
+                                                    </div>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={loginForm.control}
+                                        name="password"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>رمز عبور</FormLabel>
+                                                <FormControl>
+                                                    <div className="relative">
+                                                        <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                        <Input type="password" placeholder="••••••••" {...field} className="pl-10" />
+                                                    </div>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <Button type="submit" className="w-full" disabled={isLoading}>
+                                        {isLoading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+                                        ورود به حساب کاربری
+                                    </Button>
+                                </form>
+                            </Form>
+                        </TabsContent>
+                        <TabsContent value="register">
+                            <Form {...registerForm}>
+                                <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4 pt-4 text-right">
+                                    <FormField
+                                        control={registerForm.control}
+                                        name="name"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>نام</FormLabel>
+                                                <FormControl>
+                                                     <div className="relative">
+                                                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                        <Input placeholder="نام و نام خانوادگی" {...field} className="pl-10" />
+                                                    </div>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={registerForm.control}
+                                        name="email"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>ایمیل</FormLabel>
+                                                <FormControl>
+                                                     <div className="relative">
+                                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                        <Input placeholder="email@example.com" {...field} className="pl-10" />
+                                                    </div>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={registerForm.control}
+                                        name="password"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>رمز عبور</FormLabel>
+                                                <FormControl>
+                                                     <div className="relative">
+                                                        <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                        <Input type="password" placeholder="حداقل ۶ کاراکتر" {...field} className="pl-10" />
+                                                    </div>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <Button type="submit" className="w-full" disabled={isLoading}>
+                                         {isLoading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+                                        ایجاد حساب کاربری جدید
+                                    </Button>
+                                </form>
+                            </Form>
+                        </TabsContent>
+                    </Tabs>
+                    
+                    <div className="relative my-6">
+                        <div className="absolute inset-0 flex items-center">
+                            <span className="w-full border-t" />
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase">
+                            <span className="bg-card px-2 text-muted-foreground">
+                                یا ادامه با
+                            </span>
+                        </div>
+                    </div>
 
-                 <p className="text-xs text-muted-foreground mt-4">
-                    با ورود، شما با شرایط و قوانین ما موافقت می‌کنید.
-                </p>
-            </div>
+                    <Button onClick={handleGoogleSignIn} variant="outline" className="w-full" disabled={isGoogleLoading}>
+                        {isGoogleLoading ? (
+                            <Loader2 className="ml-2 h-5 w-5 animate-spin" />
+                        ) : (
+                            <GoogleIcon className="ml-2 h-5 w-5" />
+                        )}
+                        {isGoogleLoading ? 'در حال هدایت...' : 'ورود با حساب کاربری گوگل'}
+                    </Button>
+                </CardContent>
+            </Card>
+            <p className="text-xs text-muted-foreground mt-4 text-center max-w-xs">
+                با ورود یا ثبت‌نام، شما با شرایط و قوانین و سیاست حفظ حریم خصوصی ما موافقت می‌کنید.
+            </p>
         </div>
     );
 }
