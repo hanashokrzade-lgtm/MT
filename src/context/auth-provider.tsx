@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut as firebaseSignOut, User, Auth } from 'firebase/auth';
 import { getApp, getApps, initializeApp, type FirebaseApp } from "firebase/app";
 import { useToast } from '@/hooks/use-toast';
+import { Loader2 } from 'lucide-react';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -37,19 +38,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [auth, setAuth] = useState<Auth | null>(null);
+  const [isFirebaseInitialized, setIsFirebaseInitialized] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
-    const app = getFirebaseApp();
-    const authInstance = getAuth(app);
-    setAuth(authInstance);
+    try {
+        const app = getFirebaseApp();
+        const authInstance = getAuth(app);
+        setAuth(authInstance);
 
-    const unsubscribe = onAuthStateChanged(authInstance, (currentUser) => {
-      setUser(currentUser);
-      setIsLoading(false);
-    });
+        const unsubscribe = onAuthStateChanged(authInstance, (currentUser) => {
+          setUser(currentUser);
+          setIsLoading(false);
+        });
+        
+        setIsFirebaseInitialized(true);
 
-    return () => unsubscribe();
+        return () => unsubscribe();
+    } catch (error) {
+        console.error("Firebase initialization error:", error);
+        toast({
+            title: 'خطای حیاتی در اتصال به سرور',
+            description: 'امکان اتصال به سرویس‌های برنامه وجود ندارد. لطفاً صفحه را مجدداً بارگذاری کنید.',
+            variant: 'destructive',
+        });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const signInWithGoogle = async () => {
@@ -70,7 +84,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         variant: 'destructive',
       });
     } finally {
-        // A short delay to allow firebase to update auth state
         setTimeout(() => setIsLoading(false), 1000);
     }
   };
@@ -102,6 +115,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signInWithGoogle,
     signOut,
   };
+
+  if (!isFirebaseInitialized) {
+      return (
+        <div className="flex h-screen w-full flex-col items-center justify-center bg-background">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            <p className="mt-4 text-lg text-muted-foreground">در حال آماده‌سازی...</p>
+        </div>
+      )
+  }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
