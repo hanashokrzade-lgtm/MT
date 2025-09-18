@@ -22,6 +22,7 @@ import { generateAudioFromText } from '@/ai/flows/generate-audio-from-text';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
 
 const qaSchema = z.object({
   question: z.string().min(2, { message: 'لطفاً سوال خود را با حداقل ۲ کاراکتر وارد کنید.' }),
@@ -382,7 +383,10 @@ export function QaForm() {
                             <Textarea
                                 placeholder={isRecording ? 'در حال شنیدن...' : 'سوال خود را اینجا بنویسید یا با میکروفون بپرسید...'}
                                 rows={1}
-                                className="resize-none border-0 shadow-none focus-visible:ring-0 min-h-0 h-auto py-3 bg-transparent"
+                                className={cn(
+                                    "resize-none border-0 shadow-none focus-visible:ring-0 min-h-0 h-auto py-3 bg-transparent",
+                                    "max-h-24 overflow-y-auto"
+                                )}
                                 {...field}
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter' && !e.shiftKey) {
