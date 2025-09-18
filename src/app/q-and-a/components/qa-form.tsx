@@ -14,7 +14,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, Sparkles, Volume2, Pause, User, Bot, Send, Mic } from 'lucide-react';
+import { Loader2, Sparkles, Volume2, Pause, User, Bot, Send, Mic, UserCircle2 } from 'lucide-react';
 import {
   generateAnswerForQuestion,
 } from '@/ai/flows/generate-answer-for-question';
@@ -259,11 +259,14 @@ export function QaForm() {
             targetAudioEl.src = newAudioDataUri;
             setActiveAudio({ index, isPlaying: true });
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error("Audio generation failed:", error);
+        const isQuotaError = error.message && (error.message.includes('429') || error.message.includes('Quota'));
         toast({
             title: 'خطا در تولید صدا',
-            description: 'متاسفانه در تولید فایل صوتی مشکلی پیش آمد.',
+            description: isQuotaError 
+              ? 'متاسفانه سقف استفاده از سرویس صوتی تمام شده است. لطفاً کمی بعد دوباره تلاش کنید.'
+              : 'متاسفانه در تولید فایل صوتی مشکلی پیش آمد.',
             variant: 'destructive',
         });
         setMessages(prev => prev.map((msg, i) => i === index ? { ...msg, isLoadingAudio: false } : msg));
@@ -298,7 +301,7 @@ export function QaForm() {
                     <div key={index} className={`flex items-start gap-3 ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
                         {message.type === 'bot' && (
                             <Avatar className="w-9 h-9 border-2 border-primary">
-                                <AvatarFallback className="bg-primary/20"><Bot className="h-5 w-5 text-primary" /></AvatarFallback>
+                                <AvatarFallback className="bg-primary/20"><Sparkles className="h-5 w-5 text-primary" /></AvatarFallback>
                             </Avatar>
                         )}
                         <div className={`max-w-xl p-4 rounded-2xl shadow-sm ${message.type === 'user' ? 'bg-primary text-primary-foreground rounded-br-none' : 'bg-card border rounded-bl-none'} ${message.type === 'bot' ? 'text-right' : ''}`}>
@@ -333,7 +336,7 @@ export function QaForm() {
                         </div>
                         {message.type === 'user' && (
                              <Avatar className="w-9 h-9">
-                                <AvatarFallback><User className="h-5 w-5" /></AvatarFallback>
+                                <AvatarFallback><UserCircle2 className="h-5 w-5" /></AvatarFallback>
                             </Avatar>
                         )}
                     </div>
@@ -341,7 +344,7 @@ export function QaForm() {
                 {loading && (
                     <div className="flex items-start gap-3 justify-start">
                         <Avatar className="w-9 h-9 border-2 border-primary">
-                             <AvatarFallback className="bg-primary/20"><Bot className="h-5 w-5 text-primary" /></AvatarFallback>
+                             <AvatarFallback className="bg-primary/20"><Sparkles className="h-5 w-5 text-primary" /></AvatarFallback>
                         </Avatar>
                         <div className="max-w-xl p-4 rounded-2xl bg-card border rounded-bl-none flex items-center gap-2">
                              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />

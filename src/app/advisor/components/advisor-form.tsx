@@ -172,7 +172,7 @@ export function AdvisorForm() {
         const response = await generateAudioFromText(fullText);
         setAudioDataUri(response.audioDataUri);
     } catch (error: any) {
-        const isQuotaError = error.message && error.message.includes('429');
+        const isQuotaError = error.message && (error.message.includes('429') || error.message.includes('Quota'));
         toast({
             title: 'خطا در تولید صدا',
             description: isQuotaError 
