@@ -238,6 +238,7 @@ export function QaForm() {
 
     // If audio is not loaded, fetch it.
     setMessages(prev => prev.map((msg, i) => i === index ? { ...msg, isLoadingAudio: true } : msg));
+    setActiveAudio(null);
     try {
         const audioResponse = await generateAudioFromText(message.text);
         const newAudioDataUri = audioResponse.audioDataUri;
@@ -260,7 +261,7 @@ export function QaForm() {
         }
     } catch (error: any) {
         console.error("Audio generation failed:", error);
-        const isQuotaError = error.message && error.message.includes('429');
+        const isQuotaError = error.message && (error.message.includes('429') || error.message.includes('Quota'));
         toast({
             title: 'خطا در تولید صدا',
             description: isQuotaError 

@@ -239,6 +239,7 @@ export function QaForm() {
 
     // If audio is not loaded, fetch it.
     setMessages(prev => prev.map((msg, i) => i === index ? { ...msg, isLoadingAudio: true } : msg));
+    setActiveAudio(null);
     try {
         const audioResponse = await generateAudioFromText(message.text);
         const newAudioDataUri = audioResponse.audioDataUri;
