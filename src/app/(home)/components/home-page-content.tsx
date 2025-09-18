@@ -3,13 +3,12 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { Sparkles, BrainCircuit, Target, MessagesSquare, ArrowLeft, Loader2, FileText, Plus } from "lucide-react";
+import { Sparkles, BrainCircuit, Target, MessagesSquare, ArrowLeft, Loader2, FileText } from "lucide-react";
 import { useTabs } from "@/context/tabs-provider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { getArticles, type Article } from "@/services/article-service";
-import { generateEducationalArticle } from "@/ai/flows/generate-educational-article";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -55,20 +54,17 @@ const testimonials = [
     }
 ]
 
-const articleTopics = ["انتخاب رشته", "بازار کار", "مشاوره تحصیلی", "معرفی رشته", "تکنیک‌های مطالعه"];
-
 export function HomePageContent() {
     const { setActiveTab } = useTabs();
     const heroImage = PlaceHolderImages.find(p => p.id === 'hero-student-2');
     const { toast } = useToast();
 
     const [articles, setArticles] = useState<Article[]>([]);
-    const [isGeneratingArticle, setIsGeneratingArticle] = useState(false);
-    const [isInitialLoading, setIsInitialLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchArticles = async () => {
-            setIsInitialLoading(true);
+            setIsLoading(true);
             try {
                 const fetchedArticles = await getArticles();
                 setArticles(fetchedArticles);
@@ -80,40 +76,12 @@ export function HomePageContent() {
                     variant: "destructive",
                 });
             } finally {
-                setIsInitialLoading(false);
+                setIsLoading(false);
             }
         };
 
         fetchArticles();
     }, [toast]);
-
-
-    const handleGenerateArticle = async () => {
-        setIsGeneratingArticle(true);
-        try {
-            const randomTopic = articleTopics[Math.floor(Math.random() * articleTopics.length)];
-            const newArticle = await generateEducationalArticle({ topic: randomTopic });
-            setArticles(prev => [newArticle, ...prev]);
-            toast({
-                title: "مقاله جدید تولید شد!",
-                description: `مقاله‌ای با عنوان "${newArticle.title}" با موفقیت ایجاد و اضافه شد.`,
-            });
-        } catch (error: any) {
-            console.error("Failed to generate article:", error);
-            const errorMessage = error.message || '';
-            const isModelOverloaded = errorMessage.includes('503') || errorMessage.includes('overloaded');
-            
-            toast({
-                title: "خطا در تولید مقاله",
-                description: isModelOverloaded
-                    ? "سرویس هوش مصنوعی در حال حاضر مشغول است. لطفاً کمی بعد دوباره تلاش کنید."
-                    : "متاسفانه در ارتباط با سرویس هوش مصنوعی مشکلی پیش آمد.",
-                variant: "destructive",
-            });
-        } finally {
-            setIsGeneratingArticle(false);
-        }
-    };
 
 
   return (
@@ -259,24 +227,16 @@ export function HomePageContent() {
                         دانش خود را با مقالات تولید شده توسط هوش مصنوعی افزایش دهید.
                     </p>
                 </div>
-                <Button onClick={handleGenerateArticle} disabled={isGeneratingArticle}>
-                    {isGeneratingArticle ? (
-                        <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-                    ) : (
-                        <Plus className="ml-2 h-4 w-4" />
-                    )}
-                    تولید مقاله جدید
-                </Button>
             </div>
-            {isInitialLoading ? (
+            {isLoading ? (
                  <div className="flex justify-center items-center h-40">
                     <Loader2 className="h-10 w-10 animate-spin text-primary" />
                 </div>
             ) : articles.length === 0 ? (
                 <div className="text-center py-16 px-4 border-2 border-dashed rounded-lg">
                     <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
-                    <h3 className="mt-4 text-lg font-semibold">هنوز مقاله‌ای وجود ندارد</h3>
-                    <p className="mt-2 text-sm text-muted-foreground">برای شروع، یک مقاله جدید با هوش مصنوعی تولید کنید.</p>
+                    <h3 className="mt-4 text-lg font-semibold">مقاله‌ای برای نمایش وجود ندارد</h3>
+                    <p className="mt-2 text-sm text-muted-foreground">به نظر می‌رسد هنوز مقاله‌ای در پایگاه داده ذخیره نشده است.</p>
                 </div>
             ) : (
                 <div className="grid gap-8 lg:grid-cols-3">
