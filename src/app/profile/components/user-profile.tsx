@@ -270,9 +270,11 @@ export function UserProfile() {
                                                 <span>ارسال ایمیل به پشتیبانی</span>
                                             </a>
                                         </Button>
-                                        <Button variant="secondary" className="w-full justify-start gap-3">
-                                            <Bug className="h-5 w-5" />
-                                            <span>گزارش مشکل فنی</span>
+                                        <Button variant="secondary" className="w-full justify-start gap-3" asChild>
+                                            <a href="mailto:support@example.com?subject=گزارش%20مشکل%20فنی%20در%20اپلیکیشن%20مشاور%20تحصیلی">
+                                                <Bug className="h-5 w-5" />
+                                                <span>گزارش مشکل فنی</span>
+                                            </a>
                                         </Button>
                                     </div>
                                 </div>
