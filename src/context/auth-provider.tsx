@@ -70,6 +70,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     description: 'مشکلی در فرآیند ورود با گوگل پیش آمد.',
                     variant: 'destructive',
                 });
+            }).finally(() => {
+                // This might be redundant if onAuthStateChanged fires correctly, but it's a safeguard
+                if (isLoading) {
+                    setIsLoading(false);
+                }
             });
 
     } catch (error) {
@@ -90,22 +95,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithGoogle = async () => {
     if (!auth) return;
+    setIsLoading(true);
 
     const provider = new GoogleAuthProvider();
     
     if (isMobile) {
         // Redirect is better for mobile
-        await signInWithRedirect(auth, provider).catch((error) => {
+        try {
+            await signInWithRedirect(auth, provider);
+        } catch (error) {
             console.error("Redirect Error: ", error);
-             toast({
+            toast({
                 title: 'خطا در ورود',
                 description: 'هدایت به صفحه گوگل با مشکل مواجه شد.',
                 variant: 'destructive',
             });
-        });
+            setIsLoading(false); // Reset loading state on failure
+        }
     } else {
         // Popup is a better UX on desktop
-        setIsLoading(true);
         try {
             await signInWithPopup(auth, provider);
             toast({
@@ -156,8 +164,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signOut,
   };
 
-  // Only show the initial loading logo, not during login process
-  if (isLoading && auth === null) {
+  if (isLoading) {
       return (
         <div className="fixed inset-0 flex items-center justify-center bg-background z-50">
             <LoadingLogo />
