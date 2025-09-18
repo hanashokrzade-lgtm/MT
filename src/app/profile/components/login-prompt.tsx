@@ -3,6 +3,8 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/auth-provider";
 import { Loader2 } from "lucide-react";
+import { useState } from 'react';
+import { useToast } from "@/hooks/use-toast";
 
 function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
     return (
@@ -16,7 +18,36 @@ function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
 }
 
 export function LoginPrompt() {
-    const { signInWithGoogle, isLoading } = useAuth();
+    const { signInWithGoogle } = useAuth();
+    const [isButtonLoading, setIsButtonLoading] = useState(false);
+    const { toast } = useToast();
+
+    const handleSignIn = async () => {
+        setIsButtonLoading(true);
+        try {
+            await signInWithGoogle();
+            // In popup mode, this will run. In redirect mode, the page will navigate away.
+            // A toast is shown in the provider for popup and redirect scenarios.
+        } catch (error: any) {
+            console.error("Authentication Error: ", error);
+            let description = 'متاسفانه مشکلی در فرآیند ورود با گوگل پیش آمد.';
+            if (error.code === 'auth/unauthorized-domain') {
+                description = 'دامنه شما برای ورود مجاز نیست. لطفاً با پشتیبانی تماس بگیرید.'
+            } else if (error.code === 'auth/popup-closed-by-user') {
+                description = 'پنجره ورود توسط شما بسته شد. لطفاً دوباره تلاش کنید.'
+            } else if (error.code) { // Catch other firebase errors
+                 description = `هدایت به صفحه گوگل با مشکل مواجه شد. (${error.code})`
+            }
+            toast({
+                title: 'خطا در ورود',
+                description: description,
+                variant: 'destructive',
+            });
+        } finally {
+            // This is crucial for redirect failures or popup closes
+            setIsButtonLoading(false);
+        }
+    };
 
     return (
         <div className="flex flex-col items-center justify-center text-center p-8 h-full">
@@ -27,17 +58,16 @@ export function LoginPrompt() {
                 <p className="text-muted-foreground mb-8">
                     برای دسترسی به مشاوره‌های ذخیره شده، پیگیری پیشرفت و دریافت پیشنهادهای شخصی‌سازی شده، وارد حساب کاربری خود شوید.
                 </p>
-                {isLoading ? (
-                    <Button size="lg" className="w-full" disabled>
-                        <Loader2 className="ml-2 h-5 w-5 animate-spin" />
-                        در حال بارگذاری...
-                    </Button>
-                ) : (
-                    <Button onClick={signInWithGoogle} size="lg" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
+                
+                <Button onClick={handleSignIn} size="lg" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground" disabled={isButtonLoading}>
+                    {isButtonLoading ? (
+                         <Loader2 className="ml-2 h-5 w-5 animate-spin" />
+                    ) : (
                         <GoogleIcon className="ml-2 h-5 w-5" />
-                        ورود با حساب کاربری گوگل
-                    </Button>
-                )}
+                    )}
+                   {isButtonLoading ? 'در حال هدایت...' : 'ورود با حساب کاربری گوگل'}
+                </Button>
+
                  <p className="text-xs text-muted-foreground mt-4">
                     با ورود، شما با شرایط و قوانین ما موافقت می‌کنید.
                 </p>

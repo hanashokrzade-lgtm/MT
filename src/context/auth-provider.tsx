@@ -28,7 +28,7 @@ function getFirebaseApp(): FirebaseApp {
 
 interface AuthContextType {
   user: User | null;
-  isLoading: boolean;
+  isLoading: boolean; // This will now represent only the initial auth state loading
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
 }
@@ -37,7 +37,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true); // Represents initial auth check
   const [auth, setAuth] = useState<Auth | null>(null);
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -67,14 +67,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 console.error("Redirect Result Error: ", error);
                 toast({
                     title: 'خطا در ورود',
-                    description: 'مشکلی در فرآیند ورود با گوگل پیش آمد.',
+                    description: 'مشکلی در فرآیند بازگشت از صفحه ورود گوگل پیش آمد.',
                     variant: 'destructive',
                 });
-            }).finally(() => {
-                // This might be redundant if onAuthStateChanged fires correctly, but it's a safeguard
-                if (isLoading) {
-                    setIsLoading(false);
-                }
             });
 
     } catch (error) {
@@ -94,48 +89,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signInWithGoogle = async () => {
-    if (!auth) return;
-    setIsLoading(true);
+    if (!auth) throw new Error("سرویس احراز هویت هنوز آماده نیست.");
 
     const provider = new GoogleAuthProvider();
     
     if (isMobile) {
         // Redirect is better for mobile
-        try {
-            await signInWithRedirect(auth, provider);
-        } catch (error) {
-            console.error("Redirect Error: ", error);
-            toast({
-                title: 'خطا در ورود',
-                description: 'هدایت به صفحه گوگل با مشکل مواجه شد.',
-                variant: 'destructive',
-            });
-            setIsLoading(false); // Reset loading state on failure
-        }
+        await signInWithRedirect(auth, provider);
     } else {
         // Popup is a better UX on desktop
-        try {
-            await signInWithPopup(auth, provider);
-            toast({
-                title: 'ورود موفق',
-                description: 'شما با موفقیت وارد حساب کاربری خود شدید.',
-            });
-        } catch (error: any) {
-            console.error("Authentication Error: ", error);
-            let description = 'متاسفانه مشکلی در فرآیند ورود با گوگل پیش آمد.';
-            if (error.code === 'auth/unauthorized-domain') {
-                description = 'دامنه شما برای ورود مجاز نیست. لطفاً با پشتیبانی تماس بگیرید.'
-            } else if (error.code === 'auth/popup-closed-by-user') {
-                description = 'پنجره ورود توسط شما بسته شد. لطفاً دوباره تلاش کنید.'
-            }
-            toast({
-                title: 'خطا در ورود',
-                description: description,
-                variant: 'destructive',
-            });
-        } finally {
-            setIsLoading(false);
-        }
+        await signInWithPopup(auth, provider);
+        toast({
+            title: 'ورود موفق',
+            description: 'شما با موفقیت وارد حساب کاربری خود شدید.',
+        });
     }
   };
 
@@ -164,6 +131,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signOut,
   };
 
+  // The global isLoading only controls the very initial app load.
   if (isLoading) {
       return (
         <div className="fixed inset-0 flex items-center justify-center bg-background z-50">
