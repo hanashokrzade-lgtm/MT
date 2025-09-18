@@ -13,6 +13,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import type { AuthError } from "firebase/auth";
+import { motion, AnimatePresence } from "framer-motion";
 
 function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
     return (
@@ -35,6 +36,14 @@ const registerSchema = z.object({
     email: z.string().email({ message: "لطفاً یک ایمیل معتبر وارد کنید." }),
     password: z.string().min(6, { message: "رمز عبور باید حداقل ۶ کاراکتر باشد." }),
 });
+
+const MotionTabsContent = motion(TabsContent);
+
+const tabVariants = {
+  hidden: { opacity: 0, x: 20 },
+  visible: { opacity: 1, x: 0 },
+  exit: { opacity: 0, x: -20 },
+};
 
 export function LoginPrompt() {
     const { signInWithGoogle, signInWithEmail, signUpWithEmail } = useAuth();
@@ -152,106 +161,134 @@ export function LoginPrompt() {
                             <TabsTrigger value="login">ورود</TabsTrigger>
                             <TabsTrigger value="register">ثبت نام</TabsTrigger>
                         </TabsList>
-                        <TabsContent value="login">
-                            <Form {...loginForm}>
-                                <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4 pt-4 text-right">
-                                    <FormField
-                                        control={loginForm.control}
-                                        name="email"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>ایمیل</FormLabel>
-                                                <FormControl>
-                                                    <div className="relative">
-                                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                                        <Input placeholder="email@example.com" {...field} className="pl-10" />
-                                                    </div>
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={loginForm.control}
-                                        name="password"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>رمز عبور</FormLabel>
-                                                <FormControl>
-                                                    <div className="relative">
-                                                        <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                                        <Input type="password" placeholder="••••••••" {...field} className="pl-10" />
-                                                    </div>
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <Button type="submit" className="w-full" disabled={isLoading}>
-                                        {isLoading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
-                                        ورود به حساب کاربری
-                                    </Button>
-                                </form>
-                            </Form>
-                        </TabsContent>
-                        <TabsContent value="register">
-                            <Form {...registerForm}>
-                                <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4 pt-4 text-right">
-                                    <FormField
-                                        control={registerForm.control}
-                                        name="name"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>نام</FormLabel>
-                                                <FormControl>
-                                                     <div className="relative">
-                                                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                                        <Input placeholder="نام و نام خانوادگی" {...field} className="pl-10" />
-                                                    </div>
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={registerForm.control}
-                                        name="email"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>ایمیل</FormLabel>
-                                                <FormControl>
-                                                     <div className="relative">
-                                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                                        <Input placeholder="email@example.com" {...field} className="pl-10" />
-                                                    </div>
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={registerForm.control}
-                                        name="password"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>رمز عبور</FormLabel>
-                                                <FormControl>
-                                                     <div className="relative">
-                                                        <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                                        <Input type="password" placeholder="حداقل ۶ کاراکتر" {...field} className="pl-10" />
-                                                    </div>
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <Button type="submit" className="w-full" disabled={isLoading}>
-                                         {isLoading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
-                                        ایجاد حساب کاربری جدید
-                                    </Button>
-                                </form>
-                            </Form>
-                        </TabsContent>
+                        <div className="relative overflow-hidden h-[340px]">
+                            <AnimatePresence mode="wait" initial={false}>
+                                {activeTab === "login" && (
+                                    <MotionTabsContent
+                                        key="login"
+                                        value="login"
+                                        forceMount
+                                        variants={tabVariants}
+                                        initial="hidden"
+                                        animate="visible"
+                                        exit="exit"
+                                        transition={{ duration: 0.2 }}
+                                        className="absolute top-0 left-0 right-0"
+                                    >
+                                        <Form {...loginForm}>
+                                            <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4 pt-4 text-right">
+                                                <FormField
+                                                    control={loginForm.control}
+                                                    name="email"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel>ایمیل</FormLabel>
+                                                            <FormControl>
+                                                                <div className="relative">
+                                                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                                    <Input placeholder="email@example.com" {...field} className="pl-10" />
+                                                                </div>
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={loginForm.control}
+                                                    name="password"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel>رمز عبور</FormLabel>
+                                                            <FormControl>
+                                                                <div className="relative">
+                                                                    <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                                    <Input type="password" placeholder="••••••••" {...field} className="pl-10" />
+                                                                </div>
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <Button type="submit" className="w-full !mt-6" disabled={isLoading}>
+                                                    {isLoading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+                                                    ورود به حساب کاربری
+                                                </Button>
+                                            </form>
+                                        </Form>
+                                    </MotionTabsContent>
+                                )}
+                                {activeTab === "register" && (
+                                     <MotionTabsContent
+                                        key="register"
+                                        value="register"
+                                        forceMount
+                                        variants={tabVariants}
+                                        initial="hidden"
+                                        animate="visible"
+                                        exit="exit"
+                                        transition={{ duration: 0.2 }}
+                                        className="absolute top-0 left-0 right-0"
+                                    >
+                                        <Form {...registerForm}>
+                                            <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4 pt-4 text-right">
+                                                <FormField
+                                                    control={registerForm.control}
+                                                    name="name"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel>نام</FormLabel>
+                                                            <FormControl>
+                                                                <div className="relative">
+                                                                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                                    <Input placeholder="نام و نام خانوادگی" {...field} className="pl-10" />
+                                                                </div>
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={registerForm.control}
+                                                    name="email"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel>ایمیل</FormLabel>
+                                                            <FormControl>
+                                                                <div className="relative">
+                                                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                                    <Input placeholder="email@example.com" {...field} className="pl-10" />
+                                                                </div>
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={registerForm.control}
+                                                    name="password"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel>رمز عبور</FormLabel>
+                                                            <FormControl>
+                                                                <div className="relative">
+                                                                    <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                                    <Input type="password" placeholder="حداقل ۶ کاراکتر" {...field} className="pl-10" />
+                                                                </div>
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <Button type="submit" className="w-full !mt-6" disabled={isLoading}>
+                                                    {isLoading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
+                                                    ایجاد حساب کاربری جدید
+                                                </Button>
+                                            </form>
+                                        </Form>
+                                    </MotionTabsContent>
+                                )}
+                            </AnimatePresence>
+                        </div>
                     </Tabs>
                     
                     <div className="relative my-6">
