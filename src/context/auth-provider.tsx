@@ -62,6 +62,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             description: 'امکان اتصال به سرویس‌های برنامه وجود ندارد. لطفاً صفحه را مجدداً بارگذاری کنید.',
             variant: 'destructive',
         });
+        setIsLoading(false);
+        setIsFirebaseInitialized(true);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -83,8 +85,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: 'متاسفانه مشکلی در فرآیند ورود با گوگل پیش آمد.',
         variant: 'destructive',
       });
-    } finally {
-        setTimeout(() => setIsLoading(false), 1000);
+      // If sign in fails, we should stop loading.
+      setIsLoading(false);
     }
   };
 
@@ -105,7 +107,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         variant: 'destructive',
       });
     } finally {
-      setIsLoading(false);
+      // onAuthStateChanged will handle setting the user and isLoading.
+      // No need to setIsLoading(false) here as it might cause a flicker.
     }
   };
 
@@ -116,7 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signOut,
   };
 
-  if (!isFirebaseInitialized) {
+  if (!isFirebaseInitialized || (isLoading && !user)) {
       return (
         <div className="flex h-screen w-full flex-col items-center justify-center bg-background">
             <Loader2 className="h-12 w-12 animate-spin text-primary" />
