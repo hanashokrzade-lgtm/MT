@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { User, LogOut, Settings, ChevronRight, HelpCircle, Shield, Moon, Sun, Laptop, Trash2, Bell, ShieldCheck, FileText } from "lucide-react";
+import { User, LogOut, Settings, ChevronRight, HelpCircle, Shield, Moon, Sun, Laptop, Trash2, Bell, ShieldCheck, FileText, Mail, Bug } from "lucide-react";
 import { useAuth } from "@/context/auth-provider";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 export function UserProfile() {
     const { user, signOut } = useAuth();
@@ -104,7 +105,7 @@ export function UserProfile() {
                         <DialogTrigger asChild>
                             <button className="flex justify-between items-center w-full p-3 rounded-lg hover:bg-accent/50 transition-colors text-right">
                                 <div className="flex items-center gap-3">
-                                    <Shield className="h-5 w-5 text-primary" />
+                                    <ShieldCheck className="h-5 w-5 text-primary" />
                                     <span>حریم خصوصی و امنیت</span>
                                 </div>
                                 <ChevronRight className="h-5 w-5 text-muted-foreground" />
@@ -129,7 +130,7 @@ export function UserProfile() {
                                 </div>
                                 <Dialog>
                                     <DialogTrigger asChild>
-                                        <Button variant="outline" className="justify-start gap-3 text-left">
+                                        <Button variant="outline" className="justify-start gap-3 text-left w-full">
                                             <FileText className="ml-2 h-4 w-4" />
                                             مشاهده سیاست حفظ حریم خصوصی
                                         </Button>
@@ -219,13 +220,65 @@ export function UserProfile() {
                         </DialogContent>
                     </Dialog>
 
-                    <button className="flex justify-between items-center w-full p-3 rounded-lg hover:bg-accent/50 transition-colors text-right">
-                        <div className="flex items-center gap-3">
-                            <HelpCircle className="h-5 w-5 text-primary" />
-                            <span>راهنما و پشتیبانی</span>
-                        </div>
-                        <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                    </button>
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <button className="flex justify-between items-center w-full p-3 rounded-lg hover:bg-accent/50 transition-colors text-right">
+                                <div className="flex items-center gap-3">
+                                    <HelpCircle className="h-5 w-5 text-primary" />
+                                    <span>راهنما و پشتیبانی</span>
+                                </div>
+                                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                            </button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-md">
+                            <DialogHeader>
+                                <DialogTitle>راهنما و پشتیبانی</DialogTitle>
+                                <DialogDescription>
+                                    پاسخ سوالات خود را بیابید و با ما در تماس باشید.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="py-4 space-y-6">
+                                <div>
+                                    <h4 className="font-semibold mb-3">سوالات متداول (FAQ)</h4>
+                                    <Accordion type="single" collapsible className="w-full">
+                                        <AccordionItem value="item-1">
+                                            <AccordionTrigger>چگونه بهترین نتیجه را از مشاوره بگیرم؟</AccordionTrigger>
+                                            <AccordionContent>
+                                                برای دریافت بهترین تحلیل، لطفاً تمام فیلدها را با دقت، صداقت و جزئیات کامل پر کنید. هرچه اطلاعات بیشتری ارائه دهید، هوش مصنوعی بهتر می‌تواند شما را راهنمایی کند.
+                                            </AccordionContent>
+                                        </AccordionItem>
+                                        <AccordionItem value="item-2">
+                                            <AccordionTrigger>آیا داده‌های من محرمانه باقی می‌ماند؟</AccordionTrigger>
+                                            <AccordionContent>
+                                                بله، ما به حریم خصوصی شما متعهد هستیم. تمام داده‌های شما به صورت امن ذخیره می‌شوند و فقط برای ارائه خدمات مشاوره استفاده می‌شوند. برای اطلاعات بیشتر، بخش "سیاست حفظ حریم خصوصی" را مطالعه کنید.
+                                            </AccordionContent>
+                                        </AccordionItem>
+                                         <AccordionItem value="item-3">
+                                            <AccordionTrigger>چرا پخش صوتی گاهی اوقات کار نمی‌کند؟</AccordionTrigger>
+                                            <AccordionContent>
+                                                سرویس تبدیل متن به گفتار ممکن است محدودیت‌هایی داشته باشد. اگر با خطا مواجه شدید، لطفاً چند دقیقه صبر کرده و دوباره تلاش کنید. همچنین مطمئن شوید که اتصال اینترنت شما پایدار است.
+                                            </AccordionContent>
+                                        </AccordionItem>
+                                    </Accordion>
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold mb-3">تماس با ما</h4>
+                                    <div className="space-y-3">
+                                         <Button variant="outline" className="w-full justify-start gap-3" asChild>
+                                            <a href="mailto:support@example.com">
+                                                <Mail className="h-5 w-5" />
+                                                <span>ارسال ایمیل به پشتیبانی</span>
+                                            </a>
+                                        </Button>
+                                        <Button variant="secondary" className="w-full justify-start gap-3">
+                                            <Bug className="h-5 w-5" />
+                                            <span>گزارش مشکل فنی</span>
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        </DialogContent>
+                    </Dialog>
                 </CardContent>
             </Card>
             
@@ -238,3 +291,5 @@ export function UserProfile() {
         </div>
     );
 }
+
+    
