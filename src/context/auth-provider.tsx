@@ -43,6 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isMobile = useIsMobile();
 
   useEffect(() => {
+    setIsLoading(true);
     let unsubscribe: () => void = () => {};
     try {
         const app = getFirebaseApp();
@@ -70,6 +71,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     description: 'مشکلی در فرآیند ورود با گوگل پیش آمد.',
                     variant: 'destructive',
                 });
+            })
+            .finally(() => {
+                // This is crucial for initial load on mobile after redirect
+                setIsLoading(false);
             });
 
     } catch (error) {
@@ -81,7 +86,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
         setIsLoading(false);
     }
-    return () => unsubscribe();
+    
+    // Fallback to stop loading after a timeout
+    const timer = setTimeout(() => {
+        setIsLoading(false);
+    }, 5000);
+
+    return () => {
+        unsubscribe();
+        clearTimeout(timer);
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -91,6 +105,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const provider = new GoogleAuthProvider();
     
     if (isMobile) {
+        // Redirect is better for mobile
+        setIsLoading(true); // Show loading indicator before redirecting
         await signInWithRedirect(auth, provider).catch((error) => {
             console.error("Redirect Error: ", error);
              toast({
@@ -98,6 +114,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 description: 'هدایت به صفحه ورود گوگل با مشکل مواجه شد.',
                 variant: 'destructive',
             });
+            setIsLoading(false); // Ensure loading is stopped on error
         });
     } else {
         // Popup is a better UX on desktop
@@ -122,7 +139,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 variant: 'destructive',
             });
         } finally {
-            // onAuthStateChanged will handle setting the user, but we'll stop loading here for popup flow
+            // This is crucial: always stop loading, whether it succeeds or fails.
             setIsLoading(false);
         }
     }
@@ -144,7 +161,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         variant: 'destructive',
       });
     }
-    // onAuthStateChanged will set user to null and isLoading to false
   };
 
   const value = {
@@ -154,7 +170,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signOut,
   };
 
-  if (isLoading) {
+  if (isLoading && user === null) {
       return (
         <div className="fixed inset-0 flex items-center justify-center bg-background z-50">
             <LoadingLogo />
