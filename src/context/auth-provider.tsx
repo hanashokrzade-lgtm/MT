@@ -1,11 +1,10 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { getAuth, signInWithRedirect, GoogleAuthProvider, onAuthStateChanged, signOut as firebaseSignOut, User, Auth, getRedirectResult, signInWithPopup } from 'firebase/auth';
+import { getAuth, signInWithRedirect, GoogleAuthProvider, onAuthStateChanged, signOut as firebaseSignOut, User, Auth, getRedirectResult } from 'firebase/auth';
 import { getApp, getApps, initializeApp, type FirebaseApp } from "firebase/app";
 import { useToast } from '@/hooks/use-toast';
 import { LoadingLogo } from '@/components/layout/loading-logo';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -29,7 +28,7 @@ function getFirebaseApp(): FirebaseApp {
 interface AuthContextType {
   user: User | null;
   isAuthLoading: boolean; // Renamed to be specific to initial auth state loading
-  signInWithGoogle: () => Promise<User | null>;
+  signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -53,7 +52,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setIsAuthLoading(false);
         });
 
-        // Handle redirect result on initial load
         getRedirectResult(authInstance)
             .then((result) => {
                 if (result) {
@@ -64,8 +62,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 }
             })
             .catch((error) => {
-                // This error is often benign, e.g., if the user just loads the page
-                // without coming from a redirect. We'll log it but not show a toast.
                 console.error("Redirect Result Error: ", error);
             });
 
@@ -82,20 +78,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
         unsubscribe();
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [toast]);
 
-  const signInWithGoogle = async (): Promise<User | null> => {
+  const signInWithGoogle = async (): Promise<void> => {
     if (!auth) {
         throw new Error("سرویس احراز هویت هنوز آماده نیست.");
     }
     const provider = new GoogleAuthProvider();
-    const result = await signInWithPopup(auth, provider);
-    toast({
-        title: 'ورود موفق',
-        description: 'شما با موفقیت وارد حساب کاربری خود شدید.',
-    });
-    return result.user;
+    await signInWithRedirect(auth, provider);
   };
 
   const signOut = async () => {
