@@ -128,7 +128,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   if (!isFirebaseInitialized || (isLoading && !user)) {
       return (
-        <div className="flex h-screen w-full flex-col items-center justify-center bg-background">
+        <div className="fixed inset-0 flex items-center justify-center bg-background z-50">
             <LoadingLogo />
         </div>
       )
