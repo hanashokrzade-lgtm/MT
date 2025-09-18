@@ -5,7 +5,7 @@ import { GraduationCap, Sparkles } from 'lucide-react';
 
 export function LoadingLogo() {
   return (
-    <div className="flex items-center justify-center gap-4">
+    <div className="flex flex-col items-center justify-center gap-4">
       <motion.div
         initial={{ scale: 0.8, opacity: 0, rotate: -20 }}
         animate={{ scale: 1, opacity: 1, rotate: 0 }}
