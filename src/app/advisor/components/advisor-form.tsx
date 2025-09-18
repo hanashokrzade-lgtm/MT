@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -156,10 +156,8 @@ export function AdvisorForm() {
         if(audioRef.current) {
             if (isPlaying) {
                 audioRef.current.pause();
-                setIsPlaying(false);
             } else {
                 audioRef.current.play();
-                setIsPlaying(true);
             }
         }
         return;
@@ -173,10 +171,13 @@ export function AdvisorForm() {
         `;
         const response = await generateAudioFromText(fullText);
         setAudioDataUri(response.audioDataUri);
-    } catch (error) {
+    } catch (error: any) {
+        const isQuotaError = error.message && error.message.includes('429');
         toast({
             title: 'خطا در تولید صدا',
-            description: 'متاسفانه در تولید فایل صوتی مشکلی پیش آمد. لطفاً دوباره تلاش کنید.',
+            description: isQuotaError 
+              ? 'متاسفانه سقف استفاده از سرویس صوتی تمام شده است. لطفاً کمی بعد دوباره تلاش کنید.'
+              : 'متاسفانه در تولید فایل صوتی مشکلی پیش آمد.',
             variant: 'destructive',
         });
     } finally {
@@ -184,17 +185,32 @@ export function AdvisorForm() {
     }
   };
 
-  useState(() => {
-    if (audioDataUri && audioRef.current) {
-        audioRef.current.src = audioDataUri;
-        audioRef.current.play();
-        setIsPlaying(true);
-        audioRef.current.onended = () => {
-            setIsPlaying(false);
-        }
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (audioDataUri && audio) {
+        audio.src = audioDataUri;
+        audio.play();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [audioDataUri]);
+
+  useEffect(() => {
+      const audio = audioRef.current;
+      if (!audio) return;
+      
+      const handlePlay = () => setIsPlaying(true);
+      const handlePause = () => setIsPlaying(false);
+      const handleEnded = () => setIsPlaying(false);
+
+      audio.addEventListener('play', handlePlay);
+      audio.addEventListener('pause', handlePause);
+      audio.addEventListener('ended', handleEnded);
+
+      return () => {
+          audio.removeEventListener('play', handlePlay);
+          audio.removeEventListener('pause', handlePause);
+          audio.removeEventListener('ended', handleEnded);
+      }
+  }, []);
 
 
   if (loading) {
@@ -298,7 +314,7 @@ export function AdvisorForm() {
                 ) : (
                     <Volume2 className="ml-2 h-5 w-5" />
                 )}
-                {isPlaying ? 'توقف' : 'پخش صوتی نتایج'}
+                {isPlaying ? 'توقف' : (audioDataUri ? 'پخش مجدد' : 'پخش صوتی نتایج')}
             </Button>
             <Button onClick={resetForm} size="lg" variant="outline">
                 <RotateCcw className="ml-2 h-5 w-5" />
