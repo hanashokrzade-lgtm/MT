@@ -111,7 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             console.error("Redirect Error: ", error);
              toast({
                 title: 'خطا در ورود',
-                description: 'هدایت به صفحه ورود گوگل با مشکل مواجه شد.',
+                description: 'هدایت به صفحه گوگل با مشکل مواجه شد.',
                 variant: 'destructive',
             });
             setIsLoading(false); // Ensure loading is stopped on error
