@@ -5,7 +5,7 @@ import { HomePageContent } from '@/app/(home)/components/home-page-content';
 import { AdvisorPageContent } from '@/app/advisor/components/advisor-page-content';
 import { AlignmentPageContent } from '@/app/alignment/components/alignment-page-content';
 import { QaPageContent } from '@/app/q-and-a/components/qa-page-content';
-import { ProfilePageContent } from '@/app/profile/components/profile-page-content';
+import ProfilePage from '@/app/profile/page';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const pages: { [key: string]: React.ComponentType } = {
@@ -13,7 +13,7 @@ const pages: { [key: string]: React.ComponentType } = {
   advisor: AdvisorPageContent,
   alignment: AlignmentPageContent,
   'q-and-a': QaPageContent,
-  profile: ProfilePageContent,
+  profile: ProfilePage,
 };
 
 const variants = {
