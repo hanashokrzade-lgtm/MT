@@ -74,12 +74,12 @@ const steps = [
 ];
 
 const MajorIcon = ({ major }: { major: string }) => {
-  if (major.includes('ریاضی')) return <Calculator className="h-5 w-5 text-accent-foreground" />;
-  if (major.includes('تجربی')) return <FlaskConical className="h-5 w-5 text-accent-foreground" />;
-  if (major.includes('انسانی')) return <BookOpen className="h-5 w-5 text-accent-foreground" />;
-  if (major.includes('فنی') || major.includes('تکنیک')) return <Wrench className="h-5 w-5 text-accent-foreground" />;
-  if (major.includes('هنر')) return <Paintbrush className="h-5 w-5 text-accent-foreground" />;
-  return <GraduationCap className="h-5 w-5 text-accent-foreground" />;
+  if (major.includes('ریاضی')) return <Calculator className="h-5 w-5 text-primary" />;
+  if (major.includes('تجربی')) return <FlaskConical className="h-5 w-5 text-primary" />;
+  if (major.includes('انسانی')) return <BookOpen className="h-5 w-5 text-primary" />;
+  if (major.includes('فنی') || major.includes('تکنیک')) return <Wrench className="h-5 w-5 text-primary" />;
+  if (major.includes('هنر')) return <Paintbrush className="h-5 w-5 text-primary" />;
+  return <GraduationCap className="h-5 w-5 text-primary" />;
 };
 
 export function AdvisorForm() {
@@ -215,7 +215,7 @@ export function AdvisorForm() {
 
   if (loading) {
     return (
-      <Card className="flex flex-col items-center justify-center p-8 min-h-[400px]">
+      <Card className="flex flex-col items-center justify-center p-8 min-h-[400px] border-0 bg-transparent shadow-none">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
         <p className="mt-4 text-lg text-muted-foreground">در حال تحلیل اطلاعات شما...</p>
         <p className="mt-2 text-sm text-muted-foreground">این فرآیند ممکن است کمی طول بکشد. لطفاً صبور باشید.</p>
@@ -226,10 +226,10 @@ export function AdvisorForm() {
   if (result) {
     return (
       <div className="space-y-8">
-        <Alert className="bg-accent/30 border-accent">
-            <Sparkles className="h-4 w-4" />
-            <AlertTitle className="font-bold">تحلیل هوش مصنوعی کامل شد!</AlertTitle>
-            <AlertDescription>
+        <Alert className="bg-primary/10 border-primary/20 text-primary-foreground">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <AlertTitle className="font-bold text-primary">تحلیل هوش مصنوعی کامل شد!</AlertTitle>
+            <AlertDescription className="text-foreground/80">
                 بر اساس اطلاعاتی که ارائه دادید، نتایج زیر برای شما آماده شده است.
             </AlertDescription>
         </Alert>
@@ -245,36 +245,38 @@ export function AdvisorForm() {
             <Accordion type="single" collapsible className="w-full">
               {result.suggestedMajors.map((major, index) => (
                 <AccordionItem value={`item-${index}`} key={index}>
-                  <AccordionTrigger className="font-bold text-lg">
+                  <AccordionTrigger className="font-bold text-lg hover:no-underline">
                     <div className="flex items-center gap-3">
-                      <MajorIcon major={major.major} />
+                      <div className="p-2 bg-primary/10 rounded-md">
+                        <MajorIcon major={major.major} />
+                      </div>
                       {major.major}
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent className="space-y-4 px-2">
+                  <AccordionContent className="space-y-4 px-2 pt-4">
                     <div className="flex items-start gap-3">
-                      <ThumbsUp className="h-5 w-5 text-green-500 mt-1" />
+                      <ThumbsUp className="h-5 w-5 text-green-500 mt-1 flex-shrink-0" />
                       <div>
                         <h4 className="font-semibold">نقاط قوت</h4>
                         <p className="text-muted-foreground">{major.strengths}</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <ThumbsDown className="h-5 w-5 text-red-500 mt-1" />
+                      <ThumbsDown className="h-5 w-5 text-red-500 mt-1 flex-shrink-0" />
                       <div>
                         <h4 className="font-semibold">نقاط ضعف</h4>
                         <p className="text-muted-foreground">{major.weaknesses}</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <Briefcase className="h-5 w-5 text-blue-500 mt-1" />
+                      <Briefcase className="h-5 w-5 text-blue-500 mt-1 flex-shrink-0" />
                       <div>
                         <h4 className="font-semibold">فرصت‌های شغلی</h4>
                         <p className="text-muted-foreground">{major.careerOpportunities}</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <GraduationCap className="h-5 w-5 text-purple-500 mt-1" />
+                      <GraduationCap className="h-5 w-5 text-purple-500 mt-1 flex-shrink-0" />
                       <div>
                         <h4 className="font-semibold">مسیرهای تحصیلی آینده</h4>
                         <p className="text-muted-foreground">{major.futureAcademicPaths}</p>
@@ -306,7 +308,7 @@ export function AdvisorForm() {
         </Card>
         
         <div className="text-center flex flex-col sm:flex-row justify-center items-center gap-4">
-            <Button onClick={handlePlayAudio} size="lg" disabled={audioLoading}>
+            <Button onClick={handlePlayAudio} size="lg" disabled={audioLoading} className="bg-primary hover:bg-primary/90 text-primary-foreground">
                 {audioLoading ? (
                     <Loader2 className="ml-2 h-5 w-5 animate-spin" />
                 ) : isPlaying ? (
@@ -448,7 +450,7 @@ export function AdvisorForm() {
             <ArrowLeft className="mr-2 h-4 w-4" />
           </Button>
         ) : (
-          <Button onClick={form.handleSubmit(onSubmit)} className="bg-accent hover:bg-accent/90 text-accent-foreground">
+          <Button onClick={form.handleSubmit(onSubmit)} className="bg-primary hover:bg-primary/90 text-primary-foreground">
             <Sparkles className="ml-2 h-4 w-4" />
             دریافت پیشنهاد
           </Button>

@@ -11,11 +11,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Loader2, Sparkles, Star } from 'lucide-react';
 import {
   analyzeAlignmentOfGoalsAndMajors,
@@ -23,11 +22,11 @@ import {
 } from '@/ai/flows/analyze-alignment-of-goals-and-majors';
 import { useToast } from '@/hooks/use-toast';
 import {
-  Bar,
   BarChart,
-  CartesianGrid,
+  Bar,
   XAxis,
   YAxis,
+  CartesianGrid,
   Tooltip,
   ResponsiveContainer,
   LabelList,
@@ -79,12 +78,13 @@ export function AlignmentForm() {
   const chartData = result?.map(item => ({
     major: item.major,
     score: item.alignmentScore,
-    fill: `hsl(250, ${item.alignmentScore}%, 65%)`
+    fill: `var(--color-primary)`
   })) || [];
-
+  
   const chartConfig = {
     score: {
       label: "امتیاز هم‌راستایی",
+      color: "hsl(var(--primary))",
     },
   } satisfies ChartConfig
 
@@ -93,6 +93,7 @@ export function AlignmentForm() {
       <Card>
         <CardHeader>
           <CardTitle>فرم تحلیل</CardTitle>
+          <CardDescription>اهداف و رشته‌های مورد نظر خود را وارد کنید.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -131,7 +132,7 @@ export function AlignmentForm() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" disabled={loading} className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
+              <Button type="submit" disabled={loading} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
                 {loading ? (
                   <>
                     <Loader2 className="ml-2 h-4 w-4 animate-spin" />
@@ -149,6 +150,12 @@ export function AlignmentForm() {
         </CardContent>
       </Card>
 
+      {loading && (
+          <div className="flex items-center justify-center pt-12">
+              <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          </div>
+      )}
+
       {result && (
         <Card>
           <CardHeader>
@@ -157,14 +164,14 @@ export function AlignmentForm() {
           <CardContent className="space-y-8">
             <div>
               <h3 className="text-lg font-semibold mb-4">نمودار مقایسه‌ای</h3>
-              <ChartContainer config={chartConfig} className="w-full h-[300px]">
+              <ChartContainer config={chartConfig} className="w-full h-[300px] rtl-grid">
                 <ResponsiveContainer>
                   <BarChart data={chartData} layout="vertical" margin={{ right: 40, left: 10 }}>
                     <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                     <XAxis type="number" domain={[0, 100]} />
-                    <YAxis dataKey="major" type="category" width={100} tickLine={false} axisLine={false} />
+                    <YAxis dataKey="major" type="category" width={100} tickLine={false} axisLine={false} reversed/>
                     <Tooltip cursor={{fill: 'hsl(var(--muted))'}} content={<ChartTooltipContent />} />
-                    <Bar dataKey="score" radius={4}>
+                    <Bar dataKey="score" radius={[0, 4, 4, 0]}>
                        <LabelList dataKey="score" position="right" offset={8} className="fill-foreground" fontSize={12} formatter={(value: number) => `${value}%`} />
                     </Bar>
                   </BarChart>
@@ -178,7 +185,7 @@ export function AlignmentForm() {
                   <div key={index} className="p-4 border rounded-lg bg-background">
                     <div className="flex justify-between items-center mb-2">
                         <h4 className="font-bold">{item.major}</h4>
-                        <div className="flex items-center gap-1 text-sm font-bold text-primary-foreground px-2 py-1 rounded-full bg-primary">
+                        <div className="flex items-center gap-1 text-sm font-bold text-primary-foreground px-3 py-1 rounded-full bg-primary">
                             <Star className="h-4 w-4" />
                             <span>{item.alignmentScore} / 100</span>
                         </div>

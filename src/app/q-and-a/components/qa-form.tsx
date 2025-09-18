@@ -14,7 +14,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, Sparkles, Volume2, Pause, User, Bot, Send, Mic, UserCircle2 } from 'lucide-react';
+import { Loader2, Sparkles, Volume2, Pause, Send, Mic, UserCircle2 } from 'lucide-react';
 import {
   generateAnswerForQuestion,
 } from '@/ai/flows/generate-answer-for-question';
@@ -22,7 +22,6 @@ import { generateAudioFromText } from '@/ai/flows/generate-audio-from-text';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const qaSchema = z.object({
   question: z.string().min(2, { message: 'لطفاً سوال خود را با حداقل ۲ کاراکتر وارد کنید.' }),
@@ -306,12 +305,12 @@ export function QaForm() {
                             </Avatar>
                         )}
                         <div className={`max-w-xl p-4 rounded-2xl shadow-sm ${message.type === 'user' ? 'bg-primary text-primary-foreground rounded-br-none' : 'bg-card border rounded-bl-none'} ${message.type === 'bot' ? 'text-right' : ''}`}>
-                            <div className="prose prose-sm max-w-none text-card-foreground leading-relaxed">
+                            <div className="prose prose-sm max-w-none text-foreground/90 leading-relaxed">
                                 {renderMessageContent(message.text)}
                             </div>
                              {message.type === 'bot' && (
                                 <div className="mt-4 pt-3 border-t border-border/50">
-                                    <Button onClick={() => handlePlayAudio(index)} size="sm" variant="ghost" className="h-8 gap-2 text-muted-foreground hover:bg-accent/20 hover:text-accent-foreground" disabled={message.isLoadingAudio}>
+                                    <Button onClick={() => handlePlayAudio(index)} size="sm" variant="ghost" className="h-8 gap-2 text-muted-foreground hover:bg-primary/10 hover:text-primary" disabled={message.isLoadingAudio}>
                                         {message.isLoadingAudio ? (
                                             <Loader2 className="h-4 w-4 animate-spin" />
                                         ) : (activeAudio?.index === index && activeAudio.isPlaying) ? (
@@ -336,8 +335,8 @@ export function QaForm() {
                             )}
                         </div>
                         {message.type === 'user' && (
-                             <Avatar className="w-9 h-9">
-                                <AvatarFallback><UserCircle2 className="h-5 w-5" /></AvatarFallback>
+                             <Avatar className="w-9 h-9 border-2 border-primary/50">
+                                <AvatarFallback className='bg-transparent'><UserCircle2 className="h-5 w-5 text-primary" /></AvatarFallback>
                             </Avatar>
                         )}
                     </div>
@@ -355,8 +354,8 @@ export function QaForm() {
                 )}
             </div>
         </ScrollArea>
-        <div className="p-4 border-t bg-background">
-             <Card className="max-w-4xl mx-auto shadow-none">
+        <div className="p-4 border-t bg-background/80 backdrop-blur-sm">
+             <Card className="max-w-4xl mx-auto shadow-none border-0 bg-card/50">
                 <CardContent className="p-2">
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="flex items-center gap-2">
@@ -366,7 +365,7 @@ export function QaForm() {
                       size="icon" 
                       variant="ghost" 
                       className={`w-12 h-12 rounded-full flex-shrink-0 transition-colors ${
-                        isRecording ? 'bg-red-500/20 text-red-500 hover:bg-red-500/30' : 'text-muted-foreground'
+                        isRecording ? 'bg-red-500/20 text-red-500 hover:bg-red-500/30' : 'text-primary/80 hover:text-primary'
                       }`}
                       disabled={loading}
                       title={isRecording ? 'توقف ضبط' : 'شروع ضبط'}
@@ -383,7 +382,7 @@ export function QaForm() {
                             <Textarea
                                 placeholder={isRecording ? 'در حال شنیدن...' : 'سوال خود را اینجا بنویسید یا با میکروفون بپرسید...'}
                                 rows={1}
-                                className="resize-none border-0 shadow-none focus-visible:ring-0 min-h-0 h-auto py-3"
+                                className="resize-none border-0 shadow-none focus-visible:ring-0 min-h-0 h-auto py-3 bg-transparent"
                                 {...field}
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter' && !e.shiftKey) {
@@ -399,7 +398,7 @@ export function QaForm() {
                         </FormItem>
                         )}
                     />
-                    <Button type="submit" disabled={loading || form.watch('question').trim().length < 2} size="icon" className="w-12 h-12 rounded-full flex-shrink-0 bg-accent hover:bg-accent/90">
+                    <Button type="submit" disabled={loading || form.watch('question').trim().length < 2} size="icon" className="w-12 h-12 rounded-full flex-shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground">
                         {loading ? (
                             <Loader2 className="h-6 w-6 animate-spin" />
                         ) : (
