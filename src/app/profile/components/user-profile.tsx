@@ -64,7 +64,7 @@ const chartConfig = {
 
 const SettingsDialog = () => (
     <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
+        <DialogHeader className="text-right">
             <DialogTitle>تنظیمات کلی</DialogTitle>
             <DialogDescription>
                 تنظیمات مربوط به ظاهر برنامه، داده‌ها و اعلان‌ها را مدیریت کنید.
@@ -98,7 +98,7 @@ const SettingsDialog = () => (
                 </RadioGroup>
             </div>
             <div className="flex items-center justify-between space-x-2 rtl:space-x-reverse rounded-lg border p-4">
-                <Label htmlFor="notifications" className="flex flex-col space-y-1">
+                <Label htmlFor="notifications" className="flex flex-col space-y-1 text-right">
                     <span>اعلان‌ها</span>
                     <span className="font-normal text-sm text-muted-foreground">
                         دریافت اعلان برای پیشنهادهای جدید.
@@ -119,7 +119,7 @@ const SettingsDialog = () => (
 
 const PrivacyDialog = () => (
     <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
+        <DialogHeader className="text-right">
             <DialogTitle>حریم خصوصی و امنیت</DialogTitle>
             <DialogDescription>
                 تنظیمات امنیتی و مدیریت داده‌های حساب کاربری خود را کنترل کنید.
@@ -127,7 +127,7 @@ const PrivacyDialog = () => (
         </DialogHeader>
             <div className="grid gap-6 py-4">
             <div className="flex items-center justify-between space-x-2 rtl:space-x-reverse rounded-lg border p-4">
-                <Label htmlFor="2fa" className="flex flex-col space-y-1">
+                <Label htmlFor="2fa" className="flex flex-col space-y-1 text-right">
                     <span>تایید دو مرحله‌ای</span>
                     <span className="font-normal text-sm text-muted-foreground">
                         امنیت حساب خود را با یک لایه اضافی افزایش دهید.
@@ -143,7 +143,7 @@ const PrivacyDialog = () => (
                     </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-3xl">
-                    <DialogHeader>
+                    <DialogHeader className="text-right">
                         <DialogTitle>سیاست حفظ حریم خصوصی</DialogTitle>
                         <DialogDescription>
                             آخرین بروزرسانی: ۲ مرداد ۱۴۰۳
@@ -211,7 +211,7 @@ const PrivacyDialog = () => (
                     </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
-                    <AlertDialogHeader>
+                    <AlertDialogHeader className="text-right">
                         <AlertDialogTitle>آیا کاملاً مطمئن هستید؟</AlertDialogTitle>
                         <AlertDialogDescription>
                             این عمل قابل بازگشت نیست. با این کار حساب شما و تمام داده‌های مرتبط با آن برای همیشه پاک خواهد شد.
@@ -229,13 +229,13 @@ const PrivacyDialog = () => (
 
 const HelpDialog = () => (
     <DialogContent className="sm:max-w-md">
-        <DialogHeader>
+        <DialogHeader className="text-right">
             <DialogTitle>راهنما و پشتیبانی</DialogTitle>
             <DialogDescription>
                 پاسخ سوالات خود را بیابید و با ما در تماس باشید.
             </DialogDescription>
         </DialogHeader>
-        <div className="py-4 space-y-6">
+        <div className="py-4 space-y-6 text-right">
             <div>
                 <h4 className="font-semibold mb-3">سوالات متداول (FAQ)</h4>
                 <Accordion type="single" collapsible className="w-full">
@@ -291,13 +291,13 @@ const EditProfileDialog = ({ profileData, onSave }: { profileData: any, onSave: 
 
     return (
         <DialogContent className="sm:max-w-lg">
-            <DialogHeader>
+            <DialogHeader className="text-right">
                 <DialogTitle>ویرایش پروفایل حرفه‌ای</DialogTitle>
                 <DialogDescription>
                     این اطلاعات به ما کمک می‌کند تا مشاوره‌های دقیق‌تر و شخصی‌سازی شده‌تری به شما ارائه دهیم.
                 </DialogDescription>
             </DialogHeader>
-            <div className="grid gap-6 py-4">
+            <div className="grid gap-6 py-4 text-right">
                 <div className="space-y-2">
                     <Label htmlFor="interests">علایق و سرگرمی‌ها</Label>
                     <Textarea 
@@ -427,14 +427,14 @@ export function UserProfile() {
                         </Card>
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-lg">
-                        <DialogHeader>
+                        <DialogHeader className="text-right">
                             <DialogTitle>تاریخچه مشاوره‌ها</DialogTitle>
                             <DialogDescription>
                                 در اینجا می‌توانید خلاصه‌ای از مشاوره‌های قبلی خود را مشاهده کنید.
                             </DialogDescription>
                         </DialogHeader>
                         <ScrollArea className="max-h-96 pr-4">
-                            <div className="space-y-4 py-4">
+                            <div className="space-y-4 py-4 text-right">
                                 {dashboardData.consultationHistory.map((item, index) => (
                                     <div key={index} className="p-4 border rounded-lg">
                                         <div className="flex justify-between items-center mb-2">
@@ -462,18 +462,18 @@ export function UserProfile() {
                         </Card>
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-lg">
-                        <DialogHeader>
+                        <DialogHeader className="text-right">
                             <DialogTitle>تاریخچه پرسش و پاسخ</DialogTitle>
                             <DialogDescription>
                                 در اینجا می‌توانید خلاصه‌ای از سوالات اخیر خود را مشاهده کنید.
                             </DialogDescription>
                         </DialogHeader>
                         <ScrollArea className="max-h-96 pr-4">
-                            <div className="space-y-4 py-4">
+                            <div className="space-y-4 py-4 text-right">
                                 {dashboardData.questionHistory.map((item, index) => (
                                     <div key={index} className="p-4 border rounded-lg">
-                                        <div className="flex justify-between items-center mb-2">
-                                            <p className="font-semibold text-primary truncate">{item.question}</p>
+                                        <div className="flex justify-between items-center mb-2 gap-4">
+                                            <p className="font-semibold text-primary truncate flex-1">{item.question}</p>
                                             <Badge variant="secondary">{item.date}</Badge>
                                         </div>
                                         <p className="text-sm text-muted-foreground">{item.answerSnippet}</p>
@@ -540,8 +540,8 @@ export function UserProfile() {
                                     </div>
                                 </DialogTrigger>
                                 <DialogContent>
-                                    <DialogHeader>
-                                        <DialogTitle className="flex items-center gap-2">
+                                    <DialogHeader className="text-right">
+                                        <DialogTitle className="flex items-center justify-end gap-2">
                                             <BrainCircuit className="w-6 h-6 text-primary"/>
                                             جزئیات پیشنهاد: {major.name}
                                         </DialogTitle>
@@ -549,7 +549,7 @@ export function UserProfile() {
                                             امتیاز هم‌راستایی: {major.score}%
                                         </DialogDescription>
                                     </DialogHeader>
-                                    <div className="py-4">
+                                    <div className="py-4 text-right">
                                         <h4 className="font-semibold mb-2">دلیل پیشنهاد:</h4>
                                         <p className="text-muted-foreground bg-muted/50 p-4 rounded-md">{major.reason}</p>
                                     </div>
@@ -589,7 +589,7 @@ export function UserProfile() {
                          </Dialog>
                     </div>
                 </CardHeader>
-                <CardContent className="space-y-6 pt-6">
+                <CardContent className="space-y-6 pt-6 text-right">
                     <div className="space-y-2">
                         <Label>علایق و سرگرمی‌ها</Label>
                         <p className="text-sm text-muted-foreground p-4 bg-muted/50 rounded-md min-h-[60px]">
