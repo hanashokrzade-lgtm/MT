@@ -268,7 +268,7 @@ export function HomePageContent() {
                         دانش خود را با مقالات تولید شده توسط هوش مصنوعی افزایش دهید.
                     </p>
                 </div>
-                {articles.length > 3 && (
+                {articles.length > 0 && (
                     <div className="text-center">
                         <Dialog>
                             <DialogTrigger asChild>
