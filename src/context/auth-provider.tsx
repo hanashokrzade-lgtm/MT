@@ -1,10 +1,11 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut as firebaseSignOut, User, Auth } from 'firebase/auth';
+import { getAuth, signInWithRedirect, GoogleAuthProvider, onAuthStateChanged, signOut as firebaseSignOut, User, Auth, getRedirectResult, signInWithPopup } from 'firebase/auth';
 import { getApp, getApps, initializeApp, type FirebaseApp } from "firebase/app";
 import { useToast } from '@/hooks/use-toast';
 import { LoadingLogo } from '@/components/layout/loading-logo';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -40,19 +41,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [auth, setAuth] = useState<Auth | null>(null);
   const [isFirebaseInitialized, setIsFirebaseInitialized] = useState(false);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     try {
         const app = getFirebaseApp();
         const authInstance = getAuth(app);
         setAuth(authInstance);
+        setIsFirebaseInitialized(true);
+        
+        // Handle redirect result
+        getRedirectResult(authInstance)
+            .then((result) => {
+                if (result) {
+                    toast({
+                        title: 'ورود موفق',
+                        description: 'شما با موفقیت وارد حساب کاربری خود شدید.',
+                    });
+                }
+            })
+            .catch((error) => {
+                console.error("Redirect Result Error: ", error);
+                toast({
+                    title: 'خطا در ورود',
+                    description: 'مشکلی در فرآیند ورود با گوگل پیش آمد.',
+                    variant: 'destructive',
+                });
+            })
+            .finally(() => {
+                setIsLoading(false);
+            });
 
         const unsubscribe = onAuthStateChanged(authInstance, (currentUser) => {
           setUser(currentUser);
-          setIsLoading(false);
+          // Set loading to false only after initial auth state is determined
+          if (isLoading) setIsLoading(false);
         });
-        
-        setIsFirebaseInitialized(true);
 
         return () => unsubscribe();
     } catch (error) {
@@ -72,29 +96,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!auth) return;
     setIsLoading(true);
     const provider = new GoogleAuthProvider();
-    try {
-      await signInWithPopup(auth, provider);
-      toast({
-        title: 'ورود موفق',
-        description: 'شما با موفقیت وارد حساب کاربری خود شدید.',
-      });
-    } catch (error: any) {
-      console.error("Authentication Error: ", error);
-      let description = 'متاسفانه مشکلی در فرآیند ورود با گوگل پیش آمد.';
-      if (error.code === 'auth/unauthorized-domain') {
-          description = 'دامنه شما برای ورود مجاز نیست. لطفاً با پشتیبانی تماس بگیرید.'
-      }
-      toast({
-        title: 'خطا در ورود',
-        description: description,
-        variant: 'destructive',
-      });
-    } finally {
-      // onAuthStateChanged will handle setting user and loading state
-      // but in case of a sign in error (like popup closed), we need to stop loading.
-      if (!auth.currentUser) {
-          setIsLoading(false);
-      }
+    
+    // Use signInWithRedirect for mobile devices, and signInWithPopup for desktop
+    if (isMobile) {
+        await signInWithRedirect(auth, provider);
+    } else {
+        try {
+            await signInWithPopup(auth, provider);
+            toast({
+                title: 'ورود موفق',
+                description: 'شما با موفقیت وارد حساب کاربری خود شدید.',
+            });
+        } catch (error: any) {
+            console.error("Authentication Error: ", error);
+            let description = 'متاسفانه مشکلی در فرآیند ورود با گوگل پیش آمد.';
+            if (error.code === 'auth/unauthorized-domain') {
+                description = 'دامنه شما برای ورود مجاز نیست. لطفاً با پشتیبانی تماس بگیرید.'
+            } else if (error.code === 'auth/popup-closed-by-user') {
+                description = 'پنجره ورود توسط شما بسته شد. لطفاً دوباره تلاش کنید.'
+            }
+            toast({
+                title: 'خطا در ورود',
+                description: description,
+                variant: 'destructive',
+            });
+            setIsLoading(false); // Stop loading if popup fails
+        }
     }
   };
 
@@ -115,7 +142,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         variant: 'destructive',
       });
     } finally {
-      // onAuthStateChanged will handle setting the user and isLoading.
+        // onAuthStateChanged will set loading to false.
     }
   };
 
@@ -126,7 +153,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signOut,
   };
 
-  if (!isFirebaseInitialized || (isLoading && !user)) {
+  if (!isFirebaseInitialized || isLoading) {
       return (
         <div className="fixed inset-0 flex items-center justify-center bg-background z-50">
             <LoadingLogo />
