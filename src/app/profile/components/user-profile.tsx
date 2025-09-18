@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { User, LogOut, Settings, ChevronRight, HelpCircle, Shield, Moon, Sun, Laptop, Trash2, Bell, ShieldCheck, FileText, Mail, Bug, ClipboardList, MessageSquare, Target, Edit, TrendingUp, CheckCircle, BarChart2, History } from "lucide-react";
+import { User, LogOut, Settings, ChevronRight, HelpCircle, Shield, Moon, Sun, Laptop, Trash2, Bell, ShieldCheck, FileText, Mail, Bug, ClipboardList, MessageSquare, Target, Edit, TrendingUp, CheckCircle, BarChart2, History, BrainCircuit } from "lucide-react";
 import { useAuth } from "@/context/auth-provider";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -27,7 +27,11 @@ const dashboardData = {
     questions: 12,
     avgAlignment: 82,
   },
-  recentMajors: ["مهندسی نرم‌افزار", "هوش مصنوعی", "علوم داده"],
+  recentMajors: [
+    { name: "مهندسی نرم‌افزار", score: 95, reason: "علاقه شدید به حل مسئله و تفکر الگوریتمی." },
+    { name: "هوش مصنوعی", score: 92, reason: "ترکیبی از نقاط قوت در ریاضیات و خلاقیت." },
+    { name: "علوم داده", score: 88, reason: "توانایی تحلیل داده و استخراج الگوهای معنادار." },
+  ],
   profileCompletion: 60,
   activityChart: [
     { month: "فروردین", desktop: 186 },
@@ -43,6 +47,11 @@ const dashboardData = {
     { date: "۱۴۰۳/۰۳/۲۲", topMajor: "روانشناسی", summary: "کاوش در زمینه علاقه به درک رفتار انسان." },
     { date: "۱۴۰۳/۰۳/۱۰", topMajor: "هنرهای دیجیتال", summary: "تحلیل نقاط قوت در خلاقیت و طراحی." },
     { date: "۱۴۰۳/۰۲/۱۸", topMajor: "مهندسی عمران", summary: "بر اساس نمرات بالا در ریاضی و فیزیک." },
+  ],
+  questionHistory: [
+    { date: "۱۴۰۳/۰۵/۰۲", question: "بهترین دانشگاه‌ها برای هوش مصنوعی کدامند؟", answerSnippet: "دانشگاه‌های برتر شامل دانشگاه تهران، صنعتی شریف و امیرکبیر هستند که قطب‌های علمی این رشته محسوب می‌شوند..." },
+    { date: "۱۴۰۳/۰۴/۲۸", question: "آیا رشته علوم کامپیوتر بازار کار خوبی در ایران دارد؟", answerSnippet: "بله، با توجه به رشد شرکت‌های دانش‌بنیان و نیاز به دیجیتالی شدن کسب‌وکارها، بازار کار بسیار خوبی دارد..." },
+    { date: "۱۴۰۳/۰۴/۲۰", question: "تفاوت بین مهندسی نرم‌افزار و علوم کامپیوتر چیست؟", answerSnippet: "مهندسی نرم‌افزار بیشتر بر فرآیندهای ساخت و نگهداری نرم‌افزار تمرکز دارد، در حالی که علوم کامپیوتر مباحث تئوری و بنیادی را پوشش می‌دهد..." },
   ]
 };
 
@@ -439,20 +448,47 @@ export function UserProfile() {
                         </ScrollArea>
                     </DialogContent>
                 </Dialog>
-                <Card
-                    className="hover:bg-muted/50 cursor-pointer transition-colors"
-                    onClick={() => setActiveTab('q-and-a')}
-                    role="button"
-                >
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">پرسش و پاسخ</CardTitle>
-                        <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{dashboardData.stats.questions}</div>
-                        <p className="text-xs text-muted-foreground">تعداد کل سوالات پرسیده شده</p>
-                    </CardContent>
-                </Card>
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <Card className="hover:bg-muted/50 cursor-pointer transition-colors">
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">پرسش و پاسخ</CardTitle>
+                                <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">{dashboardData.stats.questions}</div>
+                                <p className="text-xs text-muted-foreground">تعداد کل سوالات پرسیده شده</p>
+                            </CardContent>
+                        </Card>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-lg">
+                        <DialogHeader>
+                            <DialogTitle>تاریخچه پرسش و پاسخ</DialogTitle>
+                            <DialogDescription>
+                                در اینجا می‌توانید خلاصه‌ای از سوالات اخیر خود را مشاهده کنید.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <ScrollArea className="max-h-96 pr-4">
+                            <div className="space-y-4 py-4">
+                                {dashboardData.questionHistory.map((item, index) => (
+                                    <div key={index} className="p-4 border rounded-lg">
+                                        <div className="flex justify-between items-center mb-2">
+                                            <p className="font-semibold text-primary truncate">{item.question}</p>
+                                            <Badge variant="secondary">{item.date}</Badge>
+                                        </div>
+                                        <p className="text-sm text-muted-foreground">{item.answerSnippet}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </ScrollArea>
+                         <DialogFooter>
+                            <Button onClick={() => setActiveTab('q-and-a')}>
+                                <MessageSquare className="ml-2 h-4 w-4"/>
+                                رفتن به صفحه پرسش و پاسخ
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">میانگین هم‌راستایی</CardTitle>
@@ -494,11 +530,40 @@ export function UserProfile() {
                     <CardContent>
                        <div className=" space-y-4">
                         {dashboardData.recentMajors.map((major) => (
-                            <div key={major} className="flex items-center">
-                                <CheckCircle className="h-4 w-4 ml-2 text-green-500" />
-                                <div className="flex-1">{major}</div>
-                                <Button variant="ghost" size="sm">مشاهده جزئیات</Button>
-                            </div>
+                            <Dialog key={major.name}>
+                                <DialogTrigger asChild>
+                                    <div className="flex items-center hover:bg-muted/50 p-2 rounded-lg cursor-pointer transition-colors">
+                                        <CheckCircle className="h-4 w-4 ml-3 text-green-500 flex-shrink-0" />
+                                        <div className="flex-1 font-medium">{major.name}</div>
+                                        <Badge variant="outline" className="text-primary">{major.score}%</Badge>
+                                        <ChevronRight className="h-4 w-4 text-muted-foreground mr-2" />
+                                    </div>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle className="flex items-center gap-2">
+                                            <BrainCircuit className="w-6 h-6 text-primary"/>
+                                            جزئیات پیشنهاد: {major.name}
+                                        </DialogTitle>
+                                        <DialogDescription>
+                                            امتیاز هم‌راستایی: {major.score}%
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <div className="py-4">
+                                        <h4 className="font-semibold mb-2">دلیل پیشنهاد:</h4>
+                                        <p className="text-muted-foreground bg-muted/50 p-4 rounded-md">{major.reason}</p>
+                                    </div>
+                                    <DialogFooter>
+                                         <Button onClick={() => setActiveTab('alignment')}>
+                                            <BarChart2 className="ml-2 h-4 w-4"/>
+                                            تحلیل مجدد اهداف
+                                        </Button>
+                                         <DialogClose asChild>
+                                            <Button variant="outline">بستن</Button>
+                                        </DialogClose>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
                         ))}
                         </div>
                     </CardContent>
