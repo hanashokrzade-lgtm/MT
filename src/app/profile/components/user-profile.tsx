@@ -18,6 +18,7 @@ import { ChartConfig, ChartContainer } from "@/components/ui/chart";
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
+import { useTabs } from "@/context/tabs-provider";
 
 // Mock Data for the dashboard - In a real app, this would come from state or API
 const dashboardData = {
@@ -334,6 +335,7 @@ const EditProfileDialog = ({ profileData, onSave }: { profileData: any, onSave: 
 
 export function UserProfile() {
     const { user, signOut } = useAuth();
+    const { setActiveTab } = useTabs();
     const [profileData, setProfileData] = useState({
         interests: 'علاقه‌مند به برنامه‌نویسی، بازی‌های ویدیویی استراتژیک و مطالعه کتاب‌های علمی-تخیلی.',
         strengths: 'توانایی بالا در حل مسائل پیچیده ریاضی، یادگیری سریع زبان‌های برنامه‌نویسی جدید و تفکر منطقی.',
@@ -437,7 +439,11 @@ export function UserProfile() {
                         </ScrollArea>
                     </DialogContent>
                 </Dialog>
-                <Card>
+                <Card
+                    className="hover:bg-muted/50 cursor-pointer transition-colors"
+                    onClick={() => setActiveTab('q-and-a')}
+                    role="button"
+                >
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">پرسش و پاسخ</CardTitle>
                         <MessageSquare className="h-4 w-4 text-muted-foreground" />
