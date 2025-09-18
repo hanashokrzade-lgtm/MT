@@ -17,6 +17,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { ChartConfig, ChartContainer } from "@/components/ui/chart";
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 import { Textarea } from "@/components/ui/textarea";
+import { useState } from "react";
 
 // Mock Data for the dashboard - In a real app, this would come from state or API
 const dashboardData = {
@@ -262,9 +263,79 @@ const HelpDialog = () => (
     </DialogContent>
 );
 
+const EditProfileDialog = ({ profileData, onSave }: { profileData: any, onSave: (data: any) => void }) => {
+    const [interests, setInterests] = useState(profileData.interests || '');
+    const [strengths, setStrengths] = useState(profileData.strengths || '');
+    const [goals, setGoals] = useState(profileData.goals || '');
+
+    const handleSave = () => {
+        onSave({ interests, strengths, goals });
+    };
+
+    return (
+        <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+                <DialogTitle>ویرایش پروفایل حرفه‌ای</DialogTitle>
+                <DialogDescription>
+                    این اطلاعات به ما کمک می‌کند تا مشاوره‌های دقیق‌تر و شخصی‌سازی شده‌تری به شما ارائه دهیم.
+                </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-6 py-4">
+                <div className="space-y-2">
+                    <Label htmlFor="interests">علایق و سرگرمی‌ها</Label>
+                    <Textarea 
+                        id="interests" 
+                        value={interests}
+                        onChange={(e) => setInterests(e.target.value)}
+                        placeholder="موضوعات مورد علاقه، فعالیت‌هایی که از آنها لذت می‌برید، کتاب‌ها، فیلم‌ها و..." 
+                        rows={4} 
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="strengths">نقاط قوت کلیدی</Label>
+                    <Textarea 
+                        id="strengths" 
+                        value={strengths}
+                        onChange={(e) => setStrengths(e.target.value)}
+                        placeholder="مهارت‌هایی که در آنها برتر هستید، مانند حل مسئله، خلاقیت، کار گروهی، مهارت‌های فنی و..." 
+                        rows={4} 
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="goals">اهداف شغلی و آینده</Label>
+                    <Textarea 
+                        id="goals" 
+                        value={goals}
+                        onChange={(e) => setGoals(e.target.value)}
+                        placeholder="شغل رویایی شما چیست؟ چه نوع محیط کاری را ترجیح می‌دهید؟ اهداف بلندمدت شما چیست؟" 
+                        rows={4} 
+                    />
+                </div>
+            </div>
+            <DialogFooter>
+                <DialogClose asChild>
+                    <Button type="button" variant="secondary">انصراف</Button>
+                </DialogClose>
+                 <DialogClose asChild>
+                    <Button type="button" onClick={handleSave}>ذخیره تغییرات</Button>
+                </DialogClose>
+            </DialogFooter>
+        </DialogContent>
+    );
+};
+
 
 export function UserProfile() {
     const { user, signOut } = useAuth();
+    const [profileData, setProfileData] = useState({
+        interests: 'علاقه‌مند به برنامه‌نویسی، بازی‌های ویدیویی استراتژیک و مطالعه کتاب‌های علمی-تخیلی.',
+        strengths: 'توانایی بالا در حل مسائل پیچیده ریاضی، یادگیری سریع زبان‌های برنامه‌نویسی جدید و تفکر منطقی.',
+        goals: 'تبدیل شدن به یک مهندس نرم‌افزار ارشد در یک شرکت فناوری بزرگ و کار بر روی پروژه‌های هوش مصنوعی.'
+    });
+
+    const handleProfileSave = (newProfileData: any) => {
+        setProfileData(newProfileData);
+    };
 
     return (
         <div className="container py-8 max-w-4xl mx-auto space-y-8">
@@ -404,24 +475,35 @@ export function UserProfile() {
                              <CardTitle>پروفایل حرفه‌ای تحصیلی</CardTitle>
                              <CardDescription>با تکمیل این بخش، مشاوره‌های دقیق‌تری دریافت کنید.</CardDescription>
                         </div>
-                         <Button variant="default">
-                            <Edit className="ml-2 h-4 w-4" />
-                            ویرایش پروفایل
-                        </Button>
+                         <Dialog>
+                            <DialogTrigger asChild>
+                                <Button variant="default">
+                                    <Edit className="ml-2 h-4 w-4" />
+                                    ویرایش پروفایل
+                                </Button>
+                            </DialogTrigger>
+                            <EditProfileDialog profileData={profileData} onSave={handleProfileSave} />
+                         </Dialog>
                     </div>
                 </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-6 pt-6">
                     <div className="space-y-2">
                         <Label>علایق و سرگرمی‌ها</Label>
-                        <Textarea placeholder="هنوز وارد نشده..." readOnly rows={3} className="bg-muted/50 cursor-not-allowed" />
+                        <p className="text-sm text-muted-foreground p-4 bg-muted/50 rounded-md min-h-[60px]">
+                            {profileData.interests || "هنوز وارد نشده..."}
+                        </p>
                     </div>
                      <div className="space-y-2">
                         <Label>نقاط قوت کلیدی</Label>
-                        <Textarea placeholder="هنوز وارد نشده..." readOnly rows={3} className="bg-muted/50 cursor-not-allowed" />
+                        <p className="text-sm text-muted-foreground p-4 bg-muted/50 rounded-md min-h-[60px]">
+                            {profileData.strengths || "هنوز وارد نشده..."}
+                        </p>
                     </div>
                      <div className="space-y-2">
                         <Label>اهداف شغلی و آینده</Label>
-                        <Textarea placeholder="هنوز وارد نشده..." readOnly rows={3} className="bg-muted/50 cursor-not-allowed" />
+                        <p className="text-sm text-muted-foreground p-4 bg-muted/50 rounded-md min-h-[60px]">
+                            {profileData.goals || "هنوز وارد نشده..."}
+                        </p>
                     </div>
                 </CardContent>
             </Card>
