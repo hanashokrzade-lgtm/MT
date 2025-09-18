@@ -1,7 +1,5 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import { getApp, getApps, initializeApp, type FirebaseApp } from "firebase/app";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -14,7 +12,12 @@ const firebaseConfig = {
   "messagingSenderId": "1015243920281"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Initialize Firebase using a singleton pattern
+function getFirebaseApp(): FirebaseApp {
+    if (!getApps().length) {
+        return initializeApp(firebaseConfig);
+    }
+    return getApp();
+}
 
-export { app };
+export const app = getFirebaseApp();
