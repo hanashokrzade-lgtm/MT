@@ -3,11 +3,18 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { Sparkles, BrainCircuit, Target, MessagesSquare, ArrowLeft } from "lucide-react";
+import { Sparkles, BrainCircuit, Target, MessagesSquare, ArrowLeft, Loader2, FileText, Plus } from "lucide-react";
 import { useTabs } from "@/context/tabs-provider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { getArticles, type Article } from "@/services/article-service";
+import { generateEducationalArticle } from "@/ai/flows/generate-educational-article";
+import { useToast } from "@/hooks/use-toast";
+import { useState, useEffect } from "react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
 
 const features = [
     {
@@ -48,30 +55,61 @@ const testimonials = [
     }
 ]
 
-const articles = [
-    {
-        id: 'article-1',
-        title: "چگونه بهترین رشته تحصیلی را انتخاب کنیم؟",
-        category: "انتخاب رشته",
-        description: "یک راهنمای جامع برای دانش‌آموزانی که در ابتدای مسیر تصمیم‌گیری قرار دارند و به دنبال نقشه راه هستند.",
-    },
-    {
-        id: 'article-2',
-        title: "معرفی ۱۰ شغل پردرآمد آینده در ایران",
-        category: "بازار کار",
-        description: "با مشاغل نوظهور و پرتقاضا در ده سال آینده آشنا شوید و مسیر تحصیلی خود را هوشمندانه انتخاب کنید.",
-    },
-    {
-        id: 'article-3',
-        title: "اهمیت علاقه در مقابل بازار کار: کدام یک مهم‌تر است؟",
-        category: "مشاوره",
-        description: "بررسی تعادل بین دنبال کردن علاقه شخصی و در نظر گرفتن واقعیت‌های بازار کار برای یک انتخاب موفق.",
-    }
-];
+const articleTopics = ["انتخاب رشته", "بازار کار", "مشاوره تحصیلی", "معرفی رشته", "تکنیک‌های مطالعه"];
 
 export function HomePageContent() {
     const { setActiveTab } = useTabs();
     const heroImage = PlaceHolderImages.find(p => p.id === 'hero-student-2');
+    const { toast } = useToast();
+
+    const [articles, setArticles] = useState<Article[]>([]);
+    const [isGeneratingArticle, setIsGeneratingArticle] = useState(false);
+    const [isInitialLoading, setIsInitialLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchArticles = async () => {
+            setIsInitialLoading(true);
+            try {
+                const fetchedArticles = await getArticles();
+                setArticles(fetchedArticles);
+            } catch (error) {
+                console.error("Failed to fetch articles:", error);
+                toast({
+                    title: "خطا در بارگذاری مقالات",
+                    description: "مشکلی در دریافت لیست مقالات پیش آمده است.",
+                    variant: "destructive",
+                });
+            } finally {
+                setIsInitialLoading(false);
+            }
+        };
+
+        fetchArticles();
+    }, [toast]);
+
+
+    const handleGenerateArticle = async () => {
+        setIsGeneratingArticle(true);
+        try {
+            const randomTopic = articleTopics[Math.floor(Math.random() * articleTopics.length)];
+            const newArticle = await generateEducationalArticle({ topic: randomTopic });
+            setArticles(prev => [newArticle, ...prev]);
+            toast({
+                title: "مقاله جدید تولید شد!",
+                description: `مقاله‌ای با عنوان "${newArticle.title}" با موفقیت ایجاد و اضافه شد.`,
+            });
+        } catch (error) {
+            console.error("Failed to generate article:", error);
+            toast({
+                title: "خطا در تولید مقاله",
+                description: "متاسفانه در ارتباط با سرویس هوش مصنوعی مشکلی پیش آمد.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsGeneratingArticle(false);
+        }
+    };
+
 
   return (
     <div className="w-full">
@@ -209,39 +247,78 @@ export function HomePageContent() {
       {/* Articles Section */}
        <section className="w-full py-16 md:py-24 bg-card/50">
         <div className="container px-4 md:px-6">
-            <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
-                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl font-headline">مقالات</h2>
-                <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed">
-                    دانش خود را با مقالات منتخب ما در زمینه انتخاب رشته و موفقیت تحصیلی افزایش دهید.
-                </p>
+            <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0 text-center sm:text-right mb-12">
+                <div>
+                    <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl font-headline">مقالات</h2>
+                    <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed">
+                        دانش خود را با مقالات تولید شده توسط هوش مصنوعی افزایش دهید.
+                    </p>
+                </div>
+                <Button onClick={handleGenerateArticle} disabled={isGeneratingArticle}>
+                    {isGeneratingArticle ? (
+                        <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                    ) : (
+                        <Plus className="ml-2 h-4 w-4" />
+                    )}
+                    تولید مقاله جدید
+                </Button>
             </div>
-            <div className="grid gap-8 lg:grid-cols-3">
-                {articles.map((article) => {
-                     const image = PlaceHolderImages.find(p => p.id === article.id);
-                     return (
-                        <Card key={article.id} className="overflow-hidden group">
-                           {image && (
-                             <div className="relative aspect-video overflow-hidden">
-                                <Image 
-                                    src={image.imageUrl} 
-                                    alt={article.title} 
-                                    data-ai-hint={image.imageHint}
-                                    fill
-                                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                                />
-                             </div>
-                           )}
-                            <CardHeader>
-                                <Badge variant="secondary" className="w-fit mb-2">{article.category}</Badge>
-                                <CardTitle className="text-lg">{article.title}</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <CardDescription>{article.description}</CardDescription>
-                            </CardContent>
-                        </Card>
-                     )
-                })}
-            </div>
+            {isInitialLoading ? (
+                 <div className="flex justify-center items-center h-40">
+                    <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                </div>
+            ) : articles.length === 0 ? (
+                <div className="text-center py-16 px-4 border-2 border-dashed rounded-lg">
+                    <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
+                    <h3 className="mt-4 text-lg font-semibold">هنوز مقاله‌ای وجود ندارد</h3>
+                    <p className="mt-2 text-sm text-muted-foreground">برای شروع، یک مقاله جدید با هوش مصنوعی تولید کنید.</p>
+                </div>
+            ) : (
+                <div className="grid gap-8 lg:grid-cols-3">
+                    {articles.map((article, index) => {
+                         const imageId = `article-${(index % 3) + 1}`; // Cycle through article-1, 2, 3
+                         const image = PlaceHolderImages.find(p => p.id === imageId);
+                         return (
+                            <Dialog key={article.id}>
+                                <DialogTrigger asChild>
+                                    <Card className="overflow-hidden group cursor-pointer hover:shadow-primary/10 hover:shadow-lg transition-shadow">
+                                       {image && (
+                                         <div className="relative aspect-video overflow-hidden">
+                                            <Image 
+                                                src={image.imageUrl} 
+                                                alt={article.title} 
+                                                data-ai-hint={image.imageHint}
+                                                fill
+                                                className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                            />
+                                         </div>
+                                       )}
+                                        <CardHeader>
+                                            <Badge variant="secondary" className="w-fit mb-2">{article.category}</Badge>
+                                            <CardTitle className="text-lg">{article.title}</CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <CardDescription>{article.description}</CardDescription>
+                                        </CardContent>
+                                    </Card>
+                                </DialogTrigger>
+                                <DialogContent className="sm:max-w-2xl">
+                                    <DialogHeader className="text-right">
+                                        <Badge variant="secondary" className="w-fit mb-2">{article.category}</Badge>
+                                        <DialogTitle className="text-2xl">{article.title}</DialogTitle>
+                                        <DialogDescription>{article.description}</DialogDescription>
+                                    </DialogHeader>
+                                    <ScrollArea className="max-h-[60vh] pr-6 -mr-6 mt-4">
+                                        <div className="prose prose-sm dark:prose-invert text-foreground/90 leading-relaxed text-right whitespace-pre-wrap">
+                                            {article.content}
+                                        </div>
+                                    </ScrollArea>
+                                </DialogContent>
+                            </Dialog>
+                         )
+                    })}
+                </div>
+            )}
         </div>
        </section>
 
