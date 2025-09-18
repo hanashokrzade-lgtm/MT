@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { Sparkles, BrainCircuit, Target, MessagesSquare, ArrowLeft, Loader2, FileText } from "lucide-react";
+import { Sparkles, BrainCircuit, Target, MessagesSquare, ArrowLeft, Loader2, FileText, Library } from "lucide-react";
 import { useTabs } from "@/context/tabs-provider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -53,6 +53,47 @@ const testimonials = [
         text: "کاش وقتی دبیرستانی بودم چنین ابزاری وجود داشت! بخش پرسش و پاسخ برای رفع ابهامات و شناخت مسیر شغلی فوق‌العاده است.",
     }
 ]
+
+function ArticleCard({ article, image }: { article: Article, image?: typeof PlaceHolderImages[0] }) {
+    return (
+        <Dialog>
+            <DialogTrigger asChild>
+                <Card className="overflow-hidden group cursor-pointer hover:shadow-primary/10 hover:shadow-lg transition-shadow h-full flex flex-col">
+                    {image && (
+                        <div className="relative aspect-video overflow-hidden">
+                            <Image
+                                src={image.imageUrl}
+                                alt={article.title}
+                                data-ai-hint={image.imageHint}
+                                fill
+                                className="object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                        </div>
+                    )}
+                    <CardHeader>
+                        <Badge variant="secondary" className="w-fit mb-2">{article.category}</Badge>
+                        <CardTitle className="text-lg">{article.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex-grow">
+                        <CardDescription>{article.description}</CardDescription>
+                    </CardContent>
+                </Card>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-2xl">
+                <DialogHeader className="text-right">
+                    <Badge variant="secondary" className="w-fit mb-2">{article.category}</Badge>
+                    <DialogTitle className="text-2xl">{article.title}</DialogTitle>
+                    <DialogDescription>{article.description}</DialogDescription>
+                </DialogHeader>
+                <ScrollArea className="max-h-[60vh] pr-6 -mr-6 mt-4">
+                    <div className="prose prose-sm dark:prose-invert text-foreground/90 leading-relaxed text-right whitespace-pre-wrap">
+                        {article.content}
+                    </div>
+                </ScrollArea>
+            </DialogContent>
+        </Dialog>
+    );
+}
 
 export function HomePageContent() {
     const { setActiveTab } = useTabs();
@@ -239,49 +280,45 @@ export function HomePageContent() {
                     <p className="mt-2 text-sm text-muted-foreground">به نظر می‌رسد هنوز مقاله‌ای در پایگاه داده ذخیره نشده است.</p>
                 </div>
             ) : (
-                <div className="grid gap-8 lg:grid-cols-3">
-                    {articles.map((article, index) => {
-                         const imageId = `article-${(index % 3) + 1}`; // Cycle through article-1, 2, 3
-                         const image = PlaceHolderImages.find(p => p.id === imageId);
-                         return (
-                            <Dialog key={article.id}>
+                <div className="space-y-8">
+                    <div className="grid gap-8 lg:grid-cols-3">
+                        {articles.slice(0, 3).map((article, index) => {
+                             const imageId = `article-${(index % 3) + 1}`;
+                             const image = PlaceHolderImages.find(p => p.id === imageId);
+                             return (
+                                <ArticleCard key={article.id} article={article} image={image} />
+                             )
+                        })}
+                    </div>
+                    {articles.length > 3 && (
+                        <div className="text-center">
+                            <Dialog>
                                 <DialogTrigger asChild>
-                                    <Card className="overflow-hidden group cursor-pointer hover:shadow-primary/10 hover:shadow-lg transition-shadow">
-                                       {image && (
-                                         <div className="relative aspect-video overflow-hidden">
-                                            <Image 
-                                                src={image.imageUrl} 
-                                                alt={article.title} 
-                                                data-ai-hint={image.imageHint}
-                                                fill
-                                                className="object-cover group-hover:scale-105 transition-transform duration-300"
-                                            />
-                                         </div>
-                                       )}
-                                        <CardHeader>
-                                            <Badge variant="secondary" className="w-fit mb-2">{article.category}</Badge>
-                                            <CardTitle className="text-lg">{article.title}</CardTitle>
-                                        </CardHeader>
-                                        <CardContent>
-                                            <CardDescription>{article.description}</CardDescription>
-                                        </CardContent>
-                                    </Card>
+                                    <Button size="lg" variant="outline">
+                                        <Library className="ml-2 h-5 w-5" />
+                                        مشاهده همه مقالات
+                                    </Button>
                                 </DialogTrigger>
-                                <DialogContent className="sm:max-w-2xl">
+                                <DialogContent className="sm:max-w-4xl">
                                     <DialogHeader className="text-right">
-                                        <Badge variant="secondary" className="w-fit mb-2">{article.category}</Badge>
-                                        <DialogTitle className="text-2xl">{article.title}</DialogTitle>
-                                        <DialogDescription>{article.description}</DialogDescription>
+                                        <DialogTitle className="text-2xl">آرشیو مقالات</DialogTitle>
+                                        <DialogDescription>تمام مقالات تولید شده را در اینجا مرور کنید.</DialogDescription>
                                     </DialogHeader>
-                                    <ScrollArea className="max-h-[60vh] pr-6 -mr-6 mt-4">
-                                        <div className="prose prose-sm dark:prose-invert text-foreground/90 leading-relaxed text-right whitespace-pre-wrap">
-                                            {article.content}
+                                    <ScrollArea className="max-h-[70vh] p-1">
+                                        <div className="grid gap-6 py-4 sm:grid-cols-2 lg:grid-cols-3">
+                                            {articles.map((article, index) => {
+                                                const imageId = `article-${(index % 3) + 1}`;
+                                                const image = PlaceHolderImages.find(p => p.id === imageId);
+                                                return (
+                                                    <ArticleCard key={article.id} article={article} image={image} />
+                                                )
+                                            })}
                                         </div>
                                     </ScrollArea>
                                 </DialogContent>
                             </Dialog>
-                         )
-                    })}
+                        </div>
+                    )}
                 </div>
             )}
         </div>
