@@ -98,11 +98,16 @@ export function HomePageContent() {
                 title: "مقاله جدید تولید شد!",
                 description: `مقاله‌ای با عنوان "${newArticle.title}" با موفقیت ایجاد و اضافه شد.`,
             });
-        } catch (error) {
+        } catch (error: any) {
             console.error("Failed to generate article:", error);
+            const errorMessage = error.message || '';
+            const isModelOverloaded = errorMessage.includes('503') || errorMessage.includes('overloaded');
+            
             toast({
                 title: "خطا در تولید مقاله",
-                description: "متاسفانه در ارتباط با سرویس هوش مصنوعی مشکلی پیش آمد.",
+                description: isModelOverloaded
+                    ? "سرویس هوش مصنوعی در حال حاضر مشغول است. لطفاً کمی بعد دوباره تلاش کنید."
+                    : "متاسفانه در ارتباط با سرویس هوش مصنوعی مشکلی پیش آمد.",
                 variant: "destructive",
             });
         } finally {
