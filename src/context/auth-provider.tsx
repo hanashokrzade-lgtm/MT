@@ -50,7 +50,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setAuth(authInstance);
         setIsFirebaseInitialized(true);
         
-        // Handle redirect result
+        const unsubscribe = onAuthStateChanged(authInstance, (currentUser) => {
+          setUser(currentUser);
+          setIsLoading(false);
+        });
+        
+        // Handle redirect result on initial load
         getRedirectResult(authInstance)
             .then((result) => {
                 if (result) {
@@ -69,14 +74,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 });
             })
             .finally(() => {
+                // This is important for when the page reloads after redirect.
+                // onAuthStateChanged will eventually set loading to false, but this makes it faster.
                 setIsLoading(false);
             });
 
-        const unsubscribe = onAuthStateChanged(authInstance, (currentUser) => {
-          setUser(currentUser);
-          // Set loading to false only after initial auth state is determined
-          if (isLoading) setIsLoading(false);
-        });
 
         return () => unsubscribe();
     } catch (error) {
@@ -97,16 +99,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(true);
     const provider = new GoogleAuthProvider();
     
-    // Use signInWithRedirect for mobile devices, and signInWithPopup for desktop
     if (isMobile) {
+        // Redirect is better for mobile devices
         await signInWithRedirect(auth, provider);
     } else {
+        // Popup is a better UX on desktop
         try {
             await signInWithPopup(auth, provider);
             toast({
                 title: 'ورود موفق',
                 description: 'شما با موفقیت وارد حساب کاربری خود شدید.',
             });
+             // onAuthStateChanged will handle the rest, but we can optimistically stop loading
+            setIsLoading(false);
         } catch (error: any) {
             console.error("Authentication Error: ", error);
             let description = 'متاسفانه مشکلی در فرآیند ورود با گوگل پیش آمد.';
@@ -142,7 +147,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         variant: 'destructive',
       });
     } finally {
-        // onAuthStateChanged will set loading to false.
+        // onAuthStateChanged will set the user to null and trigger a re-render.
+        // It will also set loading to false.
     }
   };
 
@@ -153,6 +159,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signOut,
   };
 
+  // Show a loading screen until Firebase is initialized and the initial user state is determined.
   if (!isFirebaseInitialized || isLoading) {
       return (
         <div className="fixed inset-0 flex items-center justify-center bg-background z-50">
