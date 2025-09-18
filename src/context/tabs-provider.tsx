@@ -2,9 +2,9 @@
 
 import { createContext, useContext, useState, ReactNode, useMemo } from 'react';
 
-type Tab = 'home' | 'advisor' | 'alignment' | 'q-and-a';
+type Tab = 'home' | 'advisor' | 'alignment' | 'q-and-a' | 'profile';
 
-const tabOrder: Tab[] = ['home', 'advisor', 'alignment', 'q-and-a'];
+const tabOrder: Tab[] = ['home', 'advisor', 'profile', 'alignment', 'q-and-a'];
 
 interface TabsContextType {
   activeTab: Tab;

@@ -5,6 +5,12 @@
       "description": "A focused student working at a desk with books and a laptop.",
       "imageUrl": "https://picsum.photos/seed/hero-student/1200/800",
       "imageHint": "student studying"
+    },
+    {
+      "id": "profile-avatar",
+      "description": "A placeholder avatar image for a student's profile.",
+      "imageUrl": "https://picsum.photos/seed/profile-avatar/200/200",
+      "imageHint": "student portrait"
     }
   ]
 }

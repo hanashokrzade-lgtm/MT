@@ -25,7 +25,7 @@ export default function RootLayout({
       </head>
       <body className={cn("font-body antialiased min-h-screen flex flex-col h-full bg-background")}>
         <TabsProvider>
-            <main className="flex-grow flex flex-col pb-20">
+            <main className="flex-grow flex flex-col pb-24">
                 <TabsContainer />
             </main>
             <BottomNav />
