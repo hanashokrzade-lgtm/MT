@@ -1,3 +1,5 @@
+'use client';
+
 import { QaForm } from './qa-form';
 
 export function QaPageContent() {

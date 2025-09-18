@@ -1,3 +1,5 @@
+'use client';
+
 import { QaPageContent } from "./components/qa-page-content";
 
 
