@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { User, LogOut, Settings, ChevronRight, HelpCircle, Shield, Moon, Sun, Laptop, Trash2, Bell, ShieldCheck, FileText, Mail, Bug, ClipboardList, MessageSquare, Target, Edit, TrendingUp, CheckCircle, BarChart2 } from "lucide-react";
+import { User, LogOut, Settings, ChevronRight, HelpCircle, Shield, Moon, Sun, Laptop, Trash2, Bell, ShieldCheck, FileText, Mail, Bug, ClipboardList, MessageSquare, Target, Edit, TrendingUp, CheckCircle, BarChart2, History } from "lucide-react";
 import { useAuth } from "@/context/auth-provider";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -36,6 +36,13 @@ const dashboardData = {
     { month: "مرداد", desktop: 209 },
     { month: "شهریور", desktop: 214 },
   ],
+  consultationHistory: [
+    { date: "۱۴۰۳/۰۵/۰۱", topMajor: "مهندسی نرم‌افزار", summary: "تمرکز بر علاقه به حل مسئله و کامپیوتر." },
+    { date: "۱۴۰۳/۰۴/۱۵", topMajor: "پزشکی", summary: "بررسی علاقه به علوم زیستی و کمک به دیگران." },
+    { date: "۱۴۰۳/۰۳/۲۲", topMajor: "روانشناسی", summary: "کاوش در زمینه علاقه به درک رفتار انسان." },
+    { date: "۱۴۰۳/۰۳/۱۰", topMajor: "هنرهای دیجیتال", summary: "تحلیل نقاط قوت در خلاقیت و طراحی." },
+    { date: "۱۴۰۳/۰۲/۱۸", topMajor: "مهندسی عمران", summary: "بر اساس نمرات بالا در ریاضی و فیزیک." },
+  ]
 };
 
 const chartConfig = {
@@ -395,16 +402,41 @@ export function UserProfile() {
 
             {/* Stats Section */}
             <div className="grid gap-4 md:grid-cols-3">
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">مشاوره‌ها</CardTitle>
-                        <ClipboardList className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{dashboardData.stats.advisories}</div>
-                        <p className="text-xs text-muted-foreground">تعداد کل مشاوره‌های انجام شده</p>
-                    </CardContent>
-                </Card>
+                 <Dialog>
+                    <DialogTrigger asChild>
+                        <Card className="hover:bg-muted/50 cursor-pointer transition-colors">
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">مشاوره‌ها</CardTitle>
+                                <ClipboardList className="h-4 w-4 text-muted-foreground" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">{dashboardData.stats.advisories}</div>
+                                <p className="text-xs text-muted-foreground">تعداد کل مشاوره‌های انجام شده</p>
+                            </CardContent>
+                        </Card>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-lg">
+                        <DialogHeader>
+                            <DialogTitle>تاریخچه مشاوره‌ها</DialogTitle>
+                            <DialogDescription>
+                                در اینجا می‌توانید خلاصه‌ای از مشاوره‌های قبلی خود را مشاهده کنید.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <ScrollArea className="max-h-96 pr-4">
+                            <div className="space-y-4 py-4">
+                                {dashboardData.consultationHistory.map((item, index) => (
+                                    <div key={index} className="p-4 border rounded-lg">
+                                        <div className="flex justify-between items-center mb-2">
+                                            <p className="font-semibold text-primary">{item.topMajor}</p>
+                                            <Badge variant="secondary">{item.date}</Badge>
+                                        </div>
+                                        <p className="text-sm text-muted-foreground">{item.summary}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </ScrollArea>
+                    </DialogContent>
+                </Dialog>
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">پرسش و پاسخ</CardTitle>
