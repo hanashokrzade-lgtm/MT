@@ -2,10 +2,10 @@
   "framework": "nextjs",
   "functions": {
     "app/api/genkit/**": {
-      "maxDuration": 30
+      "maxDuration": 60
+    },
+    "src/app/**": {
+      "maxDuration": 60
     }
-  },
-  "experimental": {
-    "serverActions": true
   }
 }
