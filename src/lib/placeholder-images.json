@@ -7,6 +7,48 @@
       "imageHint": "student studying"
     },
     {
+      "id": "hero-student-2",
+      "description": "A cheerful female student holding books and smiling.",
+      "imageUrl": "https://picsum.photos/seed/hero-student-2/1200/800",
+      "imageHint": "happy student"
+    },
+    {
+      "id": "testimonial-1",
+      "description": "Portrait of a female student.",
+      "imageUrl": "https://picsum.photos/seed/testimonial-1/100/100",
+      "imageHint": "student portrait"
+    },
+    {
+      "id": "testimonial-2",
+      "description": "Portrait of a male student.",
+      "imageUrl": "https://picsum.photos/seed/testimonial-2/100/100",
+      "imageHint": "student portrait"
+    },
+    {
+      "id": "testimonial-3",
+      "description": "Portrait of a thoughtful female student.",
+      "imageUrl": "https://picsum.photos/seed/testimonial-3/100/100",
+      "imageHint": "student thinking"
+    },
+    {
+      "id": "article-1",
+      "description": "A crossroads or a path splitting in two, symbolizing choice.",
+      "imageUrl": "https://picsum.photos/seed/article-1/600/400",
+      "imageHint": "choices path"
+    },
+    {
+      "id": "article-2",
+      "description": "A futuristic city skyline or a person working with advanced technology.",
+      "imageUrl": "https://picsum.photos/seed/article-2/600/400",
+      "imageHint": "future technology"
+    },
+    {
+      "id": "article-3",
+      "description": "A heart and a brain on a scale, symbolizing the balance between passion and logic.",
+      "imageUrl": "https://picsum.photos/seed/article-3/600/400",
+      "imageHint": "passion logic"
+    },
+    {
       "id": "profile-avatar",
       "description": "A placeholder avatar image for a student's profile.",
       "imageUrl": "https://picsum.photos/seed/profile-avatar/200/200",

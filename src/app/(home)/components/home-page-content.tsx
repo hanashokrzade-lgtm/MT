@@ -3,23 +3,87 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { Sparkles } from "lucide-react";
+import { Sparkles, BrainCircuit, Target, MessagesSquare, ArrowLeft } from "lucide-react";
 import { useTabs } from "@/context/tabs-provider";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+
+const features = [
+    {
+        icon: <BrainCircuit className="h-8 w-8 text-primary" />,
+        title: "مشاوره هوشمند",
+        description: "با پاسخ به چند سوال، هوش مصنوعی ما بهترین رشته‌ها را بر اساس شخصیت، علایق و توانایی‌های شما پیشنهاد می‌دهد.",
+    },
+    {
+        icon: <Target className="h-8 w-8 text-primary" />,
+        title: "تحلیل هم‌راستایی اهداف",
+        description: "اهداف شغلی و تحصیلی خود را وارد کنید تا ببینید کدام رشته‌ها بیشترین تطابق را با آینده مورد نظر شما دارند.",
+    },
+    {
+        icon: <MessagesSquare className="h-8 w-8 text-primary" />,
+        title: "پرسش و پاسخ آنی",
+        description: "هر سوالی در مورد رشته‌ها، دانشگاه‌ها یا بازار کار دارید، از مشاور هوش مصنوعی ما بپرسید و پاسخ فوری دریافت کنید.",
+    },
+];
+
+const testimonials = [
+    {
+        id: 'testimonial-1',
+        name: "سارا احمدی",
+        major: "دانش‌آموز دوازدهم تجربی",
+        text: "این برنامه واقعاً چشم من را به روی رشته‌هایی باز کرد که هرگز به آن‌ها فکر نکرده بودم. تحلیل‌هایش بسیار دقیق و شخصی‌سازی شده بود.",
+    },
+    {
+        id: 'testimonial-2',
+        name: "علی رضایی",
+        major: "دانش‌آموز یازدهم ریاضی",
+        text: "قبلاً بین چند رشته مهندسی شک داشتم. بخش تحلیل اهداف به من کمک کرد تا با اطمینان بیشتری مهندسی کامپیوتر را انتخاب کنم.",
+    },
+    {
+        id: 'testimonial-3',
+        name: "مریم حسینی",
+        major: "فارغ‌التحصیل هنر",
+        text: "کاش وقتی دبیرستانی بودم چنین ابزاری وجود داشت! بخش پرسش و پاسخ برای رفع ابهامات و شناخت مسیر شغلی فوق‌العاده است.",
+    }
+]
+
+const articles = [
+    {
+        id: 'article-1',
+        title: "چگونه بهترین رشته تحصیلی را انتخاب کنیم؟",
+        category: "انتخاب رشته",
+        description: "یک راهنمای جامع برای دانش‌آموزانی که در ابتدای مسیر تصمیم‌گیری قرار دارند و به دنبال نقشه راه هستند.",
+    },
+    {
+        id: 'article-2',
+        title: "معرفی ۱۰ شغل پردرآمد آینده در ایران",
+        category: "بازار کار",
+        description: "با مشاغل نوظهور و پرتقاضا در ده سال آینده آشنا شوید و مسیر تحصیلی خود را هوشمندانه انتخاب کنید.",
+    },
+    {
+        id: 'article-3',
+        title: "اهمیت علاقه در مقابل بازار کار: کدام یک مهم‌تر است؟",
+        category: "مشاوره",
+        description: "بررسی تعادل بین دنبال کردن علاقه شخصی و در نظر گرفتن واقعیت‌های بازار کار برای یک انتخاب موفق.",
+    }
+];
 
 export function HomePageContent() {
     const { setActiveTab } = useTabs();
-    const heroImage = PlaceHolderImages.find(p => p.id === 'hero-student');
+    const heroImage = PlaceHolderImages.find(p => p.id === 'hero-student-2');
 
   return (
     <div className="w-full">
-      <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-card/50">
+      {/* Hero Section */}
+      <section className="w-full py-12 md:py-24 lg:py-32 bg-card/50">
         <div className="container px-4 md:px-6">
           <div className="grid gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]">
              {heroImage && (
                 <div className="relative mx-auto aspect-video overflow-hidden rounded-xl sm:w-full lg:order-last">
                     <Image
                     alt="دانش‌آموز در حال تحصیل"
-                    className="object-cover"
+                    className="object-cover rounded-xl shadow-2xl shadow-primary/10"
                     src={heroImage.imageUrl}
                     data-ai-hint={heroImage.imageHint}
                     fill
@@ -27,8 +91,8 @@ export function HomePageContent() {
                 </div>
             )}
             <div className="flex flex-col justify-center space-y-4 text-center lg:text-right">
-              <div className="space-y-2">
-                <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none font-headline text-primary">
+              <div className="space-y-4">
+                <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none font-headline text-primary">
                   آینده تحصیلی خود را هوشمندانه بسازید
                 </h1>
                 <p className="max-w-[600px] text-muted-foreground md:text-xl mx-auto lg:mx-0">
@@ -38,13 +102,173 @@ export function HomePageContent() {
               <div className="flex flex-col gap-2 min-[400px]:flex-row justify-center lg:justify-end">
                 <Button onClick={() => setActiveTab('advisor')} size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
                     <Sparkles className="ml-2 h-5 w-5" />
-                    شروع مشاوره
+                    شروع مشاوره رایگان
+                </Button>
+                 <Button onClick={() => setActiveTab('q-and-a')} size="lg" variant="outline">
+                    پرسیدن سوال
                 </Button>
               </div>
             </div>
           </div>
         </div>
       </section>
+
+      {/* Features Section */}
+      <section className="w-full py-16 md:py-24 bg-background">
+          <div className="container px-4 md:px-6">
+              <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
+                  <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl font-headline">ابزارهای شما برای یک انتخاب آگاهانه</h2>
+                  <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                      ما سه ابزار قدرتمند را در اختیار شما قرار می‌دهیم تا با اطمینان کامل مسیر آینده خود را انتخاب کنید.
+                  </p>
+              </div>
+              <div className="mx-auto grid items-start gap-8 sm:max-w-4xl sm:grid-cols-2 md:gap-12 lg:max-w-5xl lg:grid-cols-3">
+                  {features.map((feature, index) => (
+                      <Card key={index} className="bg-card/50 hover:bg-card/90 hover:-translate-y-2 transition-all duration-300">
+                          <CardHeader className="flex flex-col items-center text-center gap-4">
+                              <div className="p-4 bg-primary/10 rounded-full">{feature.icon}</div>
+                              <CardTitle>{feature.title}</CardTitle>
+                          </CardHeader>
+                          <CardContent className="text-center">
+                              <p className="text-muted-foreground">{feature.description}</p>
+                          </CardContent>
+                      </Card>
+                  ))}
+              </div>
+          </div>
+      </section>
+      
+      {/* How it works */}
+      <section className="w-full py-16 md:py-24 bg-card/50">
+        <div className="container px-4 md:px-6">
+           <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
+                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl font-headline">فقط در ۳ مرحله ساده</h2>
+                <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                    فرآیند کشف مسیر تحصیلی شما هرگز به این سادگی نبوده است.
+                </p>
+            </div>
+            <div className="relative grid gap-10 lg:grid-cols-3">
+                 <div className="absolute top-1/2 left-0 w-full h-px bg-border -translate-y-1/2 hidden lg:block"></div>
+                 <div className="absolute top-0 left-1/2 w-px h-full bg-border -translate-x-1/2 lg:hidden"></div>
+
+                <div className="relative flex flex-col items-center text-center">
+                    <div className="flex items-center justify-center h-16 w-16 rounded-full bg-primary text-primary-foreground font-bold text-2xl border-4 border-background z-10">1</div>
+                    <h3 className="mt-6 text-xl font-bold">پاسخ به سوالات</h3>
+                    <p className="mt-2 text-muted-foreground">به سوالات چندمرحله‌ای ما در مورد علایق، نمرات و اهدافتان پاسخ دهید.</p>
+                </div>
+                <div className="relative flex flex-col items-center text-center">
+                    <div className="flex items-center justify-center h-16 w-16 rounded-full bg-primary text-primary-foreground font-bold text-2xl border-4 border-background z-10">2</div>
+                    <h3 className="mt-6 text-xl font-bold">تحلیل هوشمند</h3>
+                    <p className="mt-2 text-muted-foreground">هوش مصنوعی ما پاسخ‌های شما را تحلیل کرده و لیستی از رشته‌های مناسب را پیشنهاد می‌دهد.</p>
+                </div>
+                <div className="relative flex flex-col items-center text-center">
+                    <div className="flex items-center justify-center h-16 w-16 rounded-full bg-primary text-primary-foreground font-bold text-2xl border-4 border-background z-10">3</div>
+                    <h3 className="mt-6 text-xl font-bold">دریافت نتایج</h3>
+                    <p className="mt-2 text-muted-foreground">نقاط قوت، ضعف، فرصت‌های شغلی و مسیر آینده هر رشته را به تفکیک مشاهده کنید.</p>
+                </div>
+            </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="w-full py-16 md:py-24">
+        <div className="container px-4 md:px-6">
+            <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
+                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl font-headline">صدای دانش‌آموزان مثل شما</h2>
+                <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed">
+                    ببینید دیگران چگونه از «مشاور تحصیلی من» برای پیدا کردن مسیرشان استفاده کرده‌اند.
+                </p>
+            </div>
+            <div className="grid gap-8 lg:grid-cols-3">
+                 {testimonials.map((testimonial) => {
+                     const image = PlaceHolderImages.find(p => p.id === testimonial.id);
+                     return (
+                        <Card key={testimonial.id} className="flex flex-col">
+                            <CardContent className="p-6 flex-grow">
+                                <p className="text-muted-foreground">"{testimonial.text}"</p>
+                            </CardContent>
+                            <CardHeader className="flex-row gap-4 items-center pt-0">
+                                {image && (
+                                     <Avatar>
+                                        <AvatarImage src={image.imageUrl} alt={testimonial.name} data-ai-hint={image.imageHint} />
+                                        <AvatarFallback>{testimonial.name.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                )}
+                                <div>
+                                    <h4 className="font-semibold">{testimonial.name}</h4>
+                                    <p className="text-sm text-muted-foreground">{testimonial.major}</p>
+                                </div>
+                            </CardHeader>
+                        </Card>
+                     )
+                 })}
+            </div>
+        </div>
+      </section>
+      
+      {/* Articles Section */}
+       <section className="w-full py-16 md:py-24 bg-card/50">
+        <div className="container px-4 md:px-6">
+            <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
+                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl font-headline">مقالات و راهنماها</h2>
+                <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed">
+                    دانش خود را با مقالات منتخب ما در زمینه انتخاب رشته و موفقیت تحصیلی افزایش دهید.
+                </p>
+            </div>
+            <div className="grid gap-8 lg:grid-cols-3">
+                {articles.map((article) => {
+                     const image = PlaceHolderImages.find(p => p.id === article.id);
+                     return (
+                        <Card key={article.id} className="overflow-hidden group">
+                           {image && (
+                             <div className="relative aspect-video overflow-hidden">
+                                <Image 
+                                    src={image.imageUrl} 
+                                    alt={article.title} 
+                                    data-ai-hint={image.imageHint}
+                                    fill
+                                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                />
+                             </div>
+                           )}
+                            <CardHeader>
+                                <Badge variant="secondary" className="w-fit mb-2">{article.category}</Badge>
+                                <CardTitle className="text-lg">{article.title}</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <CardDescription>{article.description}</CardDescription>
+                            </CardContent>
+                        </Card>
+                     )
+                })}
+            </div>
+        </div>
+       </section>
+
+      {/* Final CTA */}
+      <section className="w-full py-16 md:py-24">
+        <div className="container">
+            <div className="rounded-xl bg-primary/10 p-8 md:p-12 lg:p-16 border border-primary/20">
+                <div className="grid items-center gap-6 lg:grid-cols-2 lg:gap-12">
+                    <div className="space-y-4 text-center lg:text-right">
+                        <h2 className="text-3xl font-bold tracking-tighter text-primary font-headline">
+                            آماده‌اید مسیرتان را پیدا کنید؟
+                        </h2>
+                        <p className="text-foreground/80">
+                            همین حالا اولین مشاوره هوشمند خود را شروع کنید و قدم اول را برای ساختن آینده‌ای درخشان بردارید. این فرآیند سریع، ساده و کاملاً رایگان است.
+                        </p>
+                    </div>
+                    <div className="flex justify-center lg:justify-end">
+                        <Button onClick={() => setActiveTab('advisor')} size="lg" className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground text-lg py-7 px-10">
+                            شروع می‌کنم
+                            <ArrowLeft className="mr-3 h-6 w-6" />
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </section>
+
     </div>
   );
 }
