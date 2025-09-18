@@ -6,9 +6,9 @@ import { UserProfile } from "./components/user-profile";
 import { Loader2 } from "lucide-react";
 
 export default function ProfilePage() {
-    const { user, isLoading } = useAuth();
+    const { user, isAuthLoading } = useAuth();
 
-    if (isLoading) {
+    if (isAuthLoading) {
         return (
             <div className="flex justify-center items-center h-full">
                 <Loader2 className="h-12 w-12 animate-spin text-primary" />
