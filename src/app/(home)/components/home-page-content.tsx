@@ -261,13 +261,42 @@ export function HomePageContent() {
       {/* Articles Section */}
        <section className="w-full py-16 md:py-24 bg-card/50">
         <div className="container px-4 md:px-6">
-            <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0 text-center sm:text-right mb-12">
-                <div>
+            <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0 mb-12">
+                <div className="text-center sm:text-right">
                     <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl font-headline">مقالات</h2>
                     <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed">
                         دانش خود را با مقالات تولید شده توسط هوش مصنوعی افزایش دهید.
                     </p>
                 </div>
+                {articles.length > 3 && (
+                    <div className="text-center">
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button size="lg" variant="outline">
+                                    <Library className="ml-2 h-5 w-5" />
+                                    مشاهده همه مقالات
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-4xl">
+                                <DialogHeader className="text-right">
+                                    <DialogTitle className="text-2xl">آرشیو مقالات</DialogTitle>
+                                    <DialogDescription>تمام مقالات تولید شده را در اینجا مرور کنید.</DialogDescription>
+                                </DialogHeader>
+                                <ScrollArea className="max-h-[70vh] p-1">
+                                    <div className="grid gap-6 py-4 sm:grid-cols-2 lg:grid-cols-3">
+                                        {articles.map((article, index) => {
+                                            const imageId = `article-${(index % 3) + 1}`;
+                                            const image = PlaceHolderImages.find(p => p.id === imageId);
+                                            return (
+                                                <ArticleCard key={article.id} article={article} image={image} />
+                                            )
+                                        })}
+                                    </div>
+                                </ScrollArea>
+                            </DialogContent>
+                        </Dialog>
+                    </div>
+                )}
             </div>
             {isLoading ? (
                  <div className="flex justify-center items-center h-40">
@@ -290,35 +319,6 @@ export function HomePageContent() {
                              )
                         })}
                     </div>
-                    {articles.length > 3 && (
-                        <div className="text-center">
-                            <Dialog>
-                                <DialogTrigger asChild>
-                                    <Button size="lg" variant="outline">
-                                        <Library className="ml-2 h-5 w-5" />
-                                        مشاهده همه مقالات
-                                    </Button>
-                                </DialogTrigger>
-                                <DialogContent className="sm:max-w-4xl">
-                                    <DialogHeader className="text-right">
-                                        <DialogTitle className="text-2xl">آرشیو مقالات</DialogTitle>
-                                        <DialogDescription>تمام مقالات تولید شده را در اینجا مرور کنید.</DialogDescription>
-                                    </DialogHeader>
-                                    <ScrollArea className="max-h-[70vh] p-1">
-                                        <div className="grid gap-6 py-4 sm:grid-cols-2 lg:grid-cols-3">
-                                            {articles.map((article, index) => {
-                                                const imageId = `article-${(index % 3) + 1}`;
-                                                const image = PlaceHolderImages.find(p => p.id === imageId);
-                                                return (
-                                                    <ArticleCard key={article.id} article={article} image={image} />
-                                                )
-                                            })}
-                                        </div>
-                                    </ScrollArea>
-                                </DialogContent>
-                            </Dialog>
-                        </div>
-                    )}
                 </div>
             )}
         </div>
