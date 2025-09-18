@@ -472,9 +472,9 @@ export function UserProfile() {
                             <div className="space-y-4 py-4 text-right">
                                 {dashboardData.questionHistory.map((item, index) => (
                                     <div key={index} className="p-4 border rounded-lg">
-                                        <div className="flex justify-between items-center mb-2 gap-4">
-                                            <p className="font-semibold text-primary truncate flex-1">{item.question}</p>
-                                            <Badge variant="secondary">{item.date}</Badge>
+                                        <div className="flex justify-between items-start mb-2 gap-4">
+                                            <p className="font-semibold text-primary flex-1">{item.question}</p>
+                                            <Badge variant="secondary" className="flex-shrink-0">{item.date}</Badge>
                                         </div>
                                         <p className="text-sm text-muted-foreground">{item.answerSnippet}</p>
                                     </div>
