@@ -3,6 +3,8 @@ import './globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from "@/components/ui/toaster";
 import { BottomNav } from '@/components/layout/bottom-nav';
+import { TabsProvider } from '@/context/tabs-provider';
+import { TabsContainer } from '@/components/layout/tabs-container';
 
 export const metadata: Metadata = {
   title: 'مشاور تحصیلی من',
@@ -22,8 +24,12 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body className={cn("font-body antialiased min-h-screen flex flex-col h-full bg-background")}>
-        <main className="flex-grow flex flex-col pb-20">{children}</main>
-        <BottomNav />
+        <TabsProvider>
+            <main className="flex-grow flex flex-col pb-20">
+                <TabsContainer />
+            </main>
+            <BottomNav />
+        </TabsProvider>
         <Toaster />
       </body>
     </html>
