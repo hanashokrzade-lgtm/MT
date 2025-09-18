@@ -34,18 +34,18 @@ export function BottomNav() {
                 transition={{ type: 'spring', stiffness: 400, damping: 17 }}
               >
                 <div className="relative">
-                  <div className={cn(
-                      'p-3 rounded-full transition-colors',
-                      isActive ? 'bg-primary/10' : ''
-                  )}>
-                      <link.icon className="h-6 w-6" />
+                   <div className="relative p-3">
+                     {isActive && (
+                        <motion.div
+                          layoutId="active-indicator-background"
+                          className="absolute inset-0 bg-primary/10 rounded-full"
+                          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                        />
+                      )}
+                      <div className="relative z-10">
+                          <link.icon className="h-6 w-6" />
+                      </div>
                   </div>
-                  {isActive && (
-                    <motion.div
-                      layoutId="active-indicator"
-                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-1 w-8 rounded-full bg-primary"
-                    />
-                  )}
                 </div>
                 <span className="text-xs font-medium mt-1">{link.label}</span>
               </motion.button>
