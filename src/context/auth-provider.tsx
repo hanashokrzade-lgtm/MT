@@ -39,26 +39,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [auth, setAuth] = useState<Auth | null>(null);
-  const [isFirebaseInitialized, setIsFirebaseInitialized] = useState(false);
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
   useEffect(() => {
+    let unsubscribe: () => void = () => {};
     try {
         const app = getFirebaseApp();
         const authInstance = getAuth(app);
         setAuth(authInstance);
-        setIsFirebaseInitialized(true);
-        
-        // This is the primary listener for auth state changes.
-        // It will be called when the app loads, and after a redirect login.
-        const unsubscribe = onAuthStateChanged(authInstance, (currentUser) => {
+
+        unsubscribe = onAuthStateChanged(authInstance, (currentUser) => {
           setUser(currentUser);
           setIsLoading(false);
         });
-        
-        // Handle redirect result on initial load, but don't manage loading state here.
-        // `onAuthStateChanged` will handle setting loading to false.
+
         getRedirectResult(authInstance)
             .then((result) => {
                 if (result) {
@@ -77,7 +72,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 });
             });
 
-        return () => unsubscribe();
     } catch (error) {
         console.error("Firebase initialization error:", error);
         toast({
@@ -86,31 +80,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             variant: 'destructive',
         });
         setIsLoading(false);
-        setIsFirebaseInitialized(true);
     }
+    return () => unsubscribe();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const signInWithGoogle = async () => {
     if (!auth) return;
-    
-    // Do NOT set loading to true here for redirect flow, as the page navigates away.
-    // The browser's own loading indicator is sufficient.
+
     const provider = new GoogleAuthProvider();
     
     if (isMobile) {
-        // Redirect is better for mobile devices
-        await signInWithRedirect(auth, provider);
+        await signInWithRedirect(auth, provider).catch((error) => {
+            console.error("Redirect Error: ", error);
+             toast({
+                title: 'خطا در ورود',
+                description: 'هدایت به صفحه ورود گوگل با مشکل مواجه شد.',
+                variant: 'destructive',
+            });
+        });
     } else {
         // Popup is a better UX on desktop
-        setIsLoading(true); // Set loading only for popup flow
+        setIsLoading(true);
         try {
             await signInWithPopup(auth, provider);
             toast({
                 title: 'ورود موفق',
                 description: 'شما با موفقیت وارد حساب کاربری خود شدید.',
             });
-             // onAuthStateChanged will handle setting the user, and will set loading to false.
         } catch (error: any) {
             console.error("Authentication Error: ", error);
             let description = 'متاسفانه مشکلی در فرآیند ورود با گوگل پیش آمد.';
@@ -124,14 +121,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 description: description,
                 variant: 'destructive',
             });
-            setIsLoading(false); // Stop loading if popup fails
+        } finally {
+            // onAuthStateChanged will handle setting the user, but we'll stop loading here for popup flow
+            setIsLoading(false);
         }
     }
   };
 
   const signOut = async () => {
     if (!auth) return;
-    setIsLoading(true);
     try {
       await firebaseSignOut(auth);
       toast({
@@ -145,10 +143,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: 'متاسفانه مشکلی در فرآیند خروج پیش آمد.',
         variant: 'destructive',
       });
-    } finally {
-        // onAuthStateChanged will set the user to null and trigger a re-render.
-        // It will also set loading to false.
     }
+    // onAuthStateChanged will set user to null and isLoading to false
   };
 
   const value = {
@@ -158,8 +154,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signOut,
   };
 
-  // Show a loading screen until Firebase is initialized and the initial user state is determined.
-  if (!isFirebaseInitialized || isLoading) {
+  if (isLoading) {
       return (
         <div className="fixed inset-0 flex items-center justify-center bg-background z-50">
             <LoadingLogo />
