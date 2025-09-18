@@ -1,0 +1,11 @@
+{
+  "framework": "nextjs",
+  "functions": {
+    "app/api/genkit/**": {
+      "maxDuration": 30
+    }
+  },
+  "experimental": {
+    "serverActions": true
+  }
+}
