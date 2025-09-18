@@ -89,8 +89,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: description,
         variant: 'destructive',
       });
-      // If sign in fails, we should stop loading.
-      setIsLoading(false);
+    } finally {
+      // onAuthStateChanged will handle setting user and loading state
+      // but in case of a sign in error (like popup closed), we need to stop loading.
+      if (!auth.currentUser) {
+          setIsLoading(false);
+      }
     }
   };
 
@@ -122,7 +126,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signOut,
   };
 
-  if (!isFirebaseInitialized || isLoading) {
+  if (!isFirebaseInitialized || (isLoading && !user)) {
       return (
         <div className="flex h-screen w-full flex-col items-center justify-center bg-background">
             <LoadingLogo />
