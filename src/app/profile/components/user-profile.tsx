@@ -10,6 +10,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function UserProfile() {
     const { user, signOut } = useAuth();
@@ -88,12 +89,10 @@ export function UserProfile() {
                                     </Label>
                                     <Switch id="notifications" defaultChecked />
                                 </div>
-                                <div>
-                                    <Button variant="destructive" className="w-full">
-                                        <Trash2 className="ml-2 h-4 w-4" />
-                                        پاک کردن تاریخچه مشاوره‌ها
-                                    </Button>
-                                </div>
+                                <Button variant="destructive" className="w-full">
+                                    <Trash2 className="ml-2 h-4 w-4" />
+                                    پاک کردن تاریخچه مشاوره‌ها
+                                </Button>
                             </div>
                              <DialogFooter>
                                 <Button type="submit">ذخیره تغییرات</Button>
@@ -128,10 +127,74 @@ export function UserProfile() {
                                     </Label>
                                     <Switch id="2fa" />
                                 </div>
-                                <Button variant="outline" className="justify-start gap-3 text-left">
-                                     <FileText className="ml-2 h-4 w-4" />
-                                     مشاهده سیاست حفظ حریم خصوصی
-                                </Button>
+                                <Dialog>
+                                    <DialogTrigger asChild>
+                                        <Button variant="outline" className="justify-start gap-3 text-left">
+                                            <FileText className="ml-2 h-4 w-4" />
+                                            مشاهده سیاست حفظ حریم خصوصی
+                                        </Button>
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-3xl">
+                                        <DialogHeader>
+                                            <DialogTitle>سیاست حفظ حریم خصوصی</DialogTitle>
+                                            <DialogDescription>
+                                                آخرین بروزرسانی: ۲ مرداد ۱۴۰۳
+                                            </DialogDescription>
+                                        </DialogHeader>
+                                        <ScrollArea className="h-96 pr-6">
+                                            <div className="prose prose-sm dark:prose-invert text-foreground/90 leading-relaxed text-right">
+                                                <p>
+                                                    به «مشاور تحصیلی من» خوش آمدید. ما به حریم خصوصی شما احترام می‌گذاریم و متعهد به حفاظت از اطلاعات شخصی شما هستیم. این سیاست‌نامه توضیح می‌دهد که ما چگونه اطلاعات شما را جمع‌آوری، استفاده و نگهداری می‌کنیم.
+                                                </p>
+
+                                                <h4>اطلاعاتی که جمع‌آوری می‌کنیم</h4>
+                                                <ul>
+                                                    <li><strong>اطلاعات حساب کاربری:</strong> هنگام ورود با حساب گوگل، ما اطلاعاتی مانند نام، آدرس ایمیل و عکس پروفایل شما را از گوگل دریافت می‌کنیم.</li>
+                                                    <li><strong>اطلاعات مشاوره:</strong> پاسخ‌هایی که شما به سوالات مربوط به علاقه‌مندی‌ها، نمرات، نقاط قوت و ضعف، اهداف شغلی و انتظارات خانواده می‌دهید، برای ارائه پیشنهادات تحصیلی ذخیره می‌شود.</li>
+                                                    <li><strong>سوالات و پاسخ‌ها:</strong> سوالاتی که در بخش پرسش و پاسخ مطرح می‌کنید و پاسخ‌های تولید شده توسط هوش مصنوعی نیز در تاریخچه حساب شما ذخیره می‌گردد.</li>
+                                                </ul>
+
+                                                <h4>چگونه از اطلاعات شما استفاده می‌کنیم</h4>
+                                                <ul>
+                                                    <li>برای ارائه خدمات اصلی برنامه، یعنی تحلیل اطلاعات و ارائه پیشنهادات تحصیلی شخصی‌سازی شده.</li>
+                                                    <li>برای پاسخ به سوالات شما در بخش پرسش و پاسخ.</li>
+                                                    <li>برای بهبود کیفیت خدمات و مدل‌های هوش مصنوعی خود (به صورت ناشناس و تجمیعی).</li>
+                                                    <li>برای شخصی‌سازی تجربه کاربری شما در برنامه.</li>
+                                                </ul>
+
+                                                <h4>به اشتراک‌گذاری اطلاعات</h4>
+                                                <p>
+                                                    ما اطلاعات شخصی شما را با هیچ شخص یا سازمان ثالثی به اشتراک نمی‌گذاریم، نمی‌فروشیم و اجاره نمی‌دهیم، مگر در موارد زیر:
+                                                </p>
+                                                <ul>
+                                                    <li>با رضایت صریح شما.</li>
+                                                    <li>برای تبعیت از الزامات قانونی یا درخواست‌های دولتی.</li>
+                                                </ul>
+
+                                                <h4>امنیت اطلاعات</h4>
+                                                <p>
+                                                    ما از تدابیر امنیتی فنی و سازمانی مناسب برای محافظت از اطلاعات شخصی شما در برابر دسترسی غیرمجاز، افشا، تغییر یا تخریب استفاده می‌کنیم. تمام ارتباطات بین شما و سرورهای ما از طریق پروتکل امن SSL/TLS رمزنگاری می‌شود.
+                                                </p>
+
+                                                <h4>کنترل شما بر اطلاعات</h4>
+                                                <ul>
+                                                    <li>شما می‌توانید از طریق تنظیمات حساب کاربری خود، تاریخچه مشاوره‌ها و پرسش و پاسخ‌های خود را پاک کنید.</li>
+                                                    <li>شما می‌توانید در هر زمان با مراجعه به تنظیمات حساب، حساب کاربری خود و تمام داده‌های مرتبط با آن را به طور کامل حذف کنید.</li>
+                                                </ul>
+
+                                                <h4>تغییرات در این سیاست‌نامه</h4>
+                                                <p>
+                                                    ما ممکن است این سیاست حفظ حریم خصوصی را هر از چند گاهی به‌روزرسانی کنیم. در صورت ایجاد تغییرات اساسی، ما شما را از طریق برنامه مطلع خواهیم کرد.
+                                                </p>
+
+                                                <h4>تماس با ما</h4>
+                                                <p>
+                                                    اگر در مورد این سیاست حفظ حریم خصوصی سوالی دارید، لطفاً از طریق بخش "راهنما و پشتیبانی" با ما تماس بگیرید.
+                                                </p>
+                                            </div>
+                                        </ScrollArea>
+                                    </DialogContent>
+                                </Dialog>
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>
                                          <Button variant="destructive" className="w-full">
