@@ -1,61 +1,67 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+'use client';
+
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { User, Mail, Phone, LogOut } from "lucide-react";
+import { User, LogOut, Loader2 } from "lucide-react";
+import { useAuth } from "@/context/auth-provider";
 
+function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
+    return (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24px" height="24px" {...props}>
+        <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12s5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z" />
+        <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z" />
+        <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.222,0-9.519-3.536-11.088-8.264l-6.522,5.025C9.505,39.556,16.227,44,24,44z" />
+        <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C39.902,35.61,44,29.613,44,24C44,22.659,43.862,21.35,43.611,20.083z" />
+      </svg>
+    );
+  }
 
 export function ProfilePageContent() {
-    const profileImage = PlaceHolderImages.find(p => p.id === 'profile-avatar');
+    const { user, signInWithGoogle, signOut, isLoading } = useAuth();
 
     return (
-        <div className="container py-12">
-            <div className="max-w-4xl mx-auto space-y-8">
-                <Card>
-                    <CardHeader className="flex flex-col items-center text-center space-y-4">
-                        <Avatar className="w-32 h-32 border-4 border-primary">
-                            {profileImage && <AvatarImage src={profileImage.imageUrl} alt="پروفایل دانش‌آموز" data-ai-hint={profileImage.imageHint} />}
+        <Card className="w-[500px] mx-auto">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-2xl font-semibold">پروفایل</CardTitle>
+                <Button variant="destructive" onClick={signOut} disabled={isLoading}>
+                    خروج
+                    <LogOut className="mr-2 h-4 w-4" />
+                </Button>
+            </CardHeader>
+            <CardContent>
+                <div className="grid gap-4">
+                    <div className="flex items-center space-x-4">
+                        <Avatar className="h-12 w-12">
+                            {user?.photoURL && <AvatarImage src={user.photoURL} alt={user.displayName || 'User Avatar'} />}
                             <AvatarFallback>
-                                <User className="w-16 h-16" />
+                                <User className="h-8 w-8 text-muted-foreground" />
                             </AvatarFallback>
                         </Avatar>
-                        <div>
-                            <CardTitle className="text-3xl font-bold">دانش‌آموز کوشا</CardTitle>
-                            <p className="text-muted-foreground">دانش آموز سال آخر دبیرستان</p>
+                        <div className="space-y-1">
+                            <p className="text-sm font-medium leading-none">{user?.displayName || 'کاربر مهمان'}</p>
+                            <p className="text-sm text-muted-foreground">{user?.email || 'ایمیل وارد نشده'}</p>
                         </div>
-                    </CardHeader>
-                    <CardContent className="mt-4">
-                        <div className="space-y-4 text-center">
-                            <div className="flex items-center justify-center gap-4 text-muted-foreground">
-                                <Mail className="w-5 h-5"/>
-                                <span>student.koosha@example.com</span>
-                            </div>
-                            <div className="flex items-center justify-center gap-4 text-muted-foreground">
-                                <Phone className="w-5 h-5"/>
-                                <span>0912-345-6789</span>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle>تنظیمات حساب کاربری</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <Button variant="outline" className="w-full justify-start">
-                            ویرایش پروفایل
-                        </Button>
-                        <Button variant="outline" className="w-full justify-start">
-                            تغییر رمز عبور
-                        </Button>
-                        <Button variant="destructive" className="w-full justify-start">
-                            <LogOut className="ml-2 w-4 h-4"/>
-                            خروج از حساب کاربری
-                        </Button>
-                    </CardContent>
-                </Card>
-            </div>
-        </div>
+                    </div>
+                    <div className="grid gap-2">
+                        {isLoading ? (
+                            <Button variant="outline" className="w-full" disabled>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                در حال بارگذاری...
+                            </Button>
+                        ) : user ? (
+                            <p className="text-sm text-muted-foreground">
+                                شما با حساب کاربری گوگل وارد شده‌اید.
+                            </p>
+                        ) : (
+                            <Button variant="outline" className="w-full" onClick={signInWithGoogle}>
+                                <GoogleIcon className="mr-2 h-4 w-4" />
+                                ورود با گوگل
+                            </Button>
+                        )}
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
     );
 }

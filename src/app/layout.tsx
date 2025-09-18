@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { BottomNav } from '@/components/layout/bottom-nav';
 import { TabsProvider } from '@/context/tabs-provider';
 import { TabsContainer } from '@/components/layout/tabs-container';
+import { AuthProvider } from '@/context/auth-provider';
 
 export const metadata: Metadata = {
   title: 'مشاور تحصیلی من',
@@ -24,12 +25,14 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body className={cn("font-body antialiased min-h-screen flex flex-col h-full bg-background")}>
-        <TabsProvider>
-            <main className="flex-grow flex flex-col pb-24">
-                <TabsContainer />
-            </main>
-            <BottomNav />
-        </TabsProvider>
+        <AuthProvider>
+            <TabsProvider>
+                <main className="flex-grow flex flex-col pb-24">
+                    <TabsContainer />
+                </main>
+                <BottomNav />
+            </TabsProvider>
+        </AuthProvider>
         <Toaster />
       </body>
     </html>

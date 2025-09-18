@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { useTabs } from '@/context/tabs-provider';
 import { motion } from 'framer-motion';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { useAuth } from '@/context/auth-provider';
 
 const navLinks = [
   { id: 'home', label: 'خانه', icon: Home },
@@ -16,7 +16,7 @@ const navLinks = [
 
 export function BottomNav() {
   const { activeTab, setActiveTab } = useTabs();
-  const profileImage = PlaceHolderImages.find(p => p.id === 'profile-avatar');
+  const { user } = useAuth();
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 h-24 bg-transparent">
@@ -39,7 +39,7 @@ export function BottomNav() {
                     style={{ bottom: '1rem' }}
                 >
                     <Avatar className="h-full w-full border-2 border-primary/20 transition-all group-hover:border-primary/50">
-                       {profileImage && <AvatarImage src={profileImage.imageUrl} alt="پروفایل دانش‌آموز" />}
+                       {user?.photoURL && <AvatarImage src={user.photoURL} alt={user.displayName || 'User Avatar'} />}
                        <AvatarFallback>
                            <User className="h-8 w-8 text-muted-foreground" />
                        </AvatarFallback>
