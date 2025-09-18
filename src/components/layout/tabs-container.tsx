@@ -16,18 +16,21 @@ const pages: { [key: string]: React.ComponentType } = {
 
 const variants = {
   enter: (direction: number) => ({
-    x: direction > 0 ? '100%' : '-100%',
+    x: direction > 0 ? 30 : -30,
     opacity: 0,
+    scale: 0.98,
   }),
   center: {
     zIndex: 1,
     x: 0,
     opacity: 1,
+    scale: 1,
   },
   exit: (direction: number) => ({
     zIndex: 0,
-    x: direction < 0 ? '100%' : '-100%',
+    x: direction < 0 ? 30 : -30,
     opacity: 0,
+    scale: 0.98,
   }),
 };
 
@@ -37,7 +40,7 @@ export function TabsContainer() {
 
   return (
     <div className="flex-grow flex flex-col overflow-hidden relative">
-      <AnimatePresence initial={false} custom={direction}>
+      <AnimatePresence initial={false} custom={direction} mode="wait">
         <motion.div
           key={activeTab}
           custom={direction}
@@ -48,6 +51,7 @@ export function TabsContainer() {
           transition={{
             x: { type: 'spring', stiffness: 300, damping: 30 },
             opacity: { duration: 0.2 },
+            scale: { duration: 0.2 },
           }}
           className="absolute top-0 left-0 w-full h-full"
         >
