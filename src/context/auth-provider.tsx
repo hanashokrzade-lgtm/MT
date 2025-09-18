@@ -50,12 +50,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setAuth(authInstance);
         setIsFirebaseInitialized(true);
         
+        // This is the primary listener for auth state changes.
+        // It will be called when the app loads, and after a redirect login.
         const unsubscribe = onAuthStateChanged(authInstance, (currentUser) => {
           setUser(currentUser);
           setIsLoading(false);
         });
         
-        // Handle redirect result on initial load
+        // Handle redirect result on initial load, but don't manage loading state here.
+        // `onAuthStateChanged` will handle setting loading to false.
         getRedirectResult(authInstance)
             .then((result) => {
                 if (result) {
@@ -72,13 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     description: 'مشکلی در فرآیند ورود با گوگل پیش آمد.',
                     variant: 'destructive',
                 });
-            })
-            .finally(() => {
-                // This is important for when the page reloads after redirect.
-                // onAuthStateChanged will eventually set loading to false, but this makes it faster.
-                setIsLoading(false);
             });
-
 
         return () => unsubscribe();
     } catch (error) {
@@ -96,7 +93,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithGoogle = async () => {
     if (!auth) return;
-    setIsLoading(true);
+    
+    // Do NOT set loading to true here for redirect flow, as the page navigates away.
+    // The browser's own loading indicator is sufficient.
     const provider = new GoogleAuthProvider();
     
     if (isMobile) {
@@ -104,14 +103,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await signInWithRedirect(auth, provider);
     } else {
         // Popup is a better UX on desktop
+        setIsLoading(true); // Set loading only for popup flow
         try {
             await signInWithPopup(auth, provider);
             toast({
                 title: 'ورود موفق',
                 description: 'شما با موفقیت وارد حساب کاربری خود شدید.',
             });
-             // onAuthStateChanged will handle the rest, but we can optimistically stop loading
-            setIsLoading(false);
+             // onAuthStateChanged will handle setting the user, and will set loading to false.
         } catch (error: any) {
             console.error("Authentication Error: ", error);
             let description = 'متاسفانه مشکلی در فرآیند ورود با گوگل پیش آمد.';
