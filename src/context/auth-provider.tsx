@@ -4,7 +4,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut as firebaseSignOut, User, Auth } from 'firebase/auth';
 import { getApp, getApps, initializeApp, type FirebaseApp } from "firebase/app";
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import { LoadingLogo } from '@/components/layout/loading-logo';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -80,9 +80,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     } catch (error: any) {
       console.error("Authentication Error: ", error);
+      let description = 'متاسفانه مشکلی در فرآیند ورود با گوگل پیش آمد.';
+      if (error.code === 'auth/unauthorized-domain') {
+          description = 'دامنه شما برای ورود مجاز نیست. لطفاً با پشتیبانی تماس بگیرید.'
+      }
       toast({
         title: 'خطا در ورود',
-        description: 'متاسفانه مشکلی در فرآیند ورود با گوگل پیش آمد.',
+        description: description,
         variant: 'destructive',
       });
       // If sign in fails, we should stop loading.
@@ -108,7 +112,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     } finally {
       // onAuthStateChanged will handle setting the user and isLoading.
-      // No need to setIsLoading(false) here as it might cause a flicker.
     }
   };
 
@@ -119,11 +122,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signOut,
   };
 
-  if (!isFirebaseInitialized || (isLoading && !user)) {
+  if (!isFirebaseInitialized || isLoading) {
       return (
         <div className="flex h-screen w-full flex-col items-center justify-center bg-background">
-            <Loader2 className="h-12 w-12 animate-spin text-primary" />
-            <p className="mt-4 text-lg text-muted-foreground">در حال آماده‌سازی...</p>
+            <LoadingLogo />
         </div>
       )
   }
