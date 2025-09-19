@@ -25,12 +25,14 @@ export function ConstellationBackground() {
 
     let width = (canvas.width = window.innerWidth)
     let height = (canvas.height = window.innerHeight)
-    const particleCount = Math.floor(width / 15) // Increased particle density
-    const maxDistance = 180 // Increased connection distance
+    const particleCount = Math.floor(width / 10) // Increased particle density
+    const maxDistance = 200 // Increased connection distance
     const colors = [
-      'hsla(173, 70%, 45%, 0.6)', // Primary Teal
-      'hsla(200, 15%, 96%, 0.6)', // Background muted
-      'hsla(180, 5%, 65%, 0.6)', // Muted foreground
+      'hsla(173, 80%, 35%, 0.7)', // Primary Teal
+      'hsla(173, 20%, 94%, 0.7)', // Accent
+      'hsla(180, 8%, 25%, 0.7)',  // Foreground
+      'hsla(260, 60%, 60%, 0.6)', // A nice purple
+      'hsla(320, 60%, 60%, 0.6)', // A soft pink
     ];
 
     const init = () => {
@@ -39,8 +41,8 @@ export function ConstellationBackground() {
         particlesRef.current.push({
           x: Math.random() * width,
           y: Math.random() * height,
-          vx: (Math.random() - 0.5) * 0.3,
-          vy: (Math.random() - 0.5) * 0.3,
+          vx: (Math.random() - 0.5) * 0.5, // Increased speed
+          vy: (Math.random() - 0.5) * 0.5, // Increased speed
           radius: Math.random() * 1.5 + 1,
           color: colors[Math.floor(Math.random() * colors.length)],
         })
@@ -75,9 +77,9 @@ export function ConstellationBackground() {
             ctx.beginPath()
             ctx.moveTo(p1.x, p1.y)
             ctx.lineTo(p2.x, p2.y)
-            const lineColor = p1.color.replace(/, 0.6\)$/, `, ${0.7 - distance / maxDistance})`)
+            const lineColor = p1.color.replace(/, \d\.\d\)$/, `, ${0.7 - distance / maxDistance})`)
             ctx.strokeStyle = lineColor
-            ctx.lineWidth = 0.4
+            ctx.lineWidth = 0.3
             ctx.stroke()
           }
         }
