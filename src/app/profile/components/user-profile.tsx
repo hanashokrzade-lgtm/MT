@@ -19,6 +19,8 @@ import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 import { useTabs } from "@/context/tabs-provider";
+import { useTheme } from "next-themes";
+import { cn } from "@/lib/utils";
 
 // Mock Data for the dashboard - In a real app, this would come from state or API
 const dashboardData = {
@@ -62,60 +64,81 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-const SettingsDialog = () => (
-    <DialogContent className="sm:max-w-[425px] glass-card">
-        <DialogHeader className="text-right">
-            <DialogTitle>تنظیمات کلی</DialogTitle>
-            <DialogDescription>
-                تنظیمات مربوط به ظاهر برنامه، داده‌ها و اعلان‌ها را مدیریت کنید.
-            </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-6 py-4">
-            <div className="space-y-4">
-                <Label>حالت نمایش</Label>
-                <RadioGroup defaultValue="dark" className="grid grid-cols-3 gap-4">
-                    <div>
-                        <RadioGroupItem value="light" id="light" className="peer sr-only" />
-                        <Label htmlFor="light" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
+const SettingsDialog = () => {
+    const { theme, setTheme, resolvedTheme } = useTheme();
+    // Use resolvedTheme for initial default value to handle 'system'
+    const currentTheme = theme === 'system' ? resolvedTheme : theme;
+
+    return (
+        <DialogContent className="sm:max-w-[425px] glass-card">
+            <DialogHeader className="text-right">
+                <DialogTitle>تنظیمات کلی</DialogTitle>
+                <DialogDescription>
+                    تنظیمات مربوط به ظاهر برنامه، داده‌ها و اعلان‌ها را مدیریت کنید.
+                </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-6 py-4">
+                <div className="space-y-4">
+                    <Label>حالت نمایش</Label>
+                    <RadioGroup 
+                        value={theme}
+                        onValueChange={setTheme}
+                        className="grid grid-cols-3 gap-4"
+                    >
+                        <Label
+                            htmlFor="light"
+                            className={cn("flex flex-col items-center justify-between rounded-md border-2 p-4 cursor-pointer",
+                                currentTheme === 'light' ? 'border-primary bg-primary/10' : 'border-muted bg-popover hover:bg-accent hover:text-accent-foreground'
+                            )}
+                        >
+                            <RadioGroupItem value="light" id="light" className="peer sr-only" />
                             <Sun className="mb-3 h-6 w-6" />
                             روشن
                         </Label>
-                    </div>
-                    <div>
-                        <RadioGroupItem value="dark" id="dark" className="peer sr-only" />
-                        <Label htmlFor="dark" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
+                         <Label
+                            htmlFor="dark"
+                            className={cn("flex flex-col items-center justify-between rounded-md border-2 p-4 cursor-pointer",
+                                currentTheme === 'dark' ? 'border-primary bg-primary/10' : 'border-muted bg-popover hover:bg-accent hover:text-accent-foreground'
+                            )}
+                        >
+                            <RadioGroupItem value="dark" id="dark" className="peer sr-only" />
                             <Moon className="mb-3 h-6 w-6" />
                             تیره
                         </Label>
-                    </div>
-                        <div>
-                        <RadioGroupItem value="system" id="system" className="peer sr-only" />
-                        <Label htmlFor="system" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
+                        <Label
+                            htmlFor="system"
+                            className={cn("flex flex-col items-center justify-between rounded-md border-2 p-4 cursor-pointer",
+                                theme === 'system' ? 'border-primary bg-primary/10' : 'border-muted bg-popover hover:bg-accent hover:text-accent-foreground'
+                            )}
+                        >
+                            <RadioGroupItem value="system" id="system" className="peer sr-only" />
                             <Laptop className="mb-3 h-6 w-6" />
                             سیستم
                         </Label>
-                    </div>
-                </RadioGroup>
+                    </RadioGroup>
+                </div>
+                <div className="flex items-center justify-between space-x-2 rtl:space-x-reverse rounded-lg border p-4">
+                    <Label htmlFor="notifications" className="flex flex-col space-y-1 text-right">
+                        <span>اعلان‌ها</span>
+                        <span className="font-normal text-sm text-muted-foreground">
+                            دریافت اعلان برای پیشنهادهای جدید.
+                        </span>
+                    </Label>
+                    <Switch id="notifications" defaultChecked />
+                </div>
+                <Button variant="destructive" className="w-full">
+                    <Trash2 className="ml-2 h-4 w-4" />
+                    پاک کردن تاریخچه مشاوره‌ها
+                </Button>
             </div>
-            <div className="flex items-center justify-between space-x-2 rtl:space-x-reverse rounded-lg border p-4">
-                <Label htmlFor="notifications" className="flex flex-col space-y-1 text-right">
-                    <span>اعلان‌ها</span>
-                    <span className="font-normal text-sm text-muted-foreground">
-                        دریافت اعلان برای پیشنهادهای جدید.
-                    </span>
-                </Label>
-                <Switch id="notifications" defaultChecked />
-            </div>
-            <Button variant="destructive" className="w-full">
-                <Trash2 className="ml-2 h-4 w-4" />
-                پاک کردن تاریخچه مشاوره‌ها
-            </Button>
-        </div>
             <DialogFooter>
-            <Button type="submit">ذخیره تغییرات</Button>
-        </DialogFooter>
-    </DialogContent>
-);
+                <DialogClose asChild>
+                    <Button type="button" variant="secondary">بستن</Button>
+                </DialogClose>
+            </DialogFooter>
+        </DialogContent>
+    );
+};
 
 const PrivacyDialog = () => (
     <DialogContent className="sm:max-w-[425px] glass-card">
@@ -372,9 +395,7 @@ export function UserProfile() {
                             <Dialog>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <DialogTrigger asChild>
-                                            <Button variant="ghost" size="icon"><Settings className="h-5 w-5" /></Button>
-                                        </DialogTrigger>
+                                        <Button variant="ghost" size="icon"><Settings className="h-5 w-5" /></Button>
                                     </TooltipTrigger>
                                     <TooltipContent><p>تنظیمات</p></TooltipContent>
                                 </Tooltip>
@@ -383,9 +404,7 @@ export function UserProfile() {
                             <Dialog>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <DialogTrigger asChild>
-                                            <Button variant="ghost" size="icon"><ShieldCheck className="h-5 w-5" /></Button>
-                                        </DialogTrigger>
+                                        <Button variant="ghost" size="icon"><ShieldCheck className="h-5 w-5" /></Button>
                                     </TooltipTrigger>
                                     <TooltipContent><p>حریم خصوصی</p></TooltipContent>
                                 </Tooltip>
@@ -394,9 +413,7 @@ export function UserProfile() {
                             <Dialog>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <DialogTrigger asChild>
-                                            <Button variant="ghost" size="icon"><HelpCircle className="h-5 w-5" /></Button>
-                                        </DialogTrigger>
+                                        <Button variant="ghost" size="icon"><HelpCircle className="h-5 w-5" /></Button>
                                     </TooltipTrigger>
                                     <TooltipContent><p>راهنما</p></TooltipContent>
                                 </Tooltip>

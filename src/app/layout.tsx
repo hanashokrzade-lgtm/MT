@@ -7,6 +7,7 @@ import { TabsProvider } from '@/context/tabs-provider';
 import { TabsContainer } from '@/components/layout/tabs-container';
 import { AuthProvider } from '@/context/auth-provider';
 import { ConstellationBackground } from '@/components/layout/constellation-background';
+import { ThemeProvider } from '@/context/theme-provider';
 
 export const metadata: Metadata = {
   title: 'مشاور تحصیلی من',
@@ -19,7 +20,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fa" dir="rtl" className="h-full dark">
+    <html lang="fa" dir="rtl" className="h-full" suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -30,16 +31,23 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body className={cn("font-body antialiased min-h-screen flex flex-col h-full bg-[#030712] relative")}>
-        <ConstellationBackground />
-        <AuthProvider>
-            <TabsProvider>
-                <main className="flex-grow flex flex-col pb-24 z-10 bg-transparent">
-                    <TabsContainer />
-                </main>
-                <BottomNav />
-            </TabsProvider>
-        </AuthProvider>
-        <Toaster />
+        <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+        >
+            <ConstellationBackground />
+            <AuthProvider>
+                <TabsProvider>
+                    <main className="flex-grow flex flex-col pb-24 z-10 bg-transparent">
+                        <TabsContainer />
+                    </main>
+                    <BottomNav />
+                </TabsProvider>
+            </AuthProvider>
+            <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );
