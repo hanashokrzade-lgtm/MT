@@ -23,6 +23,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 
 const qaSchema = z.object({
   question: z.string().min(2, { message: 'لطفاً سوال خود را با حداقل ۲ کاراکتر وارد کنید.' }),
@@ -291,7 +292,7 @@ export function QaForm() {
   
   return (
     <div className="flex flex-col h-full relative">
-        <ScrollArea className="flex-grow p-4 pb-32" ref={scrollAreaRef}>
+        <ScrollArea className="flex-grow p-4 pb-48" ref={scrollAreaRef}>
             <div className="space-y-6 max-w-4xl mx-auto">
                 {messages.map((message, index) => (
                     <div key={index} className={`flex items-start gap-3 ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -359,69 +360,94 @@ export function QaForm() {
                 )}
             </div>
         </ScrollArea>
-        <div className="absolute bottom-16 left-0 right-0 p-4 z-10 pointer-events-none">
-             <Card className="max-w-4xl mx-auto glass-card pointer-events-auto">
-                <CardContent className="p-2">
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="flex items-center gap-2">
-                    <Button 
-                      type="button"
-                      onMouseDown={handleStartRecording}
-                      onMouseUp={handleStopRecording}
-                      onMouseLeave={handleStopRecording}
-                      onTouchStart={handleStartRecording}
-                      onTouchEnd={handleStopRecording}
-                      size="icon" 
-                      variant="ghost" 
-                      className={`w-12 h-12 rounded-full flex-shrink-0 transition-colors ${
-                        isRecording ? 'bg-red-500/20 text-red-500 hover:bg-red-500/30' : 'text-primary/80 hover:text-primary'
-                      }`}
-                      disabled={loading}
-                      title={isRecording ? 'در حال ضبط...' : 'برای صحبت کردن نگه دارید'}
-                    >
-                        {isRecording ? <Mic className="h-6 w-6 animate-pulse" /> : <Mic className="h-6 w-6" />}
-                        <span className="sr-only">{isRecording ? 'در حال ضبط...' : 'برای صحبت کردن نگه دارید'}</span>
-                    </Button>
-                    <FormField
-                        control={form.control}
-                        name="question"
-                        render={({ field }) => (
-                        <FormItem className="flex-grow">
-                            <FormControl>
-                            <Textarea
-                                placeholder={isRecording ? 'در حال شنیدن...' : 'سوال خود را اینجا بنویسید یا با میکروفون بپرسید...'}
-                                rows={1}
-                                className={cn(
-                                    "resize-none border-0 shadow-none focus-visible:ring-0 min-h-0 h-auto py-3 bg-transparent text-sm",
-                                    "max-h-24 overflow-y-auto"
-                                )}
-                                {...field}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter' && !e.shiftKey) {
-                                        e.preventDefault();
-                                        if (form.getValues('question').trim().length >= 2) {
-                                            form.handleSubmit(onSubmit)();
-                                        }
-                                    }
-                                }}
-                            />
-                            </FormControl>
-                            <FormMessage className="absolute bottom-full mb-2" />
-                        </FormItem>
-                        )}
+        <div className="absolute bottom-0 left-0 right-0 p-4 z-10 pointer-events-none">
+            <div className="max-w-4xl mx-auto flex flex-col items-center gap-4">
+                <motion.button
+                    type="button"
+                    onMouseDown={handleStartRecording}
+                    onMouseUp={handleStopRecording}
+                    onMouseLeave={handleStopRecording}
+                    onTouchStart={handleStartRecording}
+                    onTouchEnd={handleStopRecording}
+                    disabled={loading}
+                    title={isRecording ? 'در حال ضبط...' : 'برای صحبت کردن نگه دارید'}
+                    className={cn(
+                        "pointer-events-auto w-16 h-16 rounded-full flex-shrink-0 transition-all duration-300 flex items-center justify-center relative shadow-lg",
+                        isRecording 
+                            ? 'bg-red-500/20 text-red-500 scale-110 shadow-red-500/30 shadow-[0_0_20px]' 
+                            : 'bg-primary/20 text-primary shadow-primary/30'
+                    )}
+                    animate={{ scale: isRecording ? 1.1 : 1 }}
+                    whileTap={{ scale: 0.95 }}
+                >
+                    <motion.div
+                         className="absolute inset-0 rounded-full"
+                         style={{
+                            boxShadow: `0 0 0px 0px hsl(var(--primary) / 0.5)`,
+                         }}
+                         animate={{
+                            scale: [1, 1.6],
+                            opacity: [1, 0],
+                            boxShadow: `0 0 25px 8px hsl(var(--primary) / 0)`
+                         }}
+                         transition={{
+                             duration: 1.5,
+                             repeat: Infinity,
+                             repeatType: 'loop',
+                             ease: 'easeOut'
+                         }}
                     />
-                    <Button type="submit" disabled={loading || form.watch('question').trim().length < 2} size="icon" className="w-12 h-12 rounded-full flex-shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground">
-                        {loading ? (
-                            <Loader2 className="h-6 w-6 animate-spin" />
-                        ) : (
-                            <Send className="h-6 w-6" />
-                        )}
-                        <span className="sr-only">ارسال</span>
-                    </Button>
-                    </form>
-                </Form>
-                </CardContent>
-            </Card>
+                    <div className="relative z-10">
+                        <Mic className="h-8 w-8" />
+                    </div>
+                    <span className="sr-only">{isRecording ? 'در حال ضبط...' : 'برای صحبت کردن نگه دارید'}</span>
+                </motion.button>
+                <Card className="w-full glass-card pointer-events-auto">
+                    <CardContent className="p-2">
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="flex items-center gap-2">
+                        
+                        <FormField
+                            control={form.control}
+                            name="question"
+                            render={({ field }) => (
+                            <FormItem className="flex-grow">
+                                <FormControl>
+                                <Textarea
+                                    placeholder={isRecording ? 'در حال شنیدن...' : 'سوال خود را اینجا بنویسید...'}
+                                    rows={1}
+                                    className={cn(
+                                        "resize-none border-0 shadow-none focus-visible:ring-0 min-h-0 h-auto py-3 bg-transparent text-sm",
+                                        "max-h-24 overflow-y-auto"
+                                    )}
+                                    {...field}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && !e.shiftKey) {
+                                            e.preventDefault();
+                                            if (form.getValues('question').trim().length >= 2) {
+                                                form.handleSubmit(onSubmit)();
+                                            }
+                                        }
+                                    }}
+                                />
+                                </FormControl>
+                                <FormMessage className="absolute bottom-full mb-2" />
+                            </FormItem>
+                            )}
+                        />
+                        <Button type="submit" disabled={loading || form.watch('question').trim().length < 2} size="icon" className="w-12 h-12 rounded-full flex-shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground">
+                            {loading ? (
+                                <Loader2 className="h-6 w-6 animate-spin" />
+                            ) : (
+                                <Send className="h-6 w-6" />
+                            )}
+                            <span className="sr-only">ارسال</span>
+                        </Button>
+                        </form>
+                    </Form>
+                    </CardContent>
+                </Card>
+            </div>
         </div>
     </div>
   );
