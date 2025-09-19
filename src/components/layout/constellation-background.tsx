@@ -25,12 +25,12 @@ export function ConstellationBackground() {
 
     let width = (canvas.width = window.innerWidth)
     let height = (canvas.height = window.innerHeight)
-    const particleCount = Math.floor(width / 20)
-    const maxDistance = 150
+    const particleCount = Math.floor(width / 15) // Increased particle density
+    const maxDistance = 180 // Increased connection distance
     const colors = [
-      'hsla(142, 76%, 50%, 0.6)', // Primary green
-      'hsla(215, 50%, 60%, 0.6)', // Muted blue
-      'hsla(260, 50%, 65%, 0.6)', // Soft purple
+      'hsla(173, 70%, 45%, 0.6)', // Primary Teal
+      'hsla(200, 15%, 96%, 0.6)', // Background muted
+      'hsla(180, 5%, 65%, 0.6)', // Muted foreground
     ];
 
     const init = () => {
@@ -39,8 +39,8 @@ export function ConstellationBackground() {
         particlesRef.current.push({
           x: Math.random() * width,
           y: Math.random() * height,
-          vx: (Math.random() - 0.5) * 0.4,
-          vy: (Math.random() - 0.5) * 0.4,
+          vx: (Math.random() - 0.5) * 0.3,
+          vy: (Math.random() - 0.5) * 0.3,
           radius: Math.random() * 1.5 + 1,
           color: colors[Math.floor(Math.random() * colors.length)],
         })
@@ -75,10 +75,9 @@ export function ConstellationBackground() {
             ctx.beginPath()
             ctx.moveTo(p1.x, p1.y)
             ctx.lineTo(p2.x, p2.y)
-            // Use the color of the first particle for the line
-            const lineColor = p1.color.replace(/, 0.6\)$/, `, ${0.8 - distance / maxDistance})`)
+            const lineColor = p1.color.replace(/, 0.6\)$/, `, ${0.7 - distance / maxDistance})`)
             ctx.strokeStyle = lineColor
-            ctx.lineWidth = 0.5
+            ctx.lineWidth = 0.4
             ctx.stroke()
           }
         }
@@ -109,7 +108,7 @@ export function ConstellationBackground() {
   return (
     <canvas
       ref={canvasRef}
-      className="absolute top-0 left-0 w-full h-full -z-10"
+      className="absolute top-0 left-0 w-full h-full -z-10 opacity-70"
     />
   )
 }
