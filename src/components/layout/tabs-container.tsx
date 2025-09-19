@@ -41,7 +41,7 @@ export function TabsContainer() {
   const PageComponent = pages[activeTab];
 
   return (
-    <div className="relative flex-grow flex flex-col overflow-hidden">
+    <div className="relative flex-grow flex flex-col overflow-hidden pb-24">
       <AnimatePresence initial={false} custom={direction} mode="wait">
         <motion.div
           key={activeTab}
@@ -65,3 +65,5 @@ export function TabsContainer() {
     </div>
   );
 }
+
+    

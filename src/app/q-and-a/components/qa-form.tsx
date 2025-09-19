@@ -291,8 +291,8 @@ export function QaForm() {
   };
   
   return (
-    <div className="flex flex-col h-full relative">
-        <ScrollArea className="flex-grow p-4 pb-56" ref={scrollAreaRef}>
+    <div className="flex flex-col h-full">
+        <ScrollArea className="flex-grow p-4" ref={scrollAreaRef}>
             <div className="space-y-6 max-w-4xl mx-auto">
                 {messages.map((message, index) => (
                     <div key={index} className={`flex items-start gap-3 ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -360,7 +360,7 @@ export function QaForm() {
                 )}
             </div>
         </ScrollArea>
-        <div className="absolute bottom-0 left-0 right-0 p-4 z-10 pointer-events-none">
+        <div className="p-4 z-10">
             <div className="max-w-4xl mx-auto flex flex-col items-center gap-4">
                 <motion.button
                     type="button"
@@ -402,7 +402,7 @@ export function QaForm() {
                     </div>
                     <span className="sr-only">{isRecording ? 'در حال ضبط...' : 'برای صحبت کردن نگه دارید'}</span>
                 </motion.button>
-                <Card className="w-full glass-card pointer-events-auto">
+                <Card className="w-full glass-card">
                     <CardContent className="p-2">
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="flex items-center gap-2">
@@ -452,3 +452,5 @@ export function QaForm() {
     </div>
   );
 }
+
+    

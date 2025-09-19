@@ -40,7 +40,7 @@ export default function RootLayout({
           <ConstellationBackground />
             <AuthProvider>
                 <TabsProvider>
-                    <main className="flex-grow flex flex-col pb-24 z-10 bg-transparent">
+                    <main className="flex-grow flex flex-col z-10 bg-transparent">
                         <TabsContainer />
                     </main>
                     <BottomNav />
@@ -52,3 +52,5 @@ export default function RootLayout({
     </html>
   );
 }
+
+    
