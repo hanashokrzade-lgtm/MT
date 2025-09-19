@@ -57,13 +57,14 @@ function MissingConfigError() {
   const [hasCopied, setHasCopied] = useState(false);
 
   const envVars = `
-NEXT_PUBLIC_FIREBASE_API_KEY=${firebaseConfig.apiKey || 'YOUR_API_KEY'}
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=${firebaseConfig.authDomain || 'YOUR_AUTH_DOMAIN'}
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=${firebaseConfig.projectId || 'YOUR_PROJECT_ID'}
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=${firebaseConfig.storageBucket || 'YOUR_STORAGE_BUCKET'}
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${firebaseConfig.messagingSenderId || 'YOUR_MESSAGING_SENDER_ID'}
-NEXT_PUBLIC_FIREBASE_APP_ID=${firebaseConfig.appId || 'YOUR_APP_ID'}
-NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=${firebaseConfig.measurementId || 'YOUR_MEASUREMENT_ID'}
+GEMINI_API_KEY=AIzaSyB_x6BoZ2_gWGpWIDodR3I6kq9RslTn3Bo
+NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyD6bPwUGV-CSAglHG6rUgrMg7KdEb9NBrY
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=studio-7643117538-ce531.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=studio-7643117538-ce531
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=studio-7643117538-ce531.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=1015243920281
+NEXT_PUBLIC_FIREBASE_APP_ID=1:1015243920281:web:d3f61595aa3e65c57e7908
+NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=
   `.trim();
 
   const copyToClipboard = () => {
@@ -96,7 +97,7 @@ NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=${firebaseConfig.measurementId || 'YOUR_MEAS
             <ol className="list-decimal list-inside text-sm text-muted-foreground space-y-1">
               <li>مقادیر زیر را با کلیک بر روی دکمه "کپی" کپی کنید.</li>
               <li>به داشبورد پروژه خود در Vercel بروید.</li>
-              <li>به بخش <code className="bg-muted p-1 rounded-sm">Settings &gt; Environment Variables</code> بروید.</li>
+              <li>به بخش <code className="bg-muted p-1 rounded-sm">Settings > Environment Variables</code> بروید.</li>
               <li>مقادیر کپی شده را در آنجا پیست کنید و ذخیره نمایید.</li>
               <li>پروژه خود را دوباره مستقر کنید (Redeploy).</li>
             </ol>
@@ -127,7 +128,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // This check is crucial. If the apiKey is missing, it means the env vars are not set.
-    if (!firebaseConfig.apiKey) {
+    if (!firebaseConfig.apiKey || firebaseConfig.apiKey === 'YOUR_API_KEY') {
         console.error("Firebase config is missing. Environment variables are likely not set.");
         setConfigError(true);
         setIsAuthLoading(false);
@@ -207,11 +208,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
-        await updateProfile(userCredential.user, { displayName: name });
-        // Manually refetch the user to get the updated profile
-        await userCredential.user.reload();
-        // Update the local user state
-        setUser(auth.currentUser);
+        if (auth.currentUser) {
+            await updateProfile(auth.currentUser, { displayName: name });
+            // Manually refetch the user to get the updated profile
+            await auth.currentUser.reload();
+            // Update the local user state
+            setUser(auth.currentUser);
+        }
         toast({
             title: "ثبت‌نام موفق",
             description: "حساب کاربری شما با موفقیت ایجاد شد و وارد شدید.",
