@@ -59,12 +59,14 @@ export function ConstellationBackground() {
     const colors = [
         `hsl(${h}, ${s}%, ${l}%)`,
         `hsl(${h}, ${s - 10}%, ${l + 10}%)`,
-        `hsl(${h + 20}, ${s - 5}%, ${l + 5}%)`,
-        `hsl(${h - 20}, ${s}%, ${l}%)`,
+        `hsl(${h + 40}, ${s}%, ${l + 5}%)`,
+        `hsl(${h - 30}, ${s - 5}%, ${l - 5}%)`,
+        `hsl(${h + 60}, ${s - 15}%, ${l}%)`,
+        `hsl(${h - 60}, ${s}%, ${l + 10}%)`,
     ];
     
     const blobs: Blob[] = []
-    const blobCount = 4
+    const blobCount = 6
 
     const init = () => {
       blobs.length = 0
