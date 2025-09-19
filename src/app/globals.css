@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    --background: 224 71.4% 4.1%;
+    --background: 224 71.4% 4.1% / 0;
     --foreground: 210 20% 98%;
     --card: 224 71.4% 10%;
     --card-foreground: 210 20% 98%;
@@ -27,7 +27,7 @@
   }
 
   .dark {
-    --background: 224 71.4% 4.1%;
+    --background: 224 71.4% 4.1% / 0;
     --foreground: 210 20% 98%;
     --card: 224 71.4% 10%;
     --card-foreground: 210 20% 98%;
@@ -64,4 +64,8 @@
 
 .glass-nav {
      @apply bg-card/60 border-t border-border/20 backdrop-blur-xl;
+}
+
+[data-radix-popper-content-wrapper] {
+  @apply bg-popover/80 backdrop-blur-xl;
 }
