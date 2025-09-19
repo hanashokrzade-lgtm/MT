@@ -36,27 +36,39 @@ export function BottomNav() {
                 <motion.button
                     onClick={() => setActiveTab('profile')}
                     whileTap={{ scale: 0.95 }}
-                    animate={{ scale: [1, 1.05, 1] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-                    className={cn(
-                        "group relative flex h-20 w-20 flex-col items-center justify-center rounded-full border-4 border-background bg-card p-1 shadow-lg transition-all duration-300 hover:bg-card/80",
-                        isProfileActive && "shadow-primary/30 shadow-[0_0_20px]"
-                    )}
+                    className="group relative flex h-20 w-20 flex-col items-center justify-center"
                     style={{ bottom: '1rem' }}
                 >
-                    <Avatar className="h-full w-full border-2 border-primary/20 transition-all group-hover:border-primary/50">
-                       {user?.photoURL && <AvatarImage src={user.photoURL} alt={user.displayName || 'User Avatar'} />}
-                       <AvatarFallback>
-                           <User className="h-8 w-8 text-muted-foreground" />
-                       </AvatarFallback>
-                    </Avatar>
-                     {isProfileActive && (
-                        <motion.div
-                        layoutId="active-indicator-background"
-                        className="absolute inset-0 z-[-1] rounded-full border-2 border-primary bg-primary/20"
-                        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                        />
-                    )}
+                    {/* Pulsing wave animation */}
+                    <motion.div 
+                        className="absolute inset-0 rounded-full bg-card/70"
+                        animate={{ scale: [1, 1.4], opacity: [0.6, 0] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "easeOut", delay: 0 }}
+                    />
+                    <motion.div 
+                        className="absolute inset-0 rounded-full bg-card/70"
+                        animate={{ scale: [1, 1.4], opacity: [0.6, 0] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "easeOut", delay: 1 }}
+                    />
+
+                    <div className={cn(
+                        "relative flex h-full w-full items-center justify-center rounded-full border-4 border-background bg-card p-1 shadow-lg transition-all duration-300 group-hover:bg-card/80",
+                        isProfileActive && "shadow-primary/30 shadow-[0_0_20px]"
+                    )}>
+                        <Avatar className="h-full w-full border-2 border-primary/20 transition-all group-hover:border-primary/50">
+                           {user?.photoURL && <AvatarImage src={user.photoURL} alt={user.displayName || 'User Avatar'} />}
+                           <AvatarFallback>
+                               <User className="h-8 w-8 text-muted-foreground" />
+                           </AvatarFallback>
+                        </Avatar>
+                         {isProfileActive && (
+                            <motion.div
+                            layoutId="active-indicator-background"
+                            className="absolute inset-0 z-[-1] rounded-full border-2 border-primary bg-primary/20"
+                            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                            />
+                        )}
+                    </div>
                 </motion.button>
             </div>
 
