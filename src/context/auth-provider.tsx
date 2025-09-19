@@ -56,15 +56,16 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 function MissingConfigError() {
   const [hasCopied, setHasCopied] = useState(false);
 
+  // Hardcoding the values obtained from the tool call to ensure they are displayed.
   const envVars = `
-GEMINI_API_KEY=AIzaSyB_x6BoZ2_gWGpWIDodR3I6kq9RslTn3Bo
-NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyD6bPwUGV-CSAglHG6rUgrMg7KdEb9NBrY
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=studio-7643117538-ce531.firebaseapp.com
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=studio-7643117538-ce531
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=studio-7643117538-ce531.appspot.com
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=1015243920281
-NEXT_PUBLIC_FIREBASE_APP_ID=1:1015243920281:web:d3f61595aa3e65c57e7908
-NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=
+GEMINI_API_KEY="AIzaSyB_x6BoZ2_gWGpWIDodR3I6kq9RslTn3Bo"
+NEXT_PUBLIC_FIREBASE_API_KEY="AIzaSyD6bPwUGV-CSAglHG6rUgrMg7KdEb9NBrY"
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="studio-7643117538-ce531.firebaseapp.com"
+NEXT_PUBLIC_FIREBASE_PROJECT_ID="studio-7643117538-ce531"
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET="studio-7643117538-ce531.appspot.com"
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="1015243920281"
+NEXT_PUBLIC_FIREBASE_APP_ID="1:1015243920281:web:d3f61595aa3e65c57e7908"
+NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=""
   `.trim();
 
   const copyToClipboard = () => {
@@ -128,7 +129,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // This check is crucial. If the apiKey is missing, it means the env vars are not set.
-    if (!firebaseConfig.apiKey || firebaseConfig.apiKey === 'YOUR_API_KEY') {
+    if (!firebaseConfig.apiKey || firebaseConfig.apiKey.includes('YOUR_API_KEY')) {
         console.error("Firebase config is missing. Environment variables are likely not set.");
         setConfigError(true);
         setIsAuthLoading(false);
@@ -152,6 +153,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         let description = "مشکلی پیش آمده است. لطفاً دوباره تلاش کنید.";
 
         switch (error.code) {
+            case 'auth/unauthorized-domain':
+                title = "دامنه غیرمجاز";
+                description = "دامنه این سایت در لیست دامنه‌های مجاز Firebase ثبت نشده است. لطفاً آن را در کنسول Firebase اضافه کنید.";
+                break;
             case 'auth/invalid-credential':
             case 'auth/user-not-found':
             case 'auth/wrong-password':
@@ -173,8 +178,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             case 'auth/popup-closed-by-user':
                 title = "پنجره ورود بسته شد";
                 description = "شما پنجره ورود با گوگل را بستید. لطفاً دوباره تلاش کنید.";
-                toast({ title, description });
-                return; // Don't show a destructive toast for this
+                toast({ title, description }); // Don't show a destructive toast for this one
+                return; 
             default:
                 description = `یک خطای ناشناخته رخ داد: ${error.message}`;
         }
