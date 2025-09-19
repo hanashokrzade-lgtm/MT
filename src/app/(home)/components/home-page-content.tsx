@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { Sparkles, BrainCircuit, Target, MessagesSquare, ArrowLeft, Loader2, FileText, Library, Volume2, Pause, ChevronDown } from "lucide-react";
+import { Sparkles, BrainCircuit, Target, MessagesSquare, ArrowLeft, Loader2, FileText, Library, Volume2, Pause } from "lucide-react";
 import { useTabs } from "@/context/tabs-provider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -186,7 +186,7 @@ function TestimonialsSection() {
 
         setAudioLoading(true);
         try {
-            const script = testimonials.map(t => `${t.speakerId}: ${t.name} گفت: ${t.text}`).join(' ');
+            const script = testimonials.map(t => `${t.speakerId}: ${t.text}`).join(' ');
             const speakers = testimonials.map(t => ({ speaker: t.speakerId, voice: t.voice as "Algenib" | "Achernar" | "Sirius" | "Vega" }));
             
             const response = await generateMultivoiceAudio({ speakers, script });
@@ -559,3 +559,5 @@ export function HomePageContent() {
     </div>
   );
 }
+
+    
