@@ -13,7 +13,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ConstellationBackground } from "@/components/layout/constellation-background";
 
 
 const features = [
@@ -128,7 +127,6 @@ export function HomePageContent() {
 
   return (
     <div className="w-full relative">
-      <ConstellationBackground />
       {/* Hero Section */}
       <section className="w-full py-12 md:py-24 lg:py-32 relative">
         <div className="container px-4 md:px-6">
