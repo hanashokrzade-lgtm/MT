@@ -15,7 +15,7 @@ import { DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/c
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { generateMultivoiceAudio } from "@/ai/flows/generate-multivoice-audio";
 
@@ -64,7 +64,32 @@ const testimonials = [
     }
 ]
 
-function AnimatedSection({ children }: { children: React.ReactNode }) {
+const sectionVariants: Variants = {
+    hidden: { opacity: 0, y: 50 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            duration: 0.6,
+            ease: "easeOut",
+            staggerChildren: 0.2
+        }
+    }
+};
+
+const itemVariants: Variants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            duration: 0.5,
+            ease: "easeOut"
+        }
+    }
+};
+
+function AnimatedSection({ children, className }: { children: React.ReactNode, className?: string }) {
     const { ref, inView } = useInView({
         triggerOnce: true,
         threshold: 0.2,
@@ -73,10 +98,10 @@ function AnimatedSection({ children }: { children: React.ReactNode }) {
     return (
         <motion.section
             ref={ref}
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: inView ? 1 : 0, y: inView ? 0 : 50 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="w-full py-16 md:py-24"
+            variants={sectionVariants}
+            initial="hidden"
+            animate={inView ? "visible" : "hidden"}
+            className={className}
         >
             {children}
         </motion.section>
@@ -140,7 +165,7 @@ function ArticleCard({ article, image }: { article: Article, image?: typeof Plac
 }
 
 function TestimonialsSection() {
-    const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.5 });
+    const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.2 });
     const [audioLoading, setAudioLoading] = useState(false);
     const [audioDataUri, setAudioDataUri] = useState<string | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
@@ -205,12 +230,15 @@ function TestimonialsSection() {
   }, []);
 
     return (
-        <section ref={ref} className="w-full py-16 md:py-24 bg-muted/30">
+        <motion.section 
+            ref={ref}
+            variants={sectionVariants}
+            initial="hidden"
+            animate={inView ? "visible" : "hidden"}
+            className="w-full py-16 md:py-24 bg-muted/30">
             <div className="container px-4 md:px-6">
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: inView ? 1 : 0, y: inView ? 0 : 20 }}
-                    transition={{ duration: 0.6, delay: 0.2 }}
+                    variants={itemVariants}
                     className="flex flex-col items-center justify-center space-y-4 text-center mb-12"
                 >
                     <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl font-headline">صدای دانش‌آموزان مثل شما</h2>
@@ -219,14 +247,12 @@ function TestimonialsSection() {
                     </p>
                 </motion.div>
                 <div className="grid gap-8 lg:grid-cols-3">
-                    {testimonials.map((testimonial, index) => {
+                    {testimonials.map((testimonial) => {
                         const image = PlaceHolderImages.find(p => p.id === testimonial.id);
                         return (
                             <motion.div
                                 key={testimonial.id}
-                                initial={{ opacity: 0, y: 50 }}
-                                animate={{ opacity: inView ? 1 : 0, y: inView ? 0 : 50 }}
-                                transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
+                                variants={itemVariants}
                             >
                                 <Card className="flex flex-col h-full bg-card">
                                     <CardContent className="p-6 flex-grow">
@@ -250,9 +276,7 @@ function TestimonialsSection() {
                     })}
                 </div>
                  <motion.div 
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: inView ? 1 : 0 }}
-                    transition={{ duration: 0.6, delay: 0.8 }}
+                    variants={itemVariants}
                     className="flex justify-center mt-12">
                     <Button onClick={handlePlayAudio} size="lg" variant="outline" disabled={audioLoading}>
                         {audioLoading ? (
@@ -267,7 +291,7 @@ function TestimonialsSection() {
                     <audio ref={audioRef} className="hidden" />
                 </motion.div>
             </div>
-        </section>
+        </motion.section>
     )
 }
 
@@ -356,58 +380,60 @@ export function HomePageContent() {
       </section>
 
       {/* Features Section */}
-      <AnimatedSection>
+      <AnimatedSection className="w-full py-16 md:py-24">
           <div className="container px-4 md:px-6">
-              <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
+              <motion.div variants={itemVariants} className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
                   <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl font-headline">ابزارهای شما برای یک انتخاب آگاهانه</h2>
                   <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
                       ما سه ابزار قدرتمند را در اختیار شما قرار می‌دهیم تا با اطمینان کامل مسیر آینده خود را انتخاب کنید.
                   </p>
-              </div>
+              </motion.div>
               <div className="mx-auto grid items-start gap-8 sm:max-w-4xl sm:grid-cols-2 md:gap-12 lg:max-w-5xl lg:grid-cols-3">
                   {features.map((feature, index) => (
-                      <Card key={index} className="bg-transparent border-0 shadow-none hover:-translate-y-2 transition-transform duration-300">
-                          <CardHeader className="flex flex-col items-center text-center gap-4">
-                              <div className="p-4 bg-primary/10 rounded-full">{feature.icon}</div>
-                              <CardTitle>{feature.title}</CardTitle>
-                          </CardHeader>
-                          <CardContent className="text-center">
-                              <p className="text-muted-foreground">{feature.description}</p>
-                          </CardContent>
-                      </Card>
+                      <motion.div key={index} variants={itemVariants}>
+                        <Card className="bg-transparent border-0 shadow-none hover:-translate-y-2 transition-transform duration-300">
+                            <CardHeader className="flex flex-col items-center text-center gap-4">
+                                <div className="p-4 bg-primary/10 rounded-full">{feature.icon}</div>
+                                <CardTitle>{feature.title}</CardTitle>
+                            </CardHeader>
+                            <CardContent className="text-center">
+                                <p className="text-muted-foreground">{feature.description}</p>
+                            </CardContent>
+                        </Card>
+                      </motion.div>
                   ))}
               </div>
           </div>
       </AnimatedSection>
       
       {/* How it works */}
-      <AnimatedSection>
+      <AnimatedSection className="w-full py-16 md:py-24">
         <div className="container px-4 md:px-6">
-           <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
+           <motion.div variants={itemVariants} className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl font-headline">فقط در ۳ مرحله ساده</h2>
                 <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
                     فرآیند کشف مسیر تحصیلی شما هرگز به این سادگی نبوده است.
                 </p>
-            </div>
+            </motion.div>
             <div className="relative grid gap-10 lg:grid-cols-3">
                  <div className="absolute top-1/2 left-0 w-full h-px bg-border -translate-y-1/2 hidden lg:block"></div>
                  <div className="absolute top-0 left-1/2 w-px h-full bg-border -translate-x-1/2 lg:hidden"></div>
 
-                <div className="relative flex flex-col items-center text-center">
+                <motion.div variants={itemVariants} className="relative flex flex-col items-center text-center">
                     <div className="flex items-center justify-center h-16 w-16 rounded-full bg-primary text-primary-foreground font-bold text-2xl border-4 border-card z-10">1</div>
                     <h3 className="mt-6 text-xl font-bold">پاسخ به سوالات</h3>
                     <p className="mt-2 text-muted-foreground">به سوالات چندمرحله‌ای ما در مورد علایق، نمرات و اهدافتان پاسخ دهید.</p>
-                </div>
-                <div className="relative flex flex-col items-center text-center">
+                </motion.div>
+                <motion.div variants={itemVariants} className="relative flex flex-col items-center text-center">
                     <div className="flex items-center justify-center h-16 w-16 rounded-full bg-primary text-primary-foreground font-bold text-2xl border-4 border-card z-10">2</div>
                     <h3 className="mt-6 text-xl font-bold">تحلیل هوشمند</h3>
                     <p className="mt-2 text-muted-foreground">هوش مصنوعی ما پاسخ‌های شما را تحلیل کرده و لیستی از رشته‌های مناسب را پیشنهاد می‌دهد.</p>
-                </div>
-                <div className="relative flex flex-col items-center text-center">
+                </motion.div>
+                <motion.div variants={itemVariants} className="relative flex flex-col items-center text-center">
                     <div className="flex items-center justify-center h-16 w-16 rounded-full bg-primary text-primary-foreground font-bold text-2xl border-4 border-card z-10">3</div>
                     <h3 className="mt-6 text-xl font-bold">دریافت نتایج</h3>
                     <p className="mt-2 text-muted-foreground">نقاط قوت، ضعف، فرصت‌های شغلی و مسیر آینده هر رشته را به تفکیک مشاهده کنید.</p>
-                </div>
+                </motion.div>
             </div>
         </div>
       </AnimatedSection>
@@ -416,9 +442,9 @@ export function HomePageContent() {
       <TestimonialsSection />
       
       {/* Articles Section */}
-       <AnimatedSection>
+       <AnimatedSection className="w-full py-16 md:py-24">
         <div className="container px-4 md:px-6">
-            <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0 mb-12">
+            <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0 mb-12">
                 <div className="text-center sm:text-right">
                     <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl font-headline">مقالات</h2>
                     <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed">
@@ -477,17 +503,17 @@ export function HomePageContent() {
                         />
                     </div>
                 )}
-            </div>
+            </motion.div>
             {isLoading ? (
                  <div className="flex justify-center items-center h-40">
                     <Loader2 className="h-10 w-10 animate-spin text-primary" />
                 </div>
             ) : articles.length === 0 ? (
-                <div className="text-center py-16 px-4 border-2 border-dashed rounded-lg bg-card">
+                <motion.div variants={itemVariants} className="text-center py-16 px-4 border-2 border-dashed rounded-lg bg-card">
                     <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
                     <h3 className="mt-4 text-lg font-semibold">مقاله‌ای برای نمایش وجود ندارد</h3>
                     <p className="mt-2 text-sm text-muted-foreground">به نظر می‌رسد هنوز مقاله‌ای در پایگاه داده ذخیره نشده است.</p>
-                </div>
+                </motion.div>
             ) : (
                 <div className="space-y-8">
                     <div className="grid gap-8 lg:grid-cols-3">
@@ -495,7 +521,9 @@ export function HomePageContent() {
                              const imageId = `article-${(index % 3) + 1}`;
                              const image = PlaceHolderImages.find(p => p.id === imageId);
                              return (
-                                <ArticleCard key={article.id} article={article} image={image} />
+                                <motion.div key={article.id} variants={itemVariants}>
+                                    <ArticleCard article={article} image={image} />
+                                </motion.div>
                              )
                         })}
                     </div>
@@ -505,9 +533,9 @@ export function HomePageContent() {
        </AnimatedSection>
 
       {/* Final CTA */}
-      <AnimatedSection>
+      <AnimatedSection className="w-full py-16 md:py-24">
         <div className="container">
-            <div className="rounded-xl bg-primary/10 p-8 md:p-12 lg:p-16 border border-primary/20">
+            <motion.div variants={itemVariants} className="rounded-xl bg-primary/10 p-8 md:p-12 lg:p-16 border border-primary/20">
                 <div className="grid items-center gap-6 lg:grid-cols-2 lg:gap-12">
                     <div className="space-y-4 text-center lg:text-right">
                         <h2 className="text-3xl font-bold tracking-tighter text-primary font-headline">
@@ -524,7 +552,7 @@ export function HomePageContent() {
                         </Button>
                     </div>
                 </div>
-            </div>
+            </motion.div>
         </div>
       </AnimatedSection>
 
