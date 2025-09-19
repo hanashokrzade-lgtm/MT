@@ -2,8 +2,7 @@
 // In a real-world application, this would be replaced with actual database calls.
 'use server';
 
-import { promises as fs } from 'fs';
-import path from 'path';
+import articlesData from '@/lib/articles.json';
 
 export interface Article {
     id: string;
@@ -14,17 +13,13 @@ export interface Article {
     createdAt?: string;
 }
 
-// Path to the JSON file
-const articlesFilePath = path.join(process.cwd(), 'src/lib/articles.json');
-
 /**
- * Reads all articles from the JSON file.
+ * Reads all articles from the imported JSON data.
  * @returns {Promise<Article[]>} A promise that resolves to an array of articles.
  */
 export async function getArticles(): Promise<Article[]> {
     try {
-        const fileContent = await fs.readFile(articlesFilePath, 'utf8');
-        const articles: Article[] = JSON.parse(fileContent);
+        const articles: Article[] = articlesData as Article[];
         // Sort articles by creation date, newest first
         return articles.sort((a, b) => {
             const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
@@ -32,37 +27,37 @@ export async function getArticles(): Promise<Article[]> {
             return dateB - dateA;
         });
     } catch (error) {
-        // If the file doesn't exist or is empty, return an empty array
-        if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-            return [];
-        }
         console.error("Error reading articles:", error);
         throw new Error("Could not read articles from the database.");
     }
 }
 
 /**
- * Adds a new article to the JSON file.
+ * Adds a new article. 
+ * NOTE: In this demo version, this function simulates adding an article 
+ * but does not persist it as we are reading from a static JSON file.
  * @param {Omit<Article, 'id' | 'createdAt'>} newArticleData - The new article data without id and createdAt.
  * @returns {Promise<Article>} A promise that resolves to the newly created article.
  */
 export async function addArticle(newArticleData: Omit<Article, 'id' | 'createdAt'>): Promise<Article> {
-    try {
-        const articles = await getArticles();
-        
-        const newArticle: Article = {
-            ...newArticleData,
-            id: `article-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-            createdAt: new Date().toISOString(),
-        };
+    console.warn("addArticle is a demo function and does not persist new articles.");
 
-        const updatedArticles = [newArticle, ...articles];
-        
-        await fs.writeFile(articlesFilePath, JSON.stringify(updatedArticles, null, 2), 'utf8');
-        
-        return newArticle;
-    } catch (error) {
-        console.error("Error adding article:", error);
-        throw new Error("Could not add the new article to the database.");
+    // To simulate a real-world scenario, we can create the article object
+    // and return it, but it won't be saved in the JSON file.
+    const newArticle: Article = {
+        ...newArticleData,
+        id: `article-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        createdAt: new Date().toISOString(),
+    };
+    
+    // In a real database, you would now write this to the database.
+    // For this demo, we just return the object.
+    
+    // To demonstrate a failure in a deployed environment where writing is not possible:
+    if (process.env.NODE_ENV === 'production') {
+        throw new Error("Adding articles is not supported in this demo environment. This is a static site.");
     }
+    
+    console.log("Simulating adding a new article (will not be saved):", newArticle);
+    return newArticle;
 }
