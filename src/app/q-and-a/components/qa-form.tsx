@@ -306,7 +306,16 @@ export function QaForm() {
                                 <AvatarFallback className="bg-primary/20"><Sparkles className="h-5 w-5 text-primary" /></AvatarFallback>
                             </Avatar>
                         )}
-                        <div className={`max-w-xl p-4 rounded-2xl shadow-sm ${message.type === 'user' ? 'bg-primary text-primary-foreground rounded-br-none' : 'bg-card border rounded-bl-none'} ${message.type === 'bot' ? 'text-right' : ''}`}>
+                        <div 
+                            className={cn(
+                                'max-w-xl p-4 rounded-2xl shadow-sm',
+                                message.type === 'user' 
+                                    ? 'bg-primary/90 text-primary-foreground rounded-br-none' 
+                                    : 'bg-card/10 border rounded-bl-none',
+                                message.type === 'bot' ? 'text-right' : ''
+                            )}
+                            style={{ backdropFilter: 'blur(4px)' }}
+                        >
                             <div className="prose prose-sm max-w-none text-foreground/90 leading-relaxed">
                                 {renderMessageContent(message.text)}
                             </div>
