@@ -416,8 +416,6 @@ export function HomePageContent() {
                 </p>
             </motion.div>
             <div className="relative grid gap-10 lg:grid-cols-3">
-                 <div className="absolute top-1/2 left-0 w-full h-px bg-border -translate-y-1/2 hidden lg:block"></div>
-                 <div className="absolute top-0 left-1/2 w-px h-full bg-border -translate-x-1/2 lg:hidden"></div>
 
                 <motion.div variants={itemVariants} className="relative flex flex-col items-center text-center">
                     <div className="flex items-center justify-center h-16 w-16 rounded-full bg-primary text-primary-foreground font-bold text-2xl border-4 border-card z-10">1</div>
