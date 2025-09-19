@@ -20,7 +20,7 @@ export function BottomNav() {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 h-24 bg-transparent">
-        <div className="absolute bottom-0 left-0 right-0 h-20 border-t border-border bg-card/80 backdrop-blur-lg"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-20 glass-nav"></div>
         <nav className="container relative mx-auto flex h-full items-center justify-around">
             <div className="flex w-full items-center justify-around">
                 {navLinks.slice(0, 2).map((link) => {

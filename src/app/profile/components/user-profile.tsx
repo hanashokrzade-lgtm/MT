@@ -63,7 +63,7 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 const SettingsDialog = () => (
-    <DialogContent className="sm:max-w-[425px]">
+    <DialogContent className="sm:max-w-[425px] glass-card">
         <DialogHeader className="text-right">
             <DialogTitle>تنظیمات کلی</DialogTitle>
             <DialogDescription>
@@ -118,7 +118,7 @@ const SettingsDialog = () => (
 );
 
 const PrivacyDialog = () => (
-    <DialogContent className="sm:max-w-[425px]">
+    <DialogContent className="sm:max-w-[425px] glass-card">
         <DialogHeader className="text-right">
             <DialogTitle>حریم خصوصی و امنیت</DialogTitle>
             <DialogDescription>
@@ -142,7 +142,7 @@ const PrivacyDialog = () => (
                         مشاهده سیاست حفظ حریم خصوصی
                     </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-3xl">
+                <DialogContent className="max-w-3xl glass-card">
                     <DialogHeader className="text-right">
                         <DialogTitle>سیاست حفظ حریم خصوصی</DialogTitle>
                         <DialogDescription>
@@ -210,7 +210,7 @@ const PrivacyDialog = () => (
                         حذف حساب کاربری
                     </Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent>
+                <AlertDialogContent className="glass-card">
                     <AlertDialogHeader className="text-right">
                         <AlertDialogTitle>آیا کاملاً مطمئن هستید؟</AlertDialogTitle>
                         <AlertDialogDescription>
@@ -228,7 +228,7 @@ const PrivacyDialog = () => (
 );
 
 const HelpDialog = () => (
-    <DialogContent className="sm:max-w-md">
+    <DialogContent className="sm:max-w-md glass-card">
         <DialogHeader className="text-right">
             <DialogTitle>راهنما و پشتیبانی</DialogTitle>
             <DialogDescription>
@@ -290,7 +290,7 @@ const EditProfileDialog = ({ profileData, onSave }: { profileData: any, onSave: 
     };
 
     return (
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="sm:max-w-lg glass-card">
             <DialogHeader className="text-right">
                 <DialogTitle>ویرایش پروفایل حرفه‌ای</DialogTitle>
                 <DialogDescription>
@@ -415,7 +415,7 @@ export function UserProfile() {
             <div className="grid gap-4 md:grid-cols-3">
                  <Dialog>
                     <DialogTrigger asChild>
-                        <Card className="hover:bg-muted/50 cursor-pointer transition-colors">
+                        <Card className="hover:bg-muted/50 cursor-pointer transition-colors glass-card">
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <CardTitle className="text-sm font-medium">مشاوره‌ها</CardTitle>
                                 <ClipboardList className="h-4 w-4 text-muted-foreground" />
@@ -426,7 +426,7 @@ export function UserProfile() {
                             </CardContent>
                         </Card>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-lg">
+                    <DialogContent className="sm:max-w-lg glass-card">
                         <DialogHeader className="text-right">
                             <DialogTitle>تاریخچه مشاوره‌ها</DialogTitle>
                             <DialogDescription>
@@ -436,7 +436,7 @@ export function UserProfile() {
                         <ScrollArea className="max-h-96 pr-4">
                             <div className="space-y-4 py-4 text-right">
                                 {dashboardData.consultationHistory.map((item, index) => (
-                                    <div key={index} className="p-4 border rounded-lg">
+                                    <div key={index} className="p-4 border rounded-lg bg-background/50">
                                         <div className="flex justify-between items-center mb-2">
                                             <p className="font-semibold text-primary">{item.topMajor}</p>
                                             <Badge variant="secondary">{item.date}</Badge>
@@ -450,7 +450,7 @@ export function UserProfile() {
                 </Dialog>
                 <Dialog>
                     <DialogTrigger asChild>
-                        <Card className="hover:bg-muted/50 cursor-pointer transition-colors">
+                        <Card className="hover:bg-muted/50 cursor-pointer transition-colors glass-card">
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <CardTitle className="text-sm font-medium">پرسش و پاسخ</CardTitle>
                                 <MessageSquare className="h-4 w-4 text-muted-foreground" />
@@ -461,7 +461,7 @@ export function UserProfile() {
                             </CardContent>
                         </Card>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-lg">
+                    <DialogContent className="sm:max-w-lg glass-card">
                         <DialogHeader className="text-right">
                             <DialogTitle>تاریخچه پرسش و پاسخ</DialogTitle>
                             <DialogDescription>
@@ -471,7 +471,7 @@ export function UserProfile() {
                         <ScrollArea className="max-h-96 pr-4">
                             <div className="space-y-4 py-4 text-right">
                                 {dashboardData.questionHistory.map((item, index) => (
-                                    <div key={index} className="p-4 border rounded-lg">
+                                    <div key={index} className="p-4 border rounded-lg bg-background/50">
                                         <div className="flex justify-between items-start mb-2 gap-4">
                                             <p className="font-semibold text-primary flex-1">{item.question}</p>
                                             <Badge variant="secondary" className="flex-shrink-0">{item.date}</Badge>
@@ -489,7 +489,7 @@ export function UserProfile() {
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
-                <Card>
+                <Card className="glass-card">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">میانگین هم‌راستایی</CardTitle>
                         <Target className="h-4 w-4 text-muted-foreground" />
@@ -502,7 +502,7 @@ export function UserProfile() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-                <Card className="col-span-4">
+                <Card className="col-span-4 glass-card">
                     <CardHeader>
                         <CardTitle>فعالیت‌های اخیر</CardTitle>
                     </CardHeader>
@@ -522,7 +522,7 @@ export function UserProfile() {
                         </ChartContainer>
                     </CardContent>
                 </Card>
-                 <Card className="col-span-4 lg:col-span-3">
+                 <Card className="col-span-4 lg:col-span-3 glass-card">
                     <CardHeader>
                         <CardTitle>آخرین رشته‌های پیشنهادی</CardTitle>
                         <CardDescription>بر اساس آخرین مشاوره شما.</CardDescription>
@@ -539,7 +539,7 @@ export function UserProfile() {
                                         <ChevronRight className="h-4 w-4 text-muted-foreground mr-2" />
                                     </div>
                                 </DialogTrigger>
-                                <DialogContent>
+                                <DialogContent className="glass-card">
                                     <DialogHeader className="text-right">
                                         <DialogTitle className="flex items-center justify-end gap-2">
                                             <BrainCircuit className="w-6 h-6 text-primary"/>
@@ -571,7 +571,7 @@ export function UserProfile() {
             </div>
             
             {/* Professional Profile Builder */}
-            <Card>
+            <Card className="glass-card">
                 <CardHeader>
                     <div className="flex justify-between items-center">
                         <div>

@@ -227,7 +227,7 @@ export function AdvisorForm() {
   if (result) {
     return (
       <div className="space-y-8">
-        <Alert className="bg-primary/10 border-primary/20 text-primary-foreground">
+        <Alert className="bg-primary/10 border-primary/20 text-primary-foreground backdrop-blur-md">
             <Sparkles className="h-4 w-4 text-primary" />
             <AlertTitle className="font-bold text-primary">تحلیل هوش مصنوعی کامل شد!</AlertTitle>
             <AlertDescription className="text-foreground/80">
@@ -235,7 +235,7 @@ export function AdvisorForm() {
             </AlertDescription>
         </Alert>
 
-        <Card>
+        <Card className="glass-card">
           <CardHeader>
             <CardTitle>رشته‌های تحصیلی پیشنهادی</CardTitle>
             <CardDescription>
@@ -290,7 +290,7 @@ export function AdvisorForm() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="glass-card">
           <CardHeader>
             <CardTitle>جمع‌بندی و خلاصه</CardTitle>
           </CardHeader>
@@ -299,7 +299,7 @@ export function AdvisorForm() {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="glass-card">
           <CardHeader>
             <CardTitle>مسیر گام به گام</CardTitle>
           </CardHeader>
@@ -331,7 +331,7 @@ export function AdvisorForm() {
   }
 
   return (
-    <Card>
+    <Card className="glass-card">
       <CardHeader>
         <Progress value={(step / steps.length) * 100} className="w-full" />
         <CardTitle className="pt-4">مرحله {step}: {steps[step - 1].title}</CardTitle>

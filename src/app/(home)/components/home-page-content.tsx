@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ConstellationBackground } from "@/components/layout/constellation-background";
 
 
 const features = [
@@ -58,7 +59,7 @@ function ArticleCard({ article, image }: { article: Article, image?: typeof Plac
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Card className="overflow-hidden group cursor-pointer hover:shadow-primary/10 hover:shadow-lg transition-shadow h-full flex flex-col">
+                <Card className="overflow-hidden group cursor-pointer hover:shadow-primary/10 hover:shadow-lg transition-shadow h-full flex flex-col glass-card">
                     {image && (
                         <div className="relative aspect-video overflow-hidden">
                             <Image
@@ -79,7 +80,7 @@ function ArticleCard({ article, image }: { article: Article, image?: typeof Plac
                     </CardContent>
                 </Card>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-2xl">
+            <DialogContent className="sm:max-w-2xl glass-card">
                 <DialogHeader className="text-right">
                     <Badge variant="secondary" className="w-fit mb-2">{article.category}</Badge>
                     <DialogTitle className="text-2xl">{article.title}</DialogTitle>
@@ -126,9 +127,10 @@ export function HomePageContent() {
 
 
   return (
-    <div className="w-full">
+    <div className="w-full relative">
+      <ConstellationBackground />
       {/* Hero Section */}
-      <section className="w-full py-12 md:py-24 lg:py-32 bg-card/50">
+      <section className="w-full py-12 md:py-24 lg:py-32 relative">
         <div className="container px-4 md:px-6">
           <div className="grid gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]">
              {heroImage && (
@@ -166,7 +168,7 @@ export function HomePageContent() {
       </section>
 
       {/* Features Section */}
-      <section className="w-full py-16 md:py-24 bg-background">
+      <section className="w-full py-16 md:py-24 bg-background/80 backdrop-blur-sm">
           <div className="container px-4 md:px-6">
               <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
                   <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl font-headline">ابزارهای شما برای یک انتخاب آگاهانه</h2>
@@ -176,7 +178,7 @@ export function HomePageContent() {
               </div>
               <div className="mx-auto grid items-start gap-8 sm:max-w-4xl sm:grid-cols-2 md:gap-12 lg:max-w-5xl lg:grid-cols-3">
                   {features.map((feature, index) => (
-                      <Card key={index} className="bg-card/50 hover:bg-card/90 hover:-translate-y-2 transition-all duration-300">
+                      <Card key={index} className="glass-card hover:-translate-y-2 transition-all duration-300">
                           <CardHeader className="flex flex-col items-center text-center gap-4">
                               <div className="p-4 bg-primary/10 rounded-full">{feature.icon}</div>
                               <CardTitle>{feature.title}</CardTitle>
@@ -191,7 +193,7 @@ export function HomePageContent() {
       </section>
       
       {/* How it works */}
-      <section className="w-full py-16 md:py-24 bg-card/50">
+      <section className="w-full py-16 md:py-24 bg-background/80 backdrop-blur-sm">
         <div className="container px-4 md:px-6">
            <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl font-headline">فقط در ۳ مرحله ساده</h2>
@@ -235,7 +237,7 @@ export function HomePageContent() {
                  {testimonials.map((testimonial) => {
                      const image = PlaceHolderImages.find(p => p.id === testimonial.id);
                      return (
-                        <Card key={testimonial.id} className="flex flex-col">
+                        <Card key={testimonial.id} className="flex flex-col glass-card">
                             <CardContent className="p-6 flex-grow">
                                 <p className="text-muted-foreground">"{testimonial.text}"</p>
                             </CardContent>
@@ -259,7 +261,7 @@ export function HomePageContent() {
       </section>
       
       {/* Articles Section */}
-       <section className="w-full py-16 md:py-24 bg-card/50">
+       <section className="w-full py-16 md:py-24 bg-background/80 backdrop-blur-sm">
         <div className="container px-4 md:px-6">
             <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0 mb-12">
                 <div className="text-center sm:text-right">
@@ -277,7 +279,7 @@ export function HomePageContent() {
                                     مشاهده همه مقالات
                                 </Button>
                             </DialogTrigger>
-                            <DialogContent className="sm:max-w-4xl">
+                            <DialogContent className="sm:max-w-4xl glass-card">
                                 <DialogHeader className="text-right">
                                     <DialogTitle className="text-2xl">آرشیو مقالات</DialogTitle>
                                     <DialogDescription>تمام مقالات تولید شده را در اینجا مرور کنید.</DialogDescription>
@@ -303,7 +305,7 @@ export function HomePageContent() {
                     <Loader2 className="h-10 w-10 animate-spin text-primary" />
                 </div>
             ) : articles.length === 0 ? (
-                <div className="text-center py-16 px-4 border-2 border-dashed rounded-lg">
+                <div className="text-center py-16 px-4 border-2 border-dashed rounded-lg glass-card">
                     <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
                     <h3 className="mt-4 text-lg font-semibold">مقاله‌ای برای نمایش وجود ندارد</h3>
                     <p className="mt-2 text-sm text-muted-foreground">به نظر می‌رسد هنوز مقاله‌ای در پایگاه داده ذخیره نشده است.</p>
@@ -327,7 +329,7 @@ export function HomePageContent() {
       {/* Final CTA */}
       <section className="w-full py-16 md:py-24">
         <div className="container">
-            <div className="rounded-xl bg-primary/10 p-8 md:p-12 lg:p-16 border border-primary/20">
+            <div className="rounded-xl bg-primary/10 p-8 md:p-12 lg:p-16 border border-primary/20 backdrop-blur-md">
                 <div className="grid items-center gap-6 lg:grid-cols-2 lg:gap-12">
                     <div className="space-y-4 text-center lg:text-right">
                         <h2 className="text-3xl font-bold tracking-tighter text-primary font-headline">

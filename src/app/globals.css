@@ -6,7 +6,7 @@
   :root {
     --background: 224 71.4% 4.1%;
     --foreground: 210 20% 98%;
-    --card: 224 71.4% 4.1%;
+    --card: 224 71.4% 10%;
     --card-foreground: 210 20% 98%;
     --popover: 224 71.4% 4.1%;
     --popover-foreground: 210 20% 98%;
@@ -29,7 +29,7 @@
   .dark {
     --background: 224 71.4% 4.1%;
     --foreground: 210 20% 98%;
-    --card: 224 71.4% 4.1%;
+    --card: 224 71.4% 10%;
     --card-foreground: 210 20% 98%;
     --popover: 224 71.4% 4.1%;
     --popover-foreground: 210 20% 98%;
@@ -56,4 +56,12 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.glass-card {
+    @apply bg-card/50 border border-border/20 backdrop-blur-lg;
+}
+
+.glass-nav {
+     @apply bg-card/60 border-t border-border/20 backdrop-blur-xl;
 }

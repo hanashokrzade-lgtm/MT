@@ -91,7 +91,7 @@ export function AlignmentForm() {
 
   return (
     <div className="space-y-8">
-      <Card>
+      <Card className="glass-card">
         <CardHeader>
           <CardTitle>فرم تحلیل</CardTitle>
           <CardDescription>اهداف و رشته‌های مورد نظر خود را وارد کنید.</CardDescription>
@@ -158,7 +158,7 @@ export function AlignmentForm() {
       )}
 
       {result && (
-        <Card>
+        <Card className="glass-card">
           <CardHeader>
             <CardTitle>نتایج تحلیل هم‌راستایی</CardTitle>
           </CardHeader>
@@ -183,7 +183,7 @@ export function AlignmentForm() {
               <h3 className="text-lg font-semibold mb-4">دلایل امتیازدهی</h3>
               <div className="space-y-4">
                 {result.map((item, index) => (
-                  <div key={index} className="p-4 border rounded-lg bg-background">
+                  <div key={index} className="p-4 border rounded-lg bg-background/50">
                     <div className="flex justify-between items-center mb-2">
                         <h4 className="font-bold">{item.major}</h4>
                         <div className="flex items-center gap-1 text-sm font-bold text-primary-foreground px-3 py-1 rounded-full bg-primary">

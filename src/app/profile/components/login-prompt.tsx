@@ -81,7 +81,7 @@ export function LoginPrompt() {
 
     return (
         <div className="flex flex-col items-center justify-center text-center p-4 sm:p-8 h-full">
-            <Card className="w-full max-w-md">
+            <Card className="w-full max-w-md glass-card">
                 <CardHeader>
                     <CardTitle className="text-2xl font-bold tracking-tighter text-primary font-headline">
                          به پروفایل خود دسترسی پیدا کنید
