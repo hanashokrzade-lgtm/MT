@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -396,9 +395,7 @@ export function UserProfile() {
                             <Dialog>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <DialogTrigger asChild>
-                                            <Button variant="ghost" size="icon"><Settings className="h-5 w-5" /></Button>
-                                        </DialogTrigger>
+                                        <Button variant="ghost" size="icon"><Settings className="h-5 w-5" /></Button>
                                     </TooltipTrigger>
                                     <TooltipContent><p>تنظیمات</p></TooltipContent>
                                 </Tooltip>
@@ -407,9 +404,7 @@ export function UserProfile() {
                             <Dialog>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <DialogTrigger asChild>
-                                            <Button variant="ghost" size="icon"><ShieldCheck className="h-5 w-5" /></Button>
-                                        </DialogTrigger>
+                                        <Button variant="ghost" size="icon"><ShieldCheck className="h-5 w-5" /></Button>
                                     </TooltipTrigger>
                                     <TooltipContent><p>حریم خصوصی</p></TooltipContent>
                                 </Tooltip>
@@ -418,9 +413,7 @@ export function UserProfile() {
                             <Dialog>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <DialogTrigger asChild>
-                                            <Button variant="ghost" size="icon"><HelpCircle className="h-5 w-5" /></Button>
-                                        </DialogTrigger>
+                                        <Button variant="ghost" size="icon"><HelpCircle className="h-5 w-5" /></Button>
                                     </TooltipTrigger>
                                     <TooltipContent><p>راهنما</p></TooltipContent>
                                 </Tooltip>
@@ -575,7 +568,7 @@ export function UserProfile() {
                                     </DialogHeader>
                                     <div className="py-4 text-right">
                                         <h4 className="font-semibold mb-2">دلیل پیشنهاد:</h4>
-                                        <p className="text-muted-foreground bg-muted/50 p-4 rounded-md">{major.reason}</p>
+                                        <p className="text-muted-foreground bg-muted p-4 rounded-md">{major.reason}</p>
                                     </div>
                                     <DialogFooter>
                                          <Button onClick={() => setActiveTab('alignment')}>
@@ -616,19 +609,19 @@ export function UserProfile() {
                 <CardContent className="space-y-6 pt-6 text-right">
                     <div className="space-y-2">
                         <Label>علایق و سرگرمی‌ها</Label>
-                        <p className="text-sm text-muted-foreground p-4 bg-muted/50 rounded-md min-h-[60px]">
+                        <p className="text-sm text-muted-foreground bg-muted p-4 rounded-md min-h-[60px]">
                             {profileData.interests || "هنوز وارد نشده..."}
                         </p>
                     </div>
                      <div className="space-y-2">
                         <Label>نقاط قوت کلیدی</Label>
-                        <p className="text-sm text-muted-foreground p-4 bg-muted/50 rounded-md min-h-[60px]">
+                        <p className="text-sm text-muted-foreground bg-muted p-4 rounded-md min-h-[60px]">
                             {profileData.strengths || "هنوز وارد نشده..."}
                         </p>
                     </div>
                      <div className="space-y-2">
                         <Label>اهداف شغلی و آینده</Label>
-                        <p className="text-sm text-muted-foreground p-4 bg-muted/50 rounded-md min-h-[60px]">
+                        <p className="text-sm text-muted-foreground bg-muted p-4 rounded-md min-h-[60px]">
                             {profileData.goals || "هنوز وارد نشده..."}
                         </p>
                     </div>

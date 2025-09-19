@@ -35,7 +35,7 @@ export function BottomNav() {
                 <motion.button
                     onClick={() => setActiveTab('profile')}
                     whileTap={{ scale: 0.95 }}
-                    className="group relative flex h-20 w-20 flex-col items-center justify-center rounded-full border-4 border-background bg-card/50 p-1 shadow-lg backdrop-blur-xl transition-all duration-300 hover:bg-card/80"
+                    className="group relative flex h-20 w-20 flex-col items-center justify-center rounded-full border-4 border-background bg-card p-1 shadow-lg transition-all duration-300 hover:bg-card/80"
                     style={{ bottom: '1rem' }}
                 >
                     <Avatar className="h-full w-full border-2 border-primary/20 transition-all group-hover:border-primary/50">

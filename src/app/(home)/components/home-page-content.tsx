@@ -11,10 +11,10 @@ import { Badge } from "@/components/ui/badge";
 import { getArticles, type Article } from "@/services/article-service";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
+import { DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 
 
 const features = [
@@ -183,7 +183,7 @@ export function HomePageContent() {
       </section>
 
       {/* Features Section */}
-      <section className="w-full py-16 md:py-24 bg-background/80 backdrop-blur-sm">
+      <section className="w-full py-16 md:py-24 bg-accent/50">
           <div className="container px-4 md:px-6">
               <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
                   <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl font-headline">ابزارهای شما برای یک انتخاب آگاهانه</h2>
@@ -208,7 +208,7 @@ export function HomePageContent() {
       </section>
       
       {/* How it works */}
-      <section className="w-full py-16 md:py-24 bg-background/80 backdrop-blur-sm">
+      <section className="w-full py-16 md:py-24">
         <div className="container px-4 md:px-6">
            <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl font-headline">فقط در ۳ مرحله ساده</h2>
@@ -240,7 +240,7 @@ export function HomePageContent() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="w-full py-16 md:py-24">
+      <section className="w-full py-16 md:py-24 bg-accent/50">
         <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl font-headline">صدای دانش‌آموزان مثل شما</h2>
@@ -276,7 +276,7 @@ export function HomePageContent() {
       </section>
       
       {/* Articles Section */}
-       <section className="w-full py-16 md:py-24 bg-background/80 backdrop-blur-sm">
+       <section className="w-full py-16 md:py-24">
         <div className="container px-4 md:px-6">
             <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0 mb-12">
                 <div className="text-center sm:text-right">
@@ -317,7 +317,7 @@ export function HomePageContent() {
                                  <DrawerContent className="glass-card">
                                      <DrawerHeader className="text-right">
                                         <DrawerTitle className="text-2xl">آرشیو مقالات</DrawerTitle>
-                                        <DrawerDescription>تمام مقالات تولید شده را در اینجا مرور کنید.</DrawerDescription>
+                                        <DialogDescription>تمام مقالات تولید شده را در اینجا مرور کنید.</DialogDescription>
                                     </DrawerHeader>
                                     <div className="p-4 pt-0">
                                          <ScrollArea className="h-[70vh]">
@@ -343,7 +343,7 @@ export function HomePageContent() {
                     <Loader2 className="h-10 w-10 animate-spin text-primary" />
                 </div>
             ) : articles.length === 0 ? (
-                <div className="text-center py-16 px-4 border-2 border-dashed rounded-lg glass-card">
+                <div className="text-center py-16 px-4 border-2 border-dashed rounded-lg bg-card">
                     <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
                     <h3 className="mt-4 text-lg font-semibold">مقاله‌ای برای نمایش وجود ندارد</h3>
                     <p className="mt-2 text-sm text-muted-foreground">به نظر می‌رسد هنوز مقاله‌ای در پایگاه داده ذخیره نشده است.</p>
@@ -367,7 +367,7 @@ export function HomePageContent() {
       {/* Final CTA */}
       <section className="w-full py-16 md:py-24">
         <div className="container">
-            <div className="rounded-xl bg-primary/10 p-8 md:p-12 lg:p-16 border border-primary/20 backdrop-blur-md">
+            <div className="rounded-xl bg-primary/10 p-8 md:p-12 lg:p-16 border border-primary/20">
                 <div className="grid items-center gap-6 lg:grid-cols-2 lg:gap-12">
                     <div className="space-y-4 text-center lg:text-right">
                         <h2 className="text-3xl font-bold tracking-tighter text-primary font-headline">
@@ -391,5 +391,3 @@ export function HomePageContent() {
     </div>
   );
 }
-
-    

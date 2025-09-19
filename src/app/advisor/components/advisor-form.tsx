@@ -227,7 +227,7 @@ export function AdvisorForm() {
   if (result) {
     return (
       <div className="space-y-8">
-        <Alert className="bg-primary/10 border-primary/20 text-primary-foreground backdrop-blur-md">
+        <Alert className="bg-primary/10 border-primary/20 text-primary-foreground">
             <Sparkles className="h-4 w-4 text-primary" />
             <AlertTitle className="font-bold text-primary">تحلیل هوش مصنوعی کامل شد!</AlertTitle>
             <AlertDescription className="text-foreground/80">

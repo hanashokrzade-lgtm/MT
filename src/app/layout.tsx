@@ -6,7 +6,6 @@ import { BottomNav } from '@/components/layout/bottom-nav';
 import { TabsProvider } from '@/context/tabs-provider';
 import { TabsContainer } from '@/components/layout/tabs-container';
 import { AuthProvider } from '@/context/auth-provider';
-import { ConstellationBackground } from '@/components/layout/constellation-background';
 import { ThemeProvider } from '@/context/theme-provider';
 
 export const metadata: Metadata = {
@@ -30,14 +29,13 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet" />
       </head>
-      <body className={cn("font-body antialiased min-h-screen flex flex-col h-full bg-[#030712] relative")}>
+      <body className={cn("font-body antialiased min-h-screen flex flex-col h-full bg-background relative")}>
         <ThemeProvider
             attribute="class"
-            defaultTheme="dark"
+            defaultTheme="light"
             enableSystem
             disableTransitionOnChange
         >
-            <ConstellationBackground />
             <AuthProvider>
                 <TabsProvider>
                     <main className="flex-grow flex flex-col pb-24 z-10 bg-transparent">

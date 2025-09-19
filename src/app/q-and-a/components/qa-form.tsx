@@ -306,7 +306,7 @@ export function QaForm() {
                                 <AvatarFallback className="bg-primary/20"><Sparkles className="h-5 w-5 text-primary" /></AvatarFallback>
                             </Avatar>
                         )}
-                        <div className={`max-w-xl p-4 rounded-2xl shadow-sm ${message.type === 'user' ? 'bg-primary text-primary-foreground rounded-br-none' : 'bg-card/50 backdrop-blur-sm border border-border/20 rounded-bl-none'} ${message.type === 'bot' ? 'text-right' : ''}`}>
+                        <div className={`max-w-xl p-4 rounded-2xl shadow-sm ${message.type === 'user' ? 'bg-primary text-primary-foreground rounded-br-none' : 'bg-card border rounded-bl-none'} ${message.type === 'bot' ? 'text-right' : ''}`}>
                             <div className="prose prose-sm max-w-none text-foreground/90 leading-relaxed">
                                 {renderMessageContent(message.text)}
                             </div>
@@ -348,7 +348,7 @@ export function QaForm() {
                         <Avatar className="w-9 h-9 border-2 border-primary">
                              <AvatarFallback className="bg-primary/20"><Sparkles className="h-5 w-5 text-primary" /></AvatarFallback>
                         </Avatar>
-                        <div className="max-w-xl p-4 rounded-2xl bg-card/50 backdrop-blur-sm border border-border/20 rounded-bl-none flex items-center gap-2">
+                        <div className="max-w-xl p-4 rounded-2xl bg-card border rounded-bl-none flex items-center gap-2">
                              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                              <span className="text-muted-foreground text-sm">در حال فکر کردن...</span>
                         </div>
@@ -356,8 +356,8 @@ export function QaForm() {
                 )}
             </div>
         </ScrollArea>
-        <div className="p-4 border-t bg-background/80 backdrop-blur-sm">
-             <Card className="max-w-4xl mx-auto shadow-none border-0 bg-card/50 backdrop-blur-sm">
+        <div className="p-4 border-t bg-background">
+             <Card className="max-w-4xl mx-auto shadow-none border-0 bg-card">
                 <CardContent className="p-2">
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="flex items-center gap-2">
