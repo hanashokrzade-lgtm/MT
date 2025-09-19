@@ -122,44 +122,38 @@ export function QaForm() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleToggleRecording = async () => {
-    if (!recognitionRef.current) {
-      toast({
-        title: 'مرورگر پشتیبانی نمی‌شود',
-        description: 'متاسفانه مرورگر شما از قابلیت تشخیص گفتار پشتیبانی نمی‌کند.',
-        variant: 'destructive',
-      });
-      return;
-    }
-    
-    if (isRecording) {
-      recognitionRef.current.stop();
-      return;
-    }
+  const handleStartRecording = async () => {
+    if (isRecording || loading || !recognitionRef.current) return;
 
     try {
-      // Always ask for permission before starting
-      await navigator.mediaDevices.getUserMedia({ audio: true });
-      recognitionRef.current.start();
-      setIsRecording(true);
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+        recognitionRef.current.start();
+        setIsRecording(true);
     } catch (err) {
-      if (err instanceof DOMException && (err.name === 'NotAllowedError' || err.name === 'SecurityError' || err.name === 'NotFoundError')) {
-           toast({
-              title: 'دسترسی به میکروفون رد شد',
-              description: 'برای استفاده از میکروفون، باید دسترسی را مجاز کنید. اگر میکروفونی متصل نیست، لطفاً آن را وصل کنید.',
-              variant: 'destructive'
-          });
-      } else {
-          console.error('Error starting recording:', err);
-          toast({
-              title: 'خطا در شروع ضبط',
-              description: 'مشکلی در شروع ضبط صدا به وجود آمد. لطفاً دوباره تلاش کنید.',
-              variant: 'destructive'
-          });
-      }
-      setIsRecording(false);
+        if (err instanceof DOMException && (err.name === 'NotAllowedError' || err.name === 'SecurityError' || err.name === 'NotFoundError')) {
+            toast({
+                title: 'دسترسی به میکروفون رد شد',
+                description: 'برای استفاده از میکروفون، باید دسترسی را مجاز کنید. اگر میکروفونی متصل نیست، لطفاً آن را وصل کنید.',
+                variant: 'destructive'
+            });
+        } else {
+            console.error('Error starting recording:', err);
+            toast({
+                title: 'خطا در شروع ضبط',
+                description: 'مشکلی در شروع ضبط صدا به وجود آمد. لطفاً دوباره تلاش کنید.',
+                variant: 'destructive'
+            });
+        }
+        setIsRecording(false);
     }
   };
+
+  const handleStopRecording = () => {
+      if (isRecording && recognitionRef.current) {
+          recognitionRef.current.stop();
+      }
+  };
+
 
   useEffect(() => {
     const audioEl = activeAudio ? audioRefs.current[activeAudio.index] : null;
@@ -371,18 +365,22 @@ export function QaForm() {
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="flex items-center gap-2">
                     <Button 
-                      type="button" 
-                      onClick={handleToggleRecording} 
+                      type="button"
+                      onMouseDown={handleStartRecording}
+                      onMouseUp={handleStopRecording}
+                      onMouseLeave={handleStopRecording}
+                      onTouchStart={handleStartRecording}
+                      onTouchEnd={handleStopRecording}
                       size="icon" 
                       variant="ghost" 
                       className={`w-12 h-12 rounded-full flex-shrink-0 transition-colors ${
                         isRecording ? 'bg-red-500/20 text-red-500 hover:bg-red-500/30' : 'text-primary/80 hover:text-primary'
                       }`}
                       disabled={loading}
-                      title={isRecording ? 'توقف ضبط' : 'شروع ضبط'}
+                      title={isRecording ? 'در حال ضبط...' : 'برای صحبت کردن نگه دارید'}
                     >
                         {isRecording ? <Mic className="h-6 w-6 animate-pulse" /> : <Mic className="h-6 w-6" />}
-                        <span className="sr-only">{isRecording ? 'توقف ضبط' : 'شروع ضبط'}</span>
+                        <span className="sr-only">{isRecording ? 'در حال ضبط...' : 'برای صحبت کردن نگه دارید'}</span>
                     </Button>
                     <FormField
                         control={form.control}
@@ -394,7 +392,7 @@ export function QaForm() {
                                 placeholder={isRecording ? 'در حال شنیدن...' : 'سوال خود را اینجا بنویسید یا با میکروفون بپرسید...'}
                                 rows={1}
                                 className={cn(
-                                    "resize-none border-0 shadow-none focus-visible:ring-0 min-h-0 h-auto py-3 bg-transparent",
+                                    "resize-none border-0 shadow-none focus-visible:ring-0 min-h-0 h-auto py-3 bg-transparent text-sm",
                                     "max-h-24 overflow-y-auto"
                                 )}
                                 {...field}
