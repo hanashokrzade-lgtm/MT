@@ -13,6 +13,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
+import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 
 
 const features = [
@@ -55,10 +57,25 @@ const testimonials = [
 ]
 
 function ArticleCard({ article, image }: { article: Article, image?: typeof PlaceHolderImages[0] }) {
+    const ArticleContent = () => (
+         <>
+            <DialogHeader className="text-right">
+                <Badge variant="secondary" className="w-fit mb-2">{article.category}</Badge>
+                <DialogTitle className="text-2xl">{article.title}</DialogTitle>
+                <DialogDescription>{article.description}</DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="max-h-[60vh] pr-6 -mr-6 mt-4">
+                <div className="prose prose-sm dark:prose-invert text-foreground/90 leading-relaxed text-right whitespace-pre-wrap">
+                    {article.content}
+                </div>
+            </ScrollArea>
+        </>
+    );
+
     return (
-        <Dialog>
-            <DialogTrigger asChild>
-                <Card className="overflow-hidden group cursor-pointer hover:shadow-primary/10 hover:shadow-lg transition-shadow h-full flex flex-col glass-card">
+        <ResponsiveDialog
+            trigger={
+                 <Card className="overflow-hidden group cursor-pointer hover:shadow-primary/10 hover:shadow-lg transition-shadow h-full flex flex-col glass-card">
                     {image && (
                         <div className="relative aspect-video overflow-hidden">
                             <Image
@@ -78,20 +95,20 @@ function ArticleCard({ article, image }: { article: Article, image?: typeof Plac
                         <CardDescription>{article.description}</CardDescription>
                     </CardContent>
                 </Card>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-2xl glass-card">
-                <DialogHeader className="text-right">
-                    <Badge variant="secondary" className="w-fit mb-2">{article.category}</Badge>
-                    <DialogTitle className="text-2xl">{article.title}</DialogTitle>
-                    <DialogDescription>{article.description}</DialogDescription>
-                </DialogHeader>
-                <ScrollArea className="max-h-[60vh] pr-6 -mr-6 mt-4">
-                    <div className="prose prose-sm dark:prose-invert text-foreground/90 leading-relaxed text-right whitespace-pre-wrap">
-                        {article.content}
-                    </div>
-                </ScrollArea>
-            </DialogContent>
-        </Dialog>
+            }
+            dialogContent={
+                <DialogContent className="sm:max-w-2xl glass-card">
+                    <ArticleContent />
+                </DialogContent>
+            }
+            drawerContent={
+                <DrawerContent className="glass-card">
+                     <div className="p-4 pt-0">
+                         <ArticleContent />
+                     </div>
+                </DrawerContent>
+            }
+        />
     );
 }
 
@@ -270,31 +287,54 @@ export function HomePageContent() {
                 </div>
                 {articles.length > 0 && (
                     <div className="text-center">
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <Button size="lg" variant="outline">
+                        <ResponsiveDialog
+                             trigger={
+                                 <Button size="lg" variant="outline">
                                     <Library className="ml-2 h-5 w-5" />
                                     مشاهده همه مقالات
                                 </Button>
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-4xl glass-card">
-                                <DialogHeader className="text-right">
-                                    <DialogTitle className="text-2xl">آرشیو مقالات</DialogTitle>
-                                    <DialogDescription>تمام مقالات تولید شده را در اینجا مرور کنید.</DialogDescription>
-                                </DialogHeader>
-                                <ScrollArea className="max-h-[70vh] p-1">
-                                    <div className="grid gap-6 py-4 sm:grid-cols-2 lg:grid-cols-3">
-                                        {articles.map((article, index) => {
-                                            const imageId = `article-${(index % 3) + 1}`;
-                                            const image = PlaceHolderImages.find(p => p.id === imageId);
-                                            return (
-                                                <ArticleCard key={article.id} article={article} image={image} />
-                                            )
-                                        })}
-                                    </div>
-                                </ScrollArea>
-                            </DialogContent>
-                        </Dialog>
+                             }
+                             dialogContent={
+                                 <DialogContent className="sm:max-w-4xl glass-card">
+                                     <DialogHeader className="text-right">
+                                        <DialogTitle className="text-2xl">آرشیو مقالات</DialogTitle>
+                                        <DialogDescription>تمام مقالات تولید شده را در اینجا مرور کنید.</DialogDescription>
+                                    </DialogHeader>
+                                    <ScrollArea className="max-h-[70vh] p-1">
+                                        <div className="grid gap-6 py-4 sm:grid-cols-2 lg:grid-cols-3">
+                                            {articles.map((article, index) => {
+                                                const imageId = `article-${(index % 3) + 1}`;
+                                                const image = PlaceHolderImages.find(p => p.id === imageId);
+                                                return (
+                                                    <ArticleCard key={article.id} article={article} image={image} />
+                                                )
+                                            })}
+                                        </div>
+                                    </ScrollArea>
+                                 </DialogContent>
+                             }
+                             drawerContent={
+                                 <DrawerContent className="glass-card">
+                                     <DrawerHeader className="text-right">
+                                        <DrawerTitle className="text-2xl">آرشیو مقالات</DrawerTitle>
+                                        <DrawerDescription>تمام مقالات تولید شده را در اینجا مرور کنید.</DrawerDescription>
+                                    </DrawerHeader>
+                                    <div className="p-4 pt-0">
+                                         <ScrollArea className="h-[70vh]">
+                                             <div className="grid gap-6 py-4 grid-cols-1">
+                                                 {articles.map((article, index) => {
+                                                     const imageId = `article-${(index % 3) + 1}`;
+                                                     const image = PlaceHolderImages.find(p => p.id === imageId);
+                                                     return (
+                                                         <ArticleCard key={article.id} article={article} image={image} />
+                                                     )
+                                                 })}
+                                             </div>
+                                         </ScrollArea>
+                                     </div>
+                                 </DrawerContent>
+                             }
+                        />
                     </div>
                 )}
             </div>
@@ -351,3 +391,5 @@ export function HomePageContent() {
     </div>
   );
 }
+
+    
