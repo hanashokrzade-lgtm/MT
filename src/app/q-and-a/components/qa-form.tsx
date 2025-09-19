@@ -296,8 +296,8 @@ export function QaForm() {
   };
   
   return (
-    <div className="flex flex-col h-[calc(100vh-12rem)]">
-        <ScrollArea className="flex-grow p-4" ref={scrollAreaRef}>
+    <div className="flex flex-col h-full relative">
+        <ScrollArea className="flex-grow p-4 pb-32" ref={scrollAreaRef}>
             <div className="space-y-6 max-w-4xl mx-auto">
                 {messages.map((message, index) => (
                     <div key={index} className={`flex items-start gap-3 ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -356,8 +356,8 @@ export function QaForm() {
                 )}
             </div>
         </ScrollArea>
-        <div className="p-4 border-t bg-background">
-             <Card className="max-w-4xl mx-auto shadow-none border-0 bg-card">
+        <div className="absolute bottom-24 left-0 right-0 p-4 z-10 pointer-events-none">
+             <Card className="max-w-4xl mx-auto glass-card pointer-events-auto">
                 <CardContent className="p-2">
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="flex items-center gap-2">

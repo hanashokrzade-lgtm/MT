@@ -4,7 +4,7 @@ import { QaForm } from './qa-form';
 
 export function QaPageContent() {
   return (
-    <div className="container flex flex-col h-full mb-8">
+    <div className="container flex flex-col h-full">
       <div className="text-center my-8">
         <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl font-headline">پرسش و پاسخ با مشاور</h1>
         <p className="mt-2 text-muted-foreground">
