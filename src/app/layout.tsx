@@ -7,6 +7,7 @@ import { TabsProvider } from '@/context/tabs-provider';
 import { TabsContainer } from '@/components/layout/tabs-container';
 import { AuthProvider } from '@/context/auth-provider';
 import { ThemeProvider } from '@/context/theme-provider';
+import { ConstellationBackground } from '@/components/layout/constellation-background';
 
 export const metadata: Metadata = {
   title: 'مشاور تحصیلی من',
@@ -36,6 +37,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
         >
+          <ConstellationBackground />
             <AuthProvider>
                 <TabsProvider>
                     <main className="flex-grow flex flex-col pb-24 z-10 bg-transparent">

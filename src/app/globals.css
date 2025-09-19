@@ -59,13 +59,16 @@
 }
 
 .glass-card {
-    @apply bg-card border;
+    @apply bg-card/10 border;
+    backdrop-filter: blur(8px);
 }
 
 .glass-nav {
-     @apply bg-card border-t;
+     @apply bg-card/10 border-t;
+     backdrop-filter: blur(8px);
 }
 
 [data-radix-popper-content-wrapper] {
-  @apply bg-popover;
+  @apply bg-popover/10;
+   backdrop-filter: blur(8px);
 }

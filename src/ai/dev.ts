@@ -6,3 +6,4 @@ import '@/ai/flows/analyze-alignment-of-goals-and-majors.ts';
 import '@/ai/flows/generate-audio-from-text.ts';
 import '@/ai/flows/generate-answer-for-question.ts';
 import '@/ai/flows/generate-educational-article.ts';
+import '@/ai/flows/generate-multivoice-audio.ts';
