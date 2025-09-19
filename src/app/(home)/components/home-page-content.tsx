@@ -377,46 +377,6 @@ export function HomePageContent() {
             </div>
           </div>
         </div>
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 md:hidden">
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: heroInView ? 1 : 0 }}
-                transition={{ delay: 1, duration: 0.5 }}
-                className="relative"
-            >
-                <motion.div
-                    animate={{
-                        y: [-4, 4, -4],
-                    }}
-                    transition={{
-                        duration: 1.5,
-                        repeat: Infinity,
-                        repeatType: "loop",
-                        ease: "easeInOut",
-                    }}
-                >
-                   <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M24 30L14 20L16.8 17.2L24 24.4L31.2 17.2L34 20L24 30Z" fill="currentColor" className="text-primary"/>
-                    </svg>
-                </motion.div>
-                <motion.div 
-                    className="absolute inset-0 rounded-full"
-                    animate={{
-                        scale: [1, 1.2, 1],
-                        opacity: [0.3, 0, 0.3],
-                    }}
-                    transition={{
-                        duration: 1.5,
-                        repeat: Infinity,
-                        repeatType: "loop",
-                        ease: "easeInOut",
-                    }}
-                    style={{
-                        boxShadow: '0 0 0 4px hsl(var(--primary))'
-                    }}
-                />
-            </motion.div>
-        </div>
       </section>
 
       {/* Features Section */}
