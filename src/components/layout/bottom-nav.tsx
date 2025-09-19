@@ -17,6 +17,7 @@ const navLinks = [
 export function BottomNav() {
   const { activeTab, setActiveTab } = useTabs();
   const { user } = useAuth();
+  const isProfileActive = activeTab === 'profile';
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 h-24 bg-transparent">
@@ -35,7 +36,12 @@ export function BottomNav() {
                 <motion.button
                     onClick={() => setActiveTab('profile')}
                     whileTap={{ scale: 0.95 }}
-                    className="group relative flex h-20 w-20 flex-col items-center justify-center rounded-full border-4 border-background bg-card p-1 shadow-lg transition-all duration-300 hover:bg-card/80"
+                    animate={{ scale: [1, 1.05, 1] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                    className={cn(
+                        "group relative flex h-20 w-20 flex-col items-center justify-center rounded-full border-4 border-background bg-card p-1 shadow-lg transition-all duration-300 hover:bg-card/80",
+                        isProfileActive && "shadow-primary/30 shadow-[0_0_20px]"
+                    )}
                     style={{ bottom: '1rem' }}
                 >
                     <Avatar className="h-full w-full border-2 border-primary/20 transition-all group-hover:border-primary/50">
@@ -44,7 +50,7 @@ export function BottomNav() {
                            <User className="h-8 w-8 text-muted-foreground" />
                        </AvatarFallback>
                     </Avatar>
-                     {activeTab === 'profile' && (
+                     {isProfileActive && (
                         <motion.div
                         layoutId="active-indicator-background"
                         className="absolute inset-0 z-[-1] rounded-full border-2 border-primary bg-primary/20"
