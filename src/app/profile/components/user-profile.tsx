@@ -395,25 +395,33 @@ export function UserProfile() {
                             <Dialog>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <Button variant="ghost" size="icon"><Settings className="h-5 w-5" /></Button>
+                                        <DialogTrigger asChild>
+                                            <Button variant="ghost" size="icon"><Settings className="h-5 w-5" /></Button>
+                                        </DialogTrigger>
                                     </TooltipTrigger>
                                     <TooltipContent><p>تنظیمات</p></TooltipContent>
                                 </Tooltip>
                                 <SettingsDialog />
                             </Dialog>
+
                             <Dialog>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <Button variant="ghost" size="icon"><ShieldCheck className="h-5 w-5" /></Button>
+                                         <DialogTrigger asChild>
+                                            <Button variant="ghost" size="icon"><ShieldCheck className="h-5 w-5" /></Button>
+                                        </DialogTrigger>
                                     </TooltipTrigger>
                                     <TooltipContent><p>حریم خصوصی</p></TooltipContent>
                                 </Tooltip>
                                 <PrivacyDialog />
                             </Dialog>
+                            
                             <Dialog>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <Button variant="ghost" size="icon"><HelpCircle className="h-5 w-5" /></Button>
+                                        <DialogTrigger asChild>
+                                            <Button variant="ghost" size="icon"><HelpCircle className="h-5 w-5" /></Button>
+                                        </DialogTrigger>
                                     </TooltipTrigger>
                                     <TooltipContent><p>راهنما</p></TooltipContent>
                                 </Tooltip>
