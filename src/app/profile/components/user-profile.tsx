@@ -614,5 +614,3 @@ export function UserProfile() {
         </div>
     );
 }
-
-    
