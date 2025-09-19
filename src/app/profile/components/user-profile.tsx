@@ -369,37 +369,37 @@ export function UserProfile() {
                     <p className="text-muted-foreground">{user?.email || 'ایمیل ثبت نشده'}</p>
                     <div className="flex items-center justify-center sm:justify-start gap-2 mt-4">
                         <TooltipProvider>
-                             <Dialog>
-                                <DialogTrigger asChild>
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
+                            <Dialog>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <DialogTrigger asChild>
                                             <Button variant="ghost" size="icon"><Settings className="h-5 w-5" /></Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent><p>تنظیمات</p></TooltipContent>
-                                    </Tooltip>
-                                </DialogTrigger>
+                                        </DialogTrigger>
+                                    </TooltipTrigger>
+                                    <TooltipContent><p>تنظیمات</p></TooltipContent>
+                                </Tooltip>
                                 <SettingsDialog />
                             </Dialog>
-                             <Dialog>
-                                <DialogTrigger asChild>
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
+                            <Dialog>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <DialogTrigger asChild>
                                             <Button variant="ghost" size="icon"><ShieldCheck className="h-5 w-5" /></Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent><p>حریم خصوصی</p></TooltipContent>
-                                    </Tooltip>
-                                </DialogTrigger>
+                                        </DialogTrigger>
+                                    </TooltipTrigger>
+                                    <TooltipContent><p>حریم خصوصی</p></TooltipContent>
+                                </Tooltip>
                                 <PrivacyDialog />
                             </Dialog>
-                             <Dialog>
-                                <DialogTrigger asChild>
-                                     <Tooltip>
-                                        <TooltipTrigger asChild>
+                            <Dialog>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <DialogTrigger asChild>
                                             <Button variant="ghost" size="icon"><HelpCircle className="h-5 w-5" /></Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent><p>راهنما</p></TooltipContent>
-                                    </Tooltip>
-                                </DialogTrigger>
+                                        </DialogTrigger>
+                                    </TooltipTrigger>
+                                    <TooltipContent><p>راهنما</p></TooltipContent>
+                                </Tooltip>
                                 <HelpDialog />
                             </Dialog>
                         </TooltipProvider>
