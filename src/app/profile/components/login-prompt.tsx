@@ -12,7 +12,6 @@ import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import type { AuthError } from "firebase/auth";
 import { motion, AnimatePresence } from "framer-motion";
 
 function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
@@ -49,7 +48,6 @@ export function LoginPrompt() {
     const { signInWithGoogle, signInWithEmail, signUpWithEmail } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
     const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-    const { toast } = useToast();
     const [activeTab, setActiveTab] = useState("login");
 
     const loginForm = useForm<z.infer<typeof loginSchema>>({
@@ -62,86 +60,23 @@ export function LoginPrompt() {
         defaultValues: { name: "", email: "", password: "" },
     });
 
-    const handleAuthError = (error: AuthError) => {
-        let title = "خطا در احراز هویت";
-        let description = "مشکلی پیش آمده است. لطفاً دوباره تلاش کنید.";
-
-        switch (error.code) {
-            case 'auth/user-not-found':
-            case 'auth/wrong-password':
-                title = "ایمیل یا رمز عبور اشتباه است";
-                description = "لطفاً اطلاعات وارد شده را بررسی کرده و دوباره تلاش کنید.";
-                break;
-            case 'auth/email-already-in-use':
-                title = "ایمیل تکراری است";
-                description = "این ایمیل قبلاً ثبت‌نام کرده است. لطفاً از بخش ورود استفاده کنید یا با ایمیل دیگری تلاش کنید.";
-                break;
-            case 'auth/weak-password':
-                title = "رمز عبور ضعیف است";
-                description = "رمز عبور شما باید حداقل ۶ کاراکتر باشد.";
-                break;
-             case 'auth/invalid-email':
-                title = "ایمیل نامعتبر است";
-                description = "لطفاً یک آدرس ایمیل صحیح وارد کنید.";
-                break;
-            case 'auth/popup-closed-by-user':
-                title = "پنجره ورود بسته شد";
-                description = "شما پنجره ورود با گوگل را بستید. لطفاً دوباره تلاش کنید.";
-                return; // Don't show a destructive toast for this
-            default:
-                description = `یک خطای ناشناخته رخ داد: ${error.message}`;
-        }
-        
-        toast({
-            title,
-            description,
-            variant: "destructive",
-        });
-    }
 
     const onLoginSubmit = async (values: z.infer<typeof loginSchema>) => {
         setIsLoading(true);
-        try {
-            await signInWithEmail(values.email, values.password);
-            toast({
-                title: "ورود موفق",
-                description: "شما با موفقیت وارد حساب کاربری خود شدید.",
-            });
-        } catch (error) {
-            handleAuthError(error as AuthError);
-        } finally {
-            setIsLoading(false);
-        }
+        await signInWithEmail(values.email, values.password);
+        setIsLoading(false);
     };
     
     const onRegisterSubmit = async (values: z.infer<typeof registerSchema>) => {
         setIsLoading(true);
-        try {
-            await signUpWithEmail(values.name, values.email, values.password);
-             toast({
-                title: "ثبت‌نام موفق",
-                description: "حساب کاربری شما با موفقیت ایجاد شد و وارد شدید.",
-            });
-        } catch (error) {
-            handleAuthError(error as AuthError);
-        } finally {
-            setIsLoading(false);
-        }
+        await signUpWithEmail(values.name, values.email, values.password);
+        setIsLoading(false);
     };
 
     const handleGoogleSignIn = async () => {
         setIsGoogleLoading(true);
-        try {
-            await signInWithGoogle();
-             toast({
-                title: 'ورود موفق',
-                description: 'شما با موفقیت وارد حساب کاربری خود شدید.',
-            });
-        } catch (error) {
-            handleAuthError(error as AuthError);
-        } finally {
-            setIsGoogleLoading(false);
-        }
+        await signInWithGoogle();
+        setIsGoogleLoading(false);
     };
 
     return (
