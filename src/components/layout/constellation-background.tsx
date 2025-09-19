@@ -2,18 +2,46 @@
 
 import { useRef, useEffect } from 'react'
 
-type Dot = {
+class Blob {
   x: number
   y: number
-  size: number
-  targetSize: number
-  waveOffset: number
+  vx: number
+  vy: number
+  radius: number
+  color: string
+
+  constructor(x: number, y: number, vx: number, vy: number, radius: number, color: string) {
+    this.x = x
+    this.y = y
+    this.vx = vx
+    this.vy = vy
+    this.radius = radius
+    this.color = color
+  }
+
+  update(width: number, height: number) {
+    this.x += this.vx
+    this.y += this.vy
+
+    if (this.x - this.radius < 0 || this.x + this.radius > width) {
+      this.vx *= -1
+    }
+    if (this.y - this.radius < 0 || this.y + this.radius > height) {
+      this.vy *= -1
+    }
+  }
+
+  draw(ctx: CanvasRenderingContext2D) {
+    ctx.beginPath()
+    ctx.fillStyle = this.color
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2)
+    ctx.fill()
+  }
 }
 
 export function ConstellationBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animationFrameIdRef = useRef<number>()
-  const mousePosRef = useRef({ x: -9999, y: -9999 });
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -24,56 +52,40 @@ export function ConstellationBackground() {
 
     let width = (canvas.width = window.innerWidth)
     let height = (canvas.height = window.innerHeight)
-    const dots: Dot[] = []
-    
-    const spacing = 40
-    const baseSize = 1
-    const hoverRadius = 200
-    const baseColor = 'hsla(173, 80%, 35%, 0.4)'
-    const hoverColor = 'hsla(173, 70%, 55%, 1)'
 
+    const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim()
+    const [h, s, l] = primaryColor.split(' ').map(parseFloat);
+
+    const colors = [
+        `hsl(${h}, ${s}%, ${l}%)`,
+        `hsl(${h}, ${s - 10}%, ${l + 10}%)`,
+        `hsl(${h + 20}, ${s - 5}%, ${l + 5}%)`,
+        `hsl(${h - 20}, ${s}%, ${l}%)`,
+    ];
+    
+    const blobs: Blob[] = []
+    const blobCount = 4
 
     const init = () => {
-      dots.length = 0; // Clear the array
-      for (let x = spacing / 2; x < width; x += spacing) {
-        for (let y = spacing / 2; y < height; y += spacing) {
-          dots.push({
-            x: x,
-            y: y,
-            size: baseSize,
-            targetSize: baseSize,
-            waveOffset: Math.random() * Math.PI * 2,
-          })
-        }
+      blobs.length = 0
+      for (let i = 0; i < blobCount; i++) {
+        const radius = Math.random() * (Math.min(width, height) / 4) + (Math.min(width, height) / 6);
+        const x = Math.random() * (width - radius * 2) + radius;
+        const y = Math.random() * (height - radius * 2) + radius;
+        const vx = (Math.random() - 0.5) * 1.5;
+        const vy = (Math.random() - 0.5) * 1.5;
+        const color = colors[i % colors.length];
+        blobs.push(new Blob(x, y, vx, vy, radius, color));
       }
     }
 
-    const animate = (time: number) => {
+    const animate = () => {
+      if (!ctx) return;
       ctx.clearRect(0, 0, width, height)
-      const { x: mouseX, y: mouseY } = mousePosRef.current;
 
-      dots.forEach(dot => {
-        const distToMouse = Math.sqrt((dot.x - mouseX) ** 2 + (dot.y - mouseY) ** 2)
-        
-        let desiredSize = baseSize
-        let color = baseColor
-
-        if (distToMouse < hoverRadius) {
-            const proximity = 1 - (distToMouse / hoverRadius)
-            desiredSize = baseSize + proximity * 4
-            color = `hsla(173, 70%, ${55 + proximity * 20}%, ${0.5 + proximity * 0.5})`
-        } else {
-             // Add wave effect only when not hovered
-            desiredSize = baseSize + Math.sin(time * 0.001 + dot.waveOffset) * 0.5;
-        }
-
-        // Smooth transition for size
-        dot.size += (desiredSize - dot.size) * 0.1;
-
-        ctx.beginPath()
-        ctx.arc(dot.x, dot.y, dot.size, 0, Math.PI * 2)
-        ctx.fillStyle = color
-        ctx.fill()
+      blobs.forEach(blob => {
+        blob.update(width, height)
+        blob.draw(ctx)
       })
 
       animationFrameIdRef.current = requestAnimationFrame(animate)
@@ -84,26 +96,14 @@ export function ConstellationBackground() {
       height = canvas.height = window.innerHeight
       init()
     }
-    
-    const handleMouseMove = (e: MouseEvent) => {
-        mousePosRef.current = { x: e.clientX, y: e.clientY };
-    }
-    
-    const handleMouseLeave = () => {
-        mousePosRef.current = { x: -9999, y: -9999 };
-    }
 
     init()
-    animate(0)
+    animate()
 
     window.addEventListener('resize', handleResize)
-    window.addEventListener('mousemove', handleMouseMove);
-    document.body.addEventListener('mouseleave', handleMouseLeave);
 
     return () => {
       window.removeEventListener('resize', handleResize)
-      window.removeEventListener('mousemove', handleMouseMove);
-      document.body.removeEventListener('mouseleave', handleMouseLeave);
       if (animationFrameIdRef.current) {
         cancelAnimationFrame(animationFrameIdRef.current)
       }
@@ -113,7 +113,10 @@ export function ConstellationBackground() {
   return (
     <canvas
       ref={canvasRef}
-      className="absolute top-0 left-0 w-full h-full -z-10 opacity-100 bg-background"
+      className="absolute top-0 left-0 w-full h-full -z-10 bg-background"
+      style={{
+          filter: 'blur(100px) contrast(25)',
+      }}
     />
   )
 }
