@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 
 class Blob {
   x: number
@@ -42,8 +42,15 @@ class Blob {
 export function ConstellationBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animationFrameIdRef = useRef<number>()
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted) return;
+
     const canvas = canvasRef.current
     if (!canvas) return
 
@@ -57,12 +64,12 @@ export function ConstellationBackground() {
     const [h, s, l] = primaryColor.split(' ').map(parseFloat);
 
     const colors = [
-        `hsl(${h}, ${s}%, ${l}%)`,
-        `hsl(${h}, ${s - 10}%, ${l + 10}%)`,
-        `hsl(${h + 40}, ${s}%, ${l + 5}%)`,
-        `hsl(${h - 30}, ${s - 5}%, ${l - 5}%)`,
-        `hsl(${h + 60}, ${s - 15}%, ${l}%)`,
-        `hsl(${h - 60}, ${s}%, ${l + 10}%)`,
+        `hsla(${h}, ${s}%, ${l}%, 0.8)`,
+        `hsla(${h + 20}, ${s - 10}%, ${l + 10}%, 0.8)`,
+        `hsla(60, ${s}%, ${l + 5}%, 0.8)`, // Yellow color
+        `hsla(${h - 30}, ${s - 5}%, ${l - 5}%, 0.8)`,
+        `hsla(${h + 40}, ${s}%, ${l + 5}%, 0.8)`,
+        `hsla(${h - 60}, ${s}%, ${l + 10}%, 0.8)`,
     ];
     
     const blobs: Blob[] = []
@@ -110,7 +117,16 @@ export function ConstellationBackground() {
         cancelAnimationFrame(animationFrameIdRef.current)
       }
     }
-  }, [])
+  }, [isMounted])
+  
+  if (!isMounted) {
+    return (
+        <canvas
+            ref={canvasRef}
+            className="absolute top-0 left-0 w-full h-full -z-10 bg-background"
+        />
+    );
+  }
 
   return (
     <canvas
@@ -118,6 +134,7 @@ export function ConstellationBackground() {
       className="absolute top-0 left-0 w-full h-full -z-10 bg-background"
       style={{
           filter: 'blur(100px) contrast(25)',
+          opacity: 0.7
       }}
     />
   )
