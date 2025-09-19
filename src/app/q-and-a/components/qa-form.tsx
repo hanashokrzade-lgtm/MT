@@ -356,7 +356,7 @@ export function QaForm() {
                 )}
             </div>
         </ScrollArea>
-        <div className="absolute bottom-20 left-0 right-0 p-4 z-10 pointer-events-none">
+        <div className="absolute bottom-16 left-0 right-0 p-4 z-10 pointer-events-none">
              <Card className="max-w-4xl mx-auto glass-card pointer-events-auto">
                 <CardContent className="p-2">
                 <Form {...form}>
