@@ -14,7 +14,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, Sparkles, Volume2, Pause, Send, Mic, UserCircle2 } from 'lucide-react';
+import { Loader2, Sparkles, Volume2, Pause, Send, Mic, UserCircle2, Square } from 'lucide-react';
 import {
   generateAnswerForQuestion,
 } from '@/ai/flows/generate-answer-for-question';
@@ -123,36 +123,48 @@ export function QaForm() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleStartRecording = async () => {
-    if (isRecording || loading || !recognitionRef.current) return;
+ const toggleRecording = async () => {
+    if (loading) return;
+
+    if (isRecording) {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+      setIsRecording(false);
+      return;
+    }
 
     try {
-        await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Always ask for permission before starting
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+
+      if (recognitionRef.current) {
         recognitionRef.current.start();
         setIsRecording(true);
+      } else {
+        toast({
+            title: 'خطا',
+            description: 'سرویس تشخیص گفتار آماده نیست. لطفاً صفحه را رفرش کنید.',
+            variant: 'destructive'
+        });
+      }
     } catch (err) {
-        if (err instanceof DOMException && (err.name === 'NotAllowedError' || err.name === 'SecurityError' || err.name === 'NotFoundError')) {
+       if (err instanceof DOMException && (err.name === 'NotAllowedError' || err.name === 'NotFoundError')) {
             toast({
-                title: 'دسترسی به میکروفون رد شد',
-                description: 'برای استفاده از میکروفون، باید دسترسی را مجاز کنید. اگر میکروفونی متصل نیست، لطفاً آن را وصل کنید.',
+                title: 'دسترسی به میکروفون لازم است',
+                description: 'برای استفاده از این قابلیت، لطفاً دسترسی به میکروفون را در مرورگر خود مجاز کنید.',
                 variant: 'destructive'
             });
         } else {
-            console.error('Error starting recording:', err);
+            console.error('Error getting user media:', err);
             toast({
-                title: 'خطا در شروع ضبط',
-                description: 'مشکلی در شروع ضبط صدا به وجود آمد. لطفاً دوباره تلاش کنید.',
+                title: 'خطا در دسترسی به میکروفون',
+                description: 'مشکلی در دسترسی به میکروفون شما به وجود آمد. لطفاً مطمئن شوید که میکروفون متصل و فعال است.',
                 variant: 'destructive'
             });
         }
         setIsRecording(false);
     }
-  };
-
-  const handleStopRecording = () => {
-      if (isRecording && recognitionRef.current) {
-          recognitionRef.current.stop();
-      }
   };
 
 
@@ -362,15 +374,11 @@ export function QaForm() {
         </ScrollArea>
         <div className="p-4 z-10">
             <div className="max-w-4xl mx-auto flex flex-col items-center gap-4">
-                <motion.button
+                 <motion.button
                     type="button"
-                    onMouseDown={handleStartRecording}
-                    onMouseUp={handleStopRecording}
-                    onMouseLeave={handleStopRecording}
-                    onTouchStart={handleStartRecording}
-                    onTouchEnd={handleStopRecording}
+                    onClick={toggleRecording}
                     disabled={loading}
-                    title={isRecording ? 'در حال ضبط...' : 'برای صحبت کردن نگه دارید'}
+                    title={isRecording ? 'توقف ضبط' : 'شروع ضبط'}
                     className={cn(
                         "pointer-events-auto w-16 h-16 rounded-full flex-shrink-0 transition-all duration-300 flex items-center justify-center relative shadow-lg",
                         isRecording 
@@ -380,27 +388,28 @@ export function QaForm() {
                     animate={{ scale: isRecording ? 1.1 : 1 }}
                     whileTap={{ scale: 0.95 }}
                 >
-                    <motion.div
-                         className="absolute inset-0 rounded-full"
-                         style={{
-                            boxShadow: `0 0 0px 0px hsl(var(--primary) / 0.5)`,
-                         }}
-                         animate={{
-                            scale: [1, 1.6],
-                            opacity: [1, 0],
-                            boxShadow: `0 0 25px 8px hsl(var(--primary) / 0)`
-                         }}
-                         transition={{
-                             duration: 1.5,
-                             repeat: Infinity,
-                             repeatType: 'loop',
-                             ease: 'easeOut'
-                         }}
-                    />
+                    {isRecording && (
+                        <motion.div
+                            className="absolute inset-0 rounded-full"
+                            style={{
+                                boxShadow: `0 0 0px 0px hsl(var(--destructive) / 0.5)`,
+                            }}
+                            animate={{
+                                scale: [1, 1.6],
+                                opacity: [0.7, 0],
+                            }}
+                            transition={{
+                                duration: 1.5,
+                                repeat: Infinity,
+                                repeatType: 'loop',
+                                ease: 'easeOut'
+                            }}
+                        />
+                    )}
                     <div className="relative z-10">
-                        <Mic className="h-8 w-8" />
+                        {isRecording ? <Square className="h-7 w-7" /> : <Mic className="h-8 w-8" />}
                     </div>
-                    <span className="sr-only">{isRecording ? 'در حال ضبط...' : 'برای صحبت کردن نگه دارید'}</span>
+                    <span className="sr-only">{isRecording ? 'توقف ضبط' : 'شروع ضبط'}</span>
                 </motion.button>
                 <Card className="w-full glass-card">
                     <CardContent className="p-2">
@@ -452,5 +461,3 @@ export function QaForm() {
     </div>
   );
 }
-
-    
