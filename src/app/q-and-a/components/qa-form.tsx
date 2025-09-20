@@ -126,28 +126,10 @@ export function QaForm() {
  const toggleRecording = async () => {
     if (loading) return;
 
-    if (isRecording) {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
-      setIsRecording(false);
-      return;
-    }
-
+    // This check is important for mobile browsers that require a user gesture
+    // to activate audio context.
     try {
-      // Always ask for permission before starting
-      await navigator.mediaDevices.getUserMedia({ audio: true });
-
-      if (recognitionRef.current) {
-        recognitionRef.current.start();
-        setIsRecording(true);
-      } else {
-        toast({
-            title: 'خطا',
-            description: 'سرویس تشخیص گفتار آماده نیست. لطفاً صفحه را رفرش کنید.',
-            variant: 'destructive'
-        });
-      }
+        await navigator.mediaDevices.getUserMedia({ audio: true });
     } catch (err) {
        if (err instanceof DOMException && (err.name === 'NotAllowedError' || err.name === 'NotFoundError')) {
             toast({
@@ -164,6 +146,26 @@ export function QaForm() {
             });
         }
         setIsRecording(false);
+        return; // Stop execution if permission is denied
+    }
+
+
+    if (isRecording) {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+      setIsRecording(false);
+    } else {
+      if (recognitionRef.current) {
+        recognitionRef.current.start();
+        setIsRecording(true);
+      } else {
+        toast({
+            title: 'خطا',
+            description: 'سرویس تشخیص گفتار آماده نیست. لطفاً صفحه را رفرش کنید.',
+            variant: 'destructive'
+        });
+      }
     }
   };
 
@@ -372,7 +374,7 @@ export function QaForm() {
                 )}
             </div>
         </ScrollArea>
-        <div className="p-4 z-10">
+        <div className="p-4 z-10 fixed bottom-0 left-0 right-0 pb-[calc(6rem+10px)]">
             <div className="max-w-4xl mx-auto flex flex-col items-center gap-4">
                  <motion.button
                     type="button"
