@@ -3,21 +3,20 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { Sparkles, BrainCircuit, Target, MessagesSquare, ArrowLeft, Loader2, FileText, Library, Volume2, Pause } from "lucide-react";
+import { Sparkles, BrainCircuit, Target, MessagesSquare, ArrowLeft, Loader2, FileText, Library } from "lucide-react";
 import { useTabs } from "@/context/tabs-provider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { getArticles, type Article } from "@/services/article-service";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { motion, type Variants } from "framer-motion";
 import { useInView } from "react-intersection-observer";
-import { generateMultivoiceAudio } from "@/ai/flows/generate-multivoice-audio";
 
 const features = [
     {
@@ -40,24 +39,18 @@ const features = [
 const testimonials = [
     {
         id: 'testimonial-1',
-        speakerId: 'Speaker1',
-        voice: 'Achernar',
         name: "سارا احمدی",
         major: "دانش‌آموز دوازدهم تجربی",
         text: "این برنامه واقعاً چشم من را به روی رشته‌هایی باز کرد که هرگز به آن‌ها فکر نکرده بودم. تحلیل‌هایش بسیار دقیق و شخصی‌سازی شده بود.",
     },
     {
         id: 'testimonial-2',
-        speakerId: 'Speaker2',
-        voice: 'Sirius',
         name: "علی رضایی",
         major: "دانش‌آموز یازدهم ریاضی",
         text: "قبلاً بین چند رشته مهندسی شک داشتم. بخش تحلیل اهداف به من کمک کرد تا با اطمینان بیشتری مهندسی کامپیوتر را انتخاب کنم.",
     },
     {
         id: 'testimonial-3',
-        speakerId: 'Speaker3',
-        voice: 'Vega',
         name: "مریم حسینی",
         major: "فارغ‌التحصیل هنر",
         text: "کاش وقتی دبیرستانی بودم چنین ابزاری وجود داشت! بخش پرسش و پاسخ برای رفع ابهامات و شناخت مسیر شغلی فوق‌العاده است.",
@@ -166,69 +159,7 @@ function ArticleCard({ article, image }: { article: Article, image?: typeof Plac
 
 function TestimonialsSection() {
     const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.2 });
-    const [audioLoading, setAudioLoading] = useState(false);
-    const [audioDataUri, setAudioDataUri] = useState<string | null>(null);
-    const [isPlaying, setIsPlaying] = useState(false);
-    const audioRef = useRef<HTMLAudioElement>(null);
-    const { toast } = useToast();
-
-    const handlePlayAudio = async () => {
-        if (audioDataUri) {
-            if (audioRef.current) {
-                if (isPlaying) {
-                    audioRef.current.pause();
-                } else {
-                    audioRef.current.play();
-                }
-            }
-            return;
-        }
-
-        setAudioLoading(true);
-        try {
-            const script = testimonials.map(t => `${t.speakerId}: ${t.text}`).join(' ');
-            const speakers = testimonials.map(t => ({ speaker: t.speakerId, voice: t.voice as "Algenib" | "Achernar" | "Sirius" | "Vega" }));
-            
-            const response = await generateMultivoiceAudio({ speakers, script });
-            setAudioDataUri(response.audioDataUri);
-        } catch (error: any) {
-            toast({
-                title: 'خطا در تولید صدا',
-                description: `مشکلی در تولید فایل صوتی پیش آمد: ${error.message}`,
-                variant: 'destructive',
-            });
-        } finally {
-            setAudioLoading(false);
-        }
-    };
     
-    useEffect(() => {
-        const audio = audioRef.current;
-        if (audioDataUri && audio) {
-            audio.src = audioDataUri;
-            audio.play();
-        }
-    }, [audioDataUri]);
-
-    useEffect(() => {
-      const audio = audioRef.current;
-      if (!audio) return;
-      
-      const handlePlay = () => setIsPlaying(true);
-      const handlePause = () => setIsPlaying(false);
-      const handleEnded = () => setIsPlaying(false);
-
-      audio.addEventListener('play', handlePlay);
-      audio.addEventListener('pause', handlePause);
-      audio.addEventListener('ended', handleEnded);
-
-      return () => {
-          audio.removeEventListener('play', handlePlay);
-          audio.removeEventListener('pause', handlePause);
-          audio.removeEventListener('ended', handleEnded);
-      }
-  }, []);
-
     return (
         <motion.section 
             ref={ref}
@@ -516,7 +447,7 @@ export function HomePageContent() {
        </AnimatedSection>
 
       {/* Final CTA */}
-      <AnimatedSection className="w-full py-16 md:py-24">
+      <AnimatedSection className="w-full py-16 md:py-24 pb-12">
         <div className="container">
             <motion.div variants={itemVariants} className="rounded-xl bg-primary/10 p-8 md:p-12 lg:p-16 border border-primary/20">
                 <div className="grid items-center gap-6 lg:grid-cols-2 lg:gap-12">
@@ -542,5 +473,3 @@ export function HomePageContent() {
     </div>
   );
 }
-
-    
