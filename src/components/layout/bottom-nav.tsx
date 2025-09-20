@@ -39,18 +39,6 @@ export function BottomNav() {
                     className="group relative flex h-20 w-20 flex-col items-center justify-center"
                     style={{ bottom: '1rem' }}
                 >
-                    {/* Pulsing wave animation */}
-                    <motion.div 
-                        className="absolute inset-0 rounded-full bg-card/70"
-                        animate={{ scale: [1, 1.4], opacity: [0.6, 0] }}
-                        transition={{ duration: 2, repeat: Infinity, ease: "easeOut", delay: 0 }}
-                    />
-                    <motion.div 
-                        className="absolute inset-0 rounded-full bg-card/70"
-                        animate={{ scale: [1, 1.4], opacity: [0.6, 0] }}
-                        transition={{ duration: 2, repeat: Infinity, ease: "easeOut", delay: 1 }}
-                    />
-
                     <div className={cn(
                         "relative flex h-full w-full items-center justify-center rounded-full border-4 border-background bg-card p-1 shadow-lg transition-all duration-300 group-hover:bg-card/80",
                         isProfileActive && "shadow-primary/30 shadow-[0_0_20px]"
