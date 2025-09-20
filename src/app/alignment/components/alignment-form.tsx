@@ -108,7 +108,7 @@ export function AlignmentForm() {
                     <FormControl>
                       <Textarea
                         placeholder="اهداف شخصی، تحصیلی و شغلی خود را اینجا بنویسید..."
-                        rows={5}
+                        rows={3}
                         {...field}
                       />
                     </FormControl>
@@ -125,7 +125,7 @@ export function AlignmentForm() {
                     <FormControl>
                       <Textarea
                         placeholder="نام رشته‌ها را وارد کنید و با کاما (،)، یا خط جدید از هم جدا کنید. مثال: مهندسی کامپیوتر، پزشکی، روانشناسی"
-                        rows={5}
+                        rows={3}
                         {...field}
                       />
                     </FormControl>
