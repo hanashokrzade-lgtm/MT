@@ -275,21 +275,6 @@ function TestimonialsSection() {
                         )
                     })}
                 </div>
-                 <motion.div 
-                    variants={itemVariants}
-                    className="flex justify-center mt-12">
-                    <Button onClick={handlePlayAudio} size="lg" variant="outline" disabled={audioLoading}>
-                        {audioLoading ? (
-                            <Loader2 className="ml-2 h-5 w-5 animate-spin" />
-                        ) : isPlaying ? (
-                            <Pause className="ml-2 h-5 w-5" />
-                        ) : (
-                            <Volume2 className="ml-2 h-5 w-5" />
-                        )}
-                        {isPlaying ? 'توقف' : (audioDataUri ? 'پخش مجدد نظرات' : 'شنیدن نظرات')}
-                    </Button>
-                    <audio ref={audioRef} className="hidden" />
-                </motion.div>
             </div>
         </motion.section>
     )
