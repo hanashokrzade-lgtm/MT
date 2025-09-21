@@ -530,7 +530,7 @@ export function UserProfile() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-                <Card className="col-span-4 glass-card">
+                <Card className="lg:col-span-4 glass-card">
                     <CardHeader>
                         <CardTitle>فعالیت‌های اخیر</CardTitle>
                     </CardHeader>
@@ -550,7 +550,7 @@ export function UserProfile() {
                         </ChartContainer>
                     </CardContent>
                 </Card>
-                 <Card className="col-span-4 lg:col-span-3 glass-card">
+                 <Card className="lg:col-span-3 glass-card">
                     <CardHeader>
                         <CardTitle>آخرین رشته‌های پیشنهادی</CardTitle>
                         <CardDescription>بر اساس آخرین مشاوره شما.</CardDescription>
