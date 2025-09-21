@@ -5,7 +5,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { User, LogOut, Settings, HelpCircle, Moon, Sun, Laptop, Trash2, Edit, CheckCircle, Lightbulb, History, Target, MessageSquare } from "lucide-react";
 import { useAuth } from "@/context/auth-provider";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -21,7 +20,7 @@ import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import { DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose, DialogTrigger } from "@/components/ui/dialog";
 import { DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 
 
@@ -98,9 +97,12 @@ const SettingsDialog = () => {
     return (
         <ResponsiveDialog
             trigger={
-                <TooltipTrigger asChild>
-                     <Button variant="ghost" size="icon"><Settings className="h-5 w-5 text-muted-foreground" /></Button>
-                </TooltipTrigger>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                         <Button variant="ghost" size="icon"><Settings className="h-5 w-5 text-muted-foreground" /></Button>
+                    </TooltipTrigger>
+                    <TooltipContent><p>تنظیمات</p></TooltipContent>
+                </Tooltip>
             }
             dialogContent={<DialogContent className="sm:max-w-[425px] glass-card"><Content /></DialogContent>}
             drawerContent={<DrawerContent><div className="p-4 pt-0"><Content /></div></DrawerContent>}
@@ -133,9 +135,12 @@ const HelpDialog = () => {
      return (
         <ResponsiveDialog
             trigger={
-                <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon"><HelpCircle className="h-5 w-5 text-muted-foreground" /></Button>
-                </TooltipTrigger>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon"><HelpCircle className="h-5 w-5 text-muted-foreground" /></Button>
+                    </TooltipTrigger>
+                    <TooltipContent><p>راهنما</p></TooltipContent>
+                </Tooltip>
             }
             dialogContent={<DialogContent className="sm:max-w-md glass-card"><Content /></DialogContent>}
             drawerContent={<DrawerContent><div className="p-4 pt-0"><Content /></div></DrawerContent>}
@@ -305,7 +310,7 @@ export function UserProfile() {
                                                          <div className="font-semibold">{item.topMatch.major} <Badge variant="outline" className="text-primary">{item.topMatch.score}%</Badge></div>
                                                          <Badge variant="secondary">{item.date}</Badge>
                                                     </div>
-                                                    <p className="text-sm text-muted-foreground line-clamp-1">بر اساس اهداف: {item.goals}</p>
+                                                    <div className="text-sm text-muted-foreground line-clamp-1">بر اساس اهداف: {item.goals}</div>
                                                 </div>
                                             )) : <p className="text-center text-sm text-muted-foreground py-8">تاریخچه تحلیل اهداف خالی است.</p>}
                                         </div>
