@@ -380,60 +380,63 @@ export function UserProfile() {
 
     return (
         <div className="container py-8 max-w-4xl mx-auto space-y-8 pb-[calc(6rem+20px)]">
-            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
-                <Avatar className="h-24 w-24 border-4 border-primary/50 flex-shrink-0">
-                    {user?.photoURL && <AvatarImage src={user.photoURL} alt={user.displayName || 'User Avatar'} />}
-                    <AvatarFallback>
-                        <User className="h-12 w-12 text-muted-foreground" />
-                    </AvatarFallback>
-                </Avatar>
-                <div className="text-center sm:text-right flex-grow">
-                    <h2 className="text-2xl font-bold">{user?.displayName || 'کاربر مهمان'}</h2>
-                    <p className="text-muted-foreground">{user?.email || 'ایمیل ثبت نشده'}</p>
-                    <div className="flex items-center justify-center sm:justify-start gap-2 mt-4">
-                        <TooltipProvider>
-                            <Dialog>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <DialogTrigger asChild>
-                                            <Button variant="ghost" size="icon"><Settings className="h-5 w-5" /></Button>
-                                        </DialogTrigger>
-                                    </TooltipTrigger>
-                                    <TooltipContent><p>تنظیمات</p></TooltipContent>
-                                </Tooltip>
-                                <SettingsDialog />
-                            </Dialog>
-
-                            <Dialog>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                         <DialogTrigger asChild>
-                                            <Button variant="ghost" size="icon"><ShieldCheck className="h-5 w-5" /></Button>
-                                        </DialogTrigger>
-                                    </TooltipTrigger>
-                                    <TooltipContent><p>حریم خصوصی</p></TooltipContent>
-                                </Tooltip>
-                                <PrivacyDialog />
-                            </Dialog>
-                            
-                            <Dialog>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <DialogTrigger asChild>
-                                            <Button variant="ghost" size="icon"><HelpCircle className="h-5 w-5" /></Button>
-                                        </DialogTrigger>
-                                    </TooltipTrigger>
-                                    <TooltipContent><p>راهنما</p></TooltipContent>
-                                </Tooltip>
-                                <HelpDialog />
-                            </Dialog>
-                        </TooltipProvider>
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+                <div className="flex items-center gap-4">
+                    <Avatar className="h-24 w-24 border-4 border-primary/50 flex-shrink-0">
+                        {user?.photoURL && <AvatarImage src={user.photoURL} alt={user.displayName || 'User Avatar'} />}
+                        <AvatarFallback>
+                            <User className="h-12 w-12 text-muted-foreground" />
+                        </AvatarFallback>
+                    </Avatar>
+                    <div className="text-center sm:text-right">
+                        <h2 className="text-2xl font-bold">{user?.displayName || 'کاربر مهمان'}</h2>
+                        <p className="text-muted-foreground">{user?.email || 'ایمیل ثبت نشده'}</p>
                     </div>
                 </div>
-                <Button variant="outline" onClick={signOut} className="flex-shrink-0">
-                    <LogOut className="ml-2 h-4 w-4" />
-                    خروج
-                </Button>
+
+                <div className="flex items-center gap-2 flex-shrink-0">
+                    <TooltipProvider>
+                        <Dialog>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <DialogTrigger asChild>
+                                        <Button variant="ghost" size="icon"><Settings className="h-5 w-5" /></Button>
+                                    </DialogTrigger>
+                                </TooltipTrigger>
+                                <TooltipContent><p>تنظیمات</p></TooltipContent>
+                            </Tooltip>
+                            <SettingsDialog />
+                        </Dialog>
+
+                        <Dialog>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                        <DialogTrigger asChild>
+                                        <Button variant="ghost" size="icon"><ShieldCheck className="h-5 w-5" /></Button>
+                                    </DialogTrigger>
+                                </TooltipTrigger>
+                                <TooltipContent><p>حریم خصوصی</p></TooltipContent>
+                            </Tooltip>
+                            <PrivacyDialog />
+                        </Dialog>
+                        
+                        <Dialog>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <DialogTrigger asChild>
+                                        <Button variant="ghost" size="icon"><HelpCircle className="h-5 w-5" /></Button>
+                                    </DialogTrigger>
+                                </TooltipTrigger>
+                                <TooltipContent><p>راهنما</p></TooltipContent>
+                            </Tooltip>
+                            <HelpDialog />
+                        </Dialog>
+                    </TooltipProvider>
+                    <Button variant="outline" onClick={signOut}>
+                        <LogOut className="ml-2 h-4 w-4" />
+                        خروج
+                    </Button>
+                </div>
             </div>
 
             {/* Stats Section */}
@@ -577,6 +580,7 @@ export function UserProfile() {
                                     <div className="py-4 text-right">
                                         <h4 className="font-semibold mb-2">دلیل پیشنهاد:</h4>
                                         <p className="text-muted-foreground bg-muted p-4 rounded-md">{major.reason}</p>
+
                                     </div>
                                     <DialogFooter>
                                          <Button onClick={() => setActiveTab('alignment')}>
@@ -639,3 +643,5 @@ export function UserProfile() {
         </div>
     );
 }
+
+    
