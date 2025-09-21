@@ -379,7 +379,7 @@ export function UserProfile() {
     };
 
     return (
-        <div className="container py-8 max-w-4xl mx-auto space-y-8">
+        <div className="container py-8 max-w-4xl mx-auto space-y-8 pb-[calc(6rem+20px)]">
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
                 <Avatar className="h-24 w-24 border-4 border-primary/50 flex-shrink-0">
                     {user?.photoURL && <AvatarImage src={user.photoURL} alt={user.displayName || 'User Avatar'} />}
@@ -639,5 +639,3 @@ export function UserProfile() {
         </div>
     );
 }
-
-    
