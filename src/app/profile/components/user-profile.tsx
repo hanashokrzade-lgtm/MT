@@ -3,12 +3,11 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { User, LogOut, Settings, HelpCircle, Shield, Moon, Sun, Laptop, Trash2, Edit, CheckCircle, Lightbulb, History, Target, MessageSquare } from "lucide-react";
+import { User, LogOut, Settings, HelpCircle, Moon, Sun, Laptop, Trash2, Edit, CheckCircle, Lightbulb, History, Target, MessageSquare } from "lucide-react";
 import { useAuth } from "@/context/auth-provider";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -21,6 +20,9 @@ import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
+import { DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 
 
 // Mock Data - In a real app, this would come from state or API
@@ -47,8 +49,8 @@ const SettingsDialog = () => {
     const { theme, setTheme, resolvedTheme } = useTheme();
     const currentTheme = theme === 'system' ? resolvedTheme : theme;
 
-    return (
-        <DialogContent className="sm:max-w-[425px] glass-card">
+    const Content = () => (
+        <>
             <DialogHeader className="text-right">
                 <DialogTitle>تنظیمات کلی</DialogTitle>
             </DialogHeader>
@@ -90,31 +92,56 @@ const SettingsDialog = () => {
                     </AlertDialogContent>
                 </AlertDialog>
             </div>
-        </DialogContent>
+        </>
     );
+
+    return (
+        <ResponsiveDialog
+            trigger={
+                <TooltipTrigger asChild>
+                     <Button variant="ghost" size="icon"><Settings className="h-5 w-5 text-muted-foreground" /></Button>
+                </TooltipTrigger>
+            }
+            dialogContent={<DialogContent className="sm:max-w-[425px] glass-card"><Content /></DialogContent>}
+            drawerContent={<DrawerContent><div className="p-4 pt-0"><Content /></div></DrawerContent>}
+        />
+    )
 };
 
 
-const HelpDialog = () => (
-    <DialogContent className="sm:max-w-md glass-card">
-        <DialogHeader className="text-right">
-            <DialogTitle>راهنما و پشتیبانی</DialogTitle>
-            <DialogDescription>پاسخ سوالات خود را بیابید و با ما در تماس باشید.</DialogDescription>
-        </DialogHeader>
-        <div className="py-4 space-y-6 text-right">
-            <Accordion type="single" collapsible className="w-full">
-                <AccordionItem value="item-1">
-                    <AccordionTrigger>چگونه بهترین نتیجه را از مشاوره بگیرم؟</AccordionTrigger>
-                    <AccordionContent>برای دریافت بهترین تحلیل، لطفاً تمام فیلدها را با دقت، صداقت و جزئیات کامل پر کنید. هرچه اطلاعات بیشتری ارائه دهید، هوش مصنوعی بهتر می‌تواند شما را راهنمایی کند.</AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="item-2">
-                    <AccordionTrigger>آیا داده‌های من محرمانه باقی می‌ماند؟</AccordionTrigger>
-                    <AccordionContent>بله، ما به حریم خصوصی شما متعهد هستیم. تمام داده‌های شما به صورت امن ذخیره می‌شوند و فقط برای ارائه خدمات مشاوره استفاده می‌شوند.</AccordionContent>
-                </AccordionItem>
-            </Accordion>
-        </div>
-    </DialogContent>
-);
+const HelpDialog = () => {
+    const Content = () => (
+         <>
+            <DialogHeader className="text-right">
+                <DialogTitle>راهنما و پشتیبانی</DialogTitle>
+                <DialogDescription>پاسخ سوالات خود را بیابید و با ما در تماس باشید.</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-6 text-right">
+                <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value="item-1">
+                        <AccordionTrigger>چگونه بهترین نتیجه را از مشاوره بگیرم؟</AccordionTrigger>
+                        <AccordionContent>برای دریافت بهترین تحلیل، لطفاً تمام فیلدها را با دقت، صداقت و جزئیات کامل پر کنید. هرچه اطلاعات بیشتری ارائه دهید، هوش مصنوعی بهتر می‌تواند شما را راهنمایی کند.</AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem value="item-2">
+                        <AccordionTrigger>آیا داده‌های من محرمانه باقی می‌ماند؟</AccordionTrigger>
+                        <AccordionContent>بله، ما به حریم خصوصی شما متعهد هستیم. تمام داده‌های شما به صورت امن ذخیره می‌شوند و فقط برای ارائه خدمات مشاوره استفاده می‌شوند.</AccordionContent>
+                    </AccordionItem>
+                </Accordion>
+            </div>
+        </>
+    );
+     return (
+        <ResponsiveDialog
+            trigger={
+                <TooltipTrigger asChild>
+                    <Button variant="ghost" size="icon"><HelpCircle className="h-5 w-5 text-muted-foreground" /></Button>
+                </TooltipTrigger>
+            }
+            dialogContent={<DialogContent className="sm:max-w-md glass-card"><Content /></DialogContent>}
+            drawerContent={<DrawerContent><div className="p-4 pt-0"><Content /></div></DrawerContent>}
+        />
+    );
+}
 
 const EditProfileDialog = ({ profileData, onSave }: { profileData: any, onSave: (data: any) => void }) => {
     const [interests, setInterests] = useState(profileData.interests || '');
@@ -168,18 +195,6 @@ export function UserProfile() {
         <div className="container py-8 max-w-4xl mx-auto space-y-8 pb-[calc(6rem+20px)]">
             
             <div className="relative flex flex-col items-center justify-center pt-8">
-                <TooltipProvider>
-                    <div className="absolute top-0 left-0">
-                        <Dialog>
-                            <Tooltip>
-                                <TooltipTrigger asChild><DialogTrigger asChild><Button variant="ghost" size="icon"><HelpCircle className="h-5 w-5 text-muted-foreground" /></Button></DialogTrigger></TooltipTrigger>
-                                <TooltipContent><p>راهنما</p></TooltipContent>
-                            </Tooltip>
-                            <HelpDialog />
-                        </Dialog>
-                    </div>
-                </TooltipProvider>
-
                 <Avatar className="h-28 w-28 border-4 border-primary/50">
                     {user?.photoURL && <AvatarImage src={user.photoURL} alt={user.displayName || 'User Avatar'} />}
                     <AvatarFallback><User className="h-12 w-12 text-muted-foreground" /></AvatarFallback>
@@ -189,13 +204,8 @@ export function UserProfile() {
                 
                 <TooltipProvider>
                     <div className="absolute top-0 right-0 flex gap-1">
-                        <Dialog>
-                             <Tooltip>
-                                <TooltipTrigger asChild><DialogTrigger asChild><Button variant="ghost" size="icon"><Settings className="h-5 w-5 text-muted-foreground" /></Button></DialogTrigger></TooltipTrigger>
-                                <TooltipContent><p>تنظیمات</p></TooltipContent>
-                            </Tooltip>
-                            <SettingsDialog />
-                        </Dialog>
+                        <HelpDialog />
+                        <SettingsDialog />
                          <Tooltip>
                             <TooltipTrigger asChild><Button variant="ghost" size="icon" onClick={signOut}><LogOut className="h-5 w-5 text-muted-foreground" /></Button></TooltipTrigger>
                             <TooltipContent><p>خروج</p></TooltipContent>
@@ -292,7 +302,7 @@ export function UserProfile() {
                                             {mockData.alignmentAnalyses.length > 0 ? mockData.alignmentAnalyses.map((item, index) => (
                                                 <div key={index} className="p-3 border rounded-lg bg-background/50">
                                                     <div className="flex justify-between items-center mb-1">
-                                                         <p className="font-semibold">{item.topMatch.major} <Badge variant="outline" className="text-primary">{item.topMatch.score}%</Badge></p>
+                                                         <div className="font-semibold">{item.topMatch.major} <Badge variant="outline" className="text-primary">{item.topMatch.score}%</Badge></div>
                                                          <Badge variant="secondary">{item.date}</Badge>
                                                     </div>
                                                     <p className="text-sm text-muted-foreground line-clamp-1">بر اساس اهداف: {item.goals}</p>
