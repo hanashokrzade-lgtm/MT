@@ -6,17 +6,11 @@ export function AuroraBackground() {
   return (
     <div 
         className={cn(
-            "absolute top-0 left-0 w-full h-full -z-10 overflow-hidden transition-all duration-500",
+            "absolute top-0 left-0 w-full h-full -z-10 overflow-hidden",
             "bg-background"
         )}
     >
-        <div 
-            className="relative w-full h-full opacity-50 dark:opacity-40"
-        >
-            <div className="absolute top-[-20%] left-[-20%] w-[50%] h-[50%] rounded-full bg-primary/30 filter blur-3xl animate-blob-1" />
-            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-accent/40 filter blur-3xl animate-blob-2" />
-            <div className="absolute bottom-[20%] left-[10%] w-[30%] h-[30%] rounded-full bg-primary/20 filter blur-2xl animate-blob-3" />
-        </div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,hsl(var(--primary)/0.1),transparent_40%),radial-gradient(circle_at_1px_1px,hsl(var(--border))_1px,transparent_0)] bg-[length:100%_100%,2rem_2rem]"></div>
     </div>
   )
 }
