@@ -78,7 +78,7 @@ const NavItem = ({ isActive, onClick, icon: Icon, label }: {isActive: boolean, o
         <motion.button
             onClick={onClick}
             className={cn(
-              'relative flex h-full w-20 flex-col items-center justify-center text-center transition-colors duration-200 ease-in-out',
+              'relative flex h-full flex-col items-center justify-center text-center transition-colors duration-200 ease-in-out px-1',
               isActive
                 ? 'text-primary'
                 : 'text-muted-foreground hover:text-foreground'
