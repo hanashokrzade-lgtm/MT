@@ -306,7 +306,7 @@ export function QaForm() {
   
   return (
     <div className="flex flex-col h-full">
-        <ScrollArea className="flex-grow p-4" ref={scrollAreaRef}>
+        <ScrollArea className="flex-grow p-4 pb-56" ref={scrollAreaRef}>
             <div className="space-y-6 max-w-4xl mx-auto">
                 {messages.map((message, index) => (
                     <div key={index} className={`flex items-start gap-3 ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
