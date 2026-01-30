@@ -246,7 +246,7 @@ export function HomePageContent() {
   return (
     <div className="w-full relative">
       {/* Hero Section */}
-      <section ref={heroRef} className="w-full py-20 md:py-32 lg:py-40 relative text-white">
+      <section ref={heroRef} className="w-full py-20 md:py-32 lg:py-40 relative text-white overflow-hidden">
         {heroImage && (
             <Image
                 alt="دانش‌آموز در حال تحصیل"
@@ -276,12 +276,12 @@ export function HomePageContent() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: heroInView ? 1 : 0, y: heroInView ? 0 : 20 }}
               transition={{ duration: 0.7, delay: 0.4, ease: "easeOut" }}
-              className="flex flex-col gap-2 min-[400px]:flex-row justify-center">
-              <Button onClick={() => setActiveTab('advisor')} size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+              className="flex flex-col gap-4 min-[400px]:flex-row justify-center">
+              <Button onClick={() => setActiveTab('advisor')} size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-lg">
                   <Sparkles className="ml-2 h-5 w-5" />
                   شروع مشاوره رایگان
               </Button>
-                <Button onClick={() => setActiveTab('q-and-a')} size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-black">
+                <Button onClick={() => setActiveTab('q-and-a')} size="lg" variant="outline" className="border-2 border-white !text-white hover:bg-white hover:!text-primary font-bold shadow-lg transition-all">
                   پرسیدن سوال
               </Button>
             </motion.div>
