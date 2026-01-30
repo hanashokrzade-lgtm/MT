@@ -165,7 +165,7 @@ const EditProfileDialog = ({ profileData, onSave }: { profileData: any, onSave: 
             </DialogHeader>
             <div className="grid gap-6 py-4 text-right">
                 <div className="space-y-2"><Label htmlFor="interests">علایق و سرگرمی‌ها</Label><Textarea id="interests" value={interests} onChange={(e) => setInterests(e.target.value)} placeholder="موضوعات مورد علاقه، فعالیت‌ها، کتاب‌ها و..." rows={3} /></div>
-                <div className="space-y-2"><Label htmlFor="strengths">نقاط قوت کلیدی</Label><Textarea id="strengths" value={strengths} onChange={(e) => setStrengths(e.target.value)} placeholder="مهارت‌هایی که در آنها برتر هستید..." rows={3} /></div>
+                <div className="space-y-2"><Label htmlFor="strengths">نقاط قوت کلیدی</Label><Textarea id="strengths" value={strengths} onChange={(e) => setInterests(e.target.value)} placeholder="مهارت‌هایی که در آنها برتر هستید..." rows={3} /></div>
                 <div className="space-y-2"><Label htmlFor="goals">اهداف شغلی و آینده</Label><Textarea id="goals" value={goals} onChange={(e) => setGoals(e.target.value)} placeholder="شغل رویایی شما چیست؟..." rows={3} /></div>
             </div>
             <DialogFooter>
@@ -197,7 +197,7 @@ export function UserProfile() {
     const hasTakenFirstStep = mockData.consultationHistory.length > 0 || profileCompletion > 0;
 
     return (
-        <div className="container py-8 max-w-4xl mx-auto space-y-8 pb-[calc(6rem+20px)]">
+        <div className="container py-8 max-w-4xl mx-auto space-y-8 pb-32">
             
             <div className="relative flex flex-col items-center justify-center pt-8">
                 <Avatar className="h-28 w-28 border-4 border-primary/50">

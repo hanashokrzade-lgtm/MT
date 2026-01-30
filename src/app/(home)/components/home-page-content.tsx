@@ -167,7 +167,7 @@ function TestimonialsSection() {
             initial="hidden"
             animate={inView ? "visible" : "hidden"}
             className="w-full py-16 md:py-24 bg-muted/30">
-            <div className="container px-4 md:px-6">
+            <div className="container">
                 <motion.div
                     variants={itemVariants}
                     className="flex flex-col items-center justify-center space-y-4 text-center mb-12"
@@ -258,7 +258,7 @@ export function HomePageContent() {
             />
         )}
         <div className="absolute inset-0 bg-black/60 -z-10" />
-        <div className="container relative px-4 md:px-6">
+        <div className="container relative">
           <div className="flex flex-col items-center justify-center space-y-6 text-center">
             <motion.div 
               initial={{ opacity: 0, y: 50 }}
@@ -318,7 +318,7 @@ export function HomePageContent() {
       
       {/* How it works */}
       <AnimatedSection className="w-full py-16 md:py-24">
-        <div className="container px-4 md:px-6">
+        <div className="container">
            <motion.div variants={itemVariants} className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl font-headline">فقط در ۳ مرحله ساده</h2>
                 <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
@@ -351,7 +351,7 @@ export function HomePageContent() {
       
       {/* Articles Section */}
        <AnimatedSection className="w-full py-16 md:py-24">
-        <div className="container px-4 md:px-6">
+        <div className="container">
             <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0 mb-12">
                 <div className="text-center sm:text-right">
                     <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl font-headline">مقالات</h2>
@@ -441,7 +441,7 @@ export function HomePageContent() {
        </AnimatedSection>
 
       {/* Final CTA */}
-      <AnimatedSection className="w-full py-16 md:py-24 pb-12">
+      <AnimatedSection className="w-full py-16 md:py-24 pb-32">
         <div className="container">
             <motion.div variants={itemVariants} className="rounded-xl bg-primary/10 p-8 md:p-12 lg:p-16 border border-primary/20">
                 <div className="grid items-center gap-6 lg:grid-cols-2 lg:gap-12">
