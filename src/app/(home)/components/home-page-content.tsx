@@ -281,7 +281,12 @@ export function HomePageContent() {
                   <Sparkles className="ml-2 h-5 w-5" />
                   شروع مشاوره رایگان
               </Button>
-                <Button onClick={() => setActiveTab('q-and-a')} size="lg" variant="outline" className="border-2 border-white !text-white hover:bg-white hover:!text-primary font-bold shadow-lg transition-all">
+                <Button 
+                    onClick={() => setActiveTab('q-and-a')} 
+                    size="lg" 
+                    variant="outline" 
+                    className="border-2 border-primary text-primary hover:text-blue-800 hover:border-blue-800 font-bold shadow-lg transition-all bg-white/90"
+                >
                   پرسیدن سوال
               </Button>
             </motion.div>
