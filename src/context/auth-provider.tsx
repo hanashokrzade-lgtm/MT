@@ -22,22 +22,27 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, Copy, Flame } from 'lucide-react';
 
-
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  // Use current hostname if available to avoid firebaseapp.com branding in popups
-  authDomain: typeof window !== 'undefined' ? window.location.hostname : process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
+// Function to generate the Firebase config dynamically
+const getFirebaseConfig = () => {
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+  // Use custom domain if not on localhost and not already on a firebase domain
+  const useCustomDomain = hostname && !hostname.includes('localhost') && !hostname.includes('firebaseapp.com') && !hostname.includes('web.app');
+  
+  return {
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: useCustomDomain ? hostname : process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+    measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
+  };
 };
 
 // Initialize Firebase using a singleton pattern
 function getFirebaseApp(): FirebaseApp {
     if (!getApps().length) {
-        return initializeApp(firebaseConfig);
+        return initializeApp(getFirebaseConfig());
     }
     return getApp();
 }
@@ -57,7 +62,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 function MissingConfigError() {
   const [hasCopied, setHasCopied] = useState(false);
 
-  // Hardcoding the values obtained from the tool call to ensure they are displayed.
   const envVars = `
 GEMINI_API_KEY="AIzaSyB_x6BoZ2_gWGpWIDodR3I6kq9RslTn3Bo"
 NEXT_PUBLIC_FIREBASE_API_KEY="AIzaSyD6bPwUGV-CSAglHG6rUgrMg7KdEb9NBrY"
@@ -129,24 +133,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
 
   useEffect(() => {
-    // This check is crucial. If the apiKey is missing, it means the env vars are not set.
-    if (!firebaseConfig.apiKey || firebaseConfig.apiKey.includes('YOUR_API_KEY')) {
+    const config = getFirebaseConfig();
+    if (!config.apiKey || config.apiKey.includes('YOUR_API_KEY')) {
         console.error("Firebase config is missing. Environment variables are likely not set.");
         setConfigError(true);
         setIsAuthLoading(false);
         return;
     }
 
-    const app = getFirebaseApp();
-    const authInstance = getAuth(app);
-    setAuth(authInstance);
+    try {
+      const app = getFirebaseApp();
+      const authInstance = getAuth(app);
+      setAuth(authInstance);
 
-    const unsubscribe = onAuthStateChanged(authInstance, (currentUser) => {
-      setUser(currentUser);
+      const unsubscribe = onAuthStateChanged(authInstance, (currentUser) => {
+        setUser(currentUser);
+        setIsAuthLoading(false);
+      });
+
+      return () => unsubscribe();
+    } catch (e) {
+      console.error("Firebase initialization failed:", e);
       setIsAuthLoading(false);
-    });
-
-    return () => unsubscribe();
+    }
   }, []);
 
   const handleAuthError = (error: AuthError) => {
@@ -179,7 +188,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             case 'auth/popup-closed-by-user':
                 title = "پنجره ورود بسته شد";
                 description = "شما پنجره ورود با گوگل را بستید. لطفاً دوباره تلاش کنید.";
-                toast({ title, description }); // Don't show a destructive toast for this one
+                toast({ title, description });
                 return; 
             default:
                 description = `یک خطای ناشناخته رخ داد: ${error.message}`;
@@ -216,9 +225,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
         if (auth.currentUser) {
             await updateProfile(auth.currentUser, { displayName: name });
-            // Manually refetch the user to get the updated profile
             await auth.currentUser.reload();
-            // Update the local user state
             setUser(auth.currentUser);
         }
         toast({
