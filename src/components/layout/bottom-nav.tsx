@@ -36,7 +36,7 @@ export function BottomNav() {
                 <motion.button
                     onClick={() => setActiveTab('profile')}
                     whileTap={{ scale: 0.95 }}
-                    className="group relative flex h-20 w-20 flex-col items-center justify-center"
+                    className="group relative flex h-[72px] w-[72px] flex-col items-center justify-center"
                     style={{ bottom: '1rem' }}
                 >
                     <div className={cn(
