@@ -20,8 +20,8 @@ export function BottomNav() {
   const isProfileActive = activeTab === 'profile';
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 h-24 bg-transparent">
-        <div className="absolute bottom-0 left-0 right-0 h-20 glass-nav"></div>
+    <div className="fixed bottom-0 left-0 right-0 z-50 h-20 bg-transparent">
+        <div className="absolute bottom-0 left-0 right-0 h-16 glass-nav"></div>
         <nav className="container relative mx-auto flex h-full items-center justify-around">
             <div className="flex w-full items-center justify-around">
                 {navLinks.slice(0, 2).map((link) => {
@@ -46,7 +46,7 @@ export function BottomNav() {
                         <Avatar className="h-full w-full border-2 border-primary/20 transition-all group-hover:border-primary/50">
                            {user?.photoURL && <AvatarImage src={user.photoURL} alt={user.displayName || 'User Avatar'} />}
                            <AvatarFallback>
-                               <User className="h-8 w-8 text-muted-foreground" />
+                               <User className="h-6 w-6 text-muted-foreground" />
                            </AvatarFallback>
                         </Avatar>
                          {isProfileActive && (
@@ -87,7 +87,7 @@ const NavItem = ({ isActive, onClick, icon: Icon, label }: {isActive: boolean, o
             transition={{ type: 'spring', stiffness: 400, damping: 17 }}
           >
             <div className="relative">
-               <div className="relative p-3">
+               <div className="relative p-2">
                  {isActive && (
                     <motion.div
                       layoutId="active-indicator-background"
@@ -96,11 +96,11 @@ const NavItem = ({ isActive, onClick, icon: Icon, label }: {isActive: boolean, o
                     />
                   )}
                   <div className="relative z-10">
-                      <Icon className="h-6 w-6" />
+                      <Icon className="h-5 w-5" />
                   </div>
               </div>
             </div>
-            <span className="text-xs font-medium">{label}</span>
+            <span className="text-[10px] font-medium">{label}</span>
           </motion.button>
     )
 }
